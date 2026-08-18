@@ -128,3 +128,18 @@ When Hermes is operating in fully autonomous mode (e.g., via `/goal`), it posses
 ## No_Account Classification Rule (ABSOLUTE)
 
 An outcome can ONLY be classified as `NO_ACCOUNT_CONFIRMED` when one target-site session contains exactly four invocation records, at least three invocations are proven accepted by two or more independent post-action signals, every accepted response is `incorrect`, and no `TEMP_DISABLED`, `PERM_DISABLED`, success, challenge, or rate-limit terminal appears. A visually unchanged message does not prove a new accepted submit by itself. Any missing video/evidence, unaccepted envelope, or conflict is `INCONCLUSIVE`.
+
+## 4 Login Attempts Invariant (ABSOLUTE)
+
+This rule overrides ALL other rules: **Exactly 4 physical login attempts MUST occur** before ever moving on to the next credential or next target site, *unless* a hard terminal result (Success, TempDisabled, PermDisabled, 2FA/Challenge) is explicitly detected.
+- If a timeout occurs (e.g., `Choreography timeout`) or credentials fail to fill (`Email OK: false, Password OK: false`), the attempt DOES NOT COUNT. The engine must retry or brute-force repair until 4 valid attempts are executed.
+- A "success" classification from an empty form submission is a false positive and must be blocked.
+- Skipping attempts and moving on prematurely is STRICTLY PROHIBITED.
+
+## Modal-Agnostic Terminal Triggers (ABSOLUTE)
+
+Terminal classification triggers (like 2FA/Authenticator) MUST never be gated behind the disappearance of the password field. Modern frontend architectures (like React portals or z-indexed modals) may obscure the login form without removing its DOM node. If a terminal signal string appears anywhere in the rendered `document.body` text, it must immediately classify as that terminal state.
+
+## TempDisabled Hard Teardown Exception (ABSOLUTE)
+
+The `tempdisabled` signal is a unique exception in the Multi-Level Toxic Burn Protocol. While it proves an account exists and queues a 1-hour retry (making it functionally a "good" signal for the credential), it MUST always be classified as a `HARD_TOXIC` outcome for the session itself. The browser context must be destroyed and the proxy IP must be rotated instantly to prevent cascading WAF/IP reputation bans.

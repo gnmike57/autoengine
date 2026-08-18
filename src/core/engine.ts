@@ -217,7 +217,6 @@ const SOFT_TOXIC_OUTCOMES: ReadonlySet<Outcome | string> = new Set([
   "pin-misdirection",
   "skipped",
   "inconclusive",
-  "tempdisabled",
 ]);
 
 type ToxicLevel = "clean" | "soft" | "hard";
@@ -2893,7 +2892,7 @@ export class AutomationEngine extends EventEmitter {
                       try {
                         const targetOrigin = new URL(target.url).origin;
                         await activePage.setContent(`<html><head><link rel="dns-prefetch" href="${targetOrigin}"><link rel="preconnect" href="${targetOrigin}"></head><body></body></html>`);
-                        await new Promise(r => setTimeout(r, 60)); // Yield to network stack
+                        await new Promise(r => setTimeout(r, 20)); // Yield to network stack
                       } catch {}
 
                       // @ts-expect-error noUncheckedIndexedAccess
@@ -5973,7 +5972,7 @@ export class AutomationEngine extends EventEmitter {
                   attemptId: `${evidenceRunId}-${attemptNum}`,
                 })
               ),
-              new Promise<any>((_, rej) => { choreoTimer = setTimeout(() => rej(new Error("Choreography timeout")), 45000); })
+              new Promise<any>((_, rej) => { choreoTimer = setTimeout(() => rej(new Error("Choreography timeout")), 80000); })
             ]).finally(() => { if (choreoTimer) clearTimeout(choreoTimer); });
             this.log("DEBUG", `[FLOW DEBUG] ✅ Completed universalLoginFlow`);
             success = result.success;

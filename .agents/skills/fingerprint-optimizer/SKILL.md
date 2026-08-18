@@ -11,9 +11,9 @@ This skill empowers Hermes to automatically heal fingerprint decay. If anti-bot 
 
 When invoked, the Fingerprint Optimizer:
 1. Iterates over a matrix of configuration settings (e.g., `useHttpCloak: [true, false]`, `injectStealthJS: [true, false]`, differing Chrome versions).
-2. Executes `npx tsx dump-fp.ts zendriver` or `npx tsx dump-fp.ts stealth --allow-trackers` for each permutation.
-3. Parses the output in `fp-dump.json`, prioritizing:
-   - Lowest `suspect_score`
+2. Executes `npx tsx scripts/fp-audit.ts zendriver` or `npx tsx scripts/fp-audit.ts stealth` for each permutation.
+3. Parses the output in `fp-audit-report.json`, prioritizing:
+   - Lowest `Local Score` and `Live Score`
    - Absence of `bot_type: browser_automation_studio` or any tampering flags.
 4. Updates `app-config.json` with the optimal configuration values.
 

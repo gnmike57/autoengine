@@ -143,13 +143,11 @@ export async function installLoginTriggerObserver(
           } catch { /* selector failed on this root */ }
           const raw = (root.textContent || "");
           const upper = raw.toUpperCase();
-          if (formChanged()) {
-            for (const trigger of TRIGGERS) {
-              if (trigger.site && trigger.site !== sn) continue;
-              if (upper.includes(trigger.upper)) {
-                (window as unknown as AutomatiWindow)[STATUS_SYM] = trigger.verdict;
-                return;
-              }
+          for (const trigger of TRIGGERS) {
+            if (trigger.site && trigger.site !== sn) continue;
+            if (upper.includes(trigger.upper)) {
+              (window as unknown as AutomatiWindow)[STATUS_SYM] = trigger.verdict;
+              return;
             }
           }
           if ((window as unknown as AutomatiWindow)[STATUS_SYM]) return;
@@ -527,7 +525,7 @@ async function ultraHumanTripleClickWithShadowPiercing(
     }, { sel: submitSelector, x: Math.round(cx), y: Math.round(cy) });
 
     if (i < 2) {
-      await new Promise(r => setTimeout(r, Math.round(gaussianClamped(80, 30, 40, 150))));
+      await new Promise(r => setTimeout(r, Math.round(gaussianClamped(30, 10, 15, 60))));
     }
   }
 
@@ -723,7 +721,7 @@ export async function ultraHumanTripleClick(
 
     // Small delay between clicks (human-like)
     if (i < 2) {
-      await new Promise(r => setTimeout(r, Math.round(gaussianClamped(80, 30, 40, 150))));
+      await new Promise(r => setTimeout(r, Math.round(gaussianClamped(30, 10, 15, 60))));
     }
   }
 
@@ -1082,6 +1080,7 @@ export async function executeUnifiedLoginChoreography(input: UnifiedChoreography
       const reVerification = await verifyCredentialsFilled(page, selectors.username, selectors.password, targetEmail, password);
       if (!reVerification.emailOk || !reVerification.passwordOk) {
         log.error(`[Verification] Credentials still not filled correctly after re-fill attempt`);
+        throw new Error("Credentials failed to fill correctly");
       }
     }
 

@@ -1,11 +1,11 @@
 {
   "decoy_count": {
-    "mean": 1.1133045000000001,
-    "stdDev": 0.5594636250000001,
+    "mean": 1.1355705900000002,
+    "stdDev": 0.5706528975000001,
     "min": 0,
     "max": 2,
     "successes": 1,
-    "failures": 3
+    "failures": 4
   },
   "decoy_scroll": {
     "mean": 166.995675,

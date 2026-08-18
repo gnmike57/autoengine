@@ -1,236 +1,80 @@
 [
   {
-    "backend": "cloak-headless",
+    "backend": "stealth",
     "mode": "direct",
     "strategy": "optimal",
-    "localScore": 99,
+    "localScore": 0,
     "fpComScore": null,
     "sannySoftPass": false,
     "issues": [
-      "Launch Failed: checkAiFingerprint is not defined"
+      "SannySoft Failed: Chrome (New): missing (failed)"
     ],
-    "durationMs": 29,
+    "durationMs": 43472,
     "profileDrift": []
   },
   {
-    "backend": "cloak-headless",
+    "backend": "stealth",
     "mode": "direct",
     "strategy": "native-only",
-    "localScore": 99,
+    "localScore": 0,
     "fpComScore": null,
     "sannySoftPass": false,
     "issues": [
-      "Launch Failed: checkAiFingerprint is not defined"
+      "SannySoft Failed: Chrome (New): missing (failed)"
     ],
-    "durationMs": 1,
+    "durationMs": 39492,
     "profileDrift": []
   },
   {
-    "backend": "cloak-headless",
+    "backend": "stealth",
     "mode": "direct",
     "strategy": "full-stealth",
-    "localScore": 99,
+    "localScore": 0,
     "fpComScore": null,
     "sannySoftPass": false,
     "issues": [
-      "Launch Failed: checkAiFingerprint is not defined"
+      "SannySoft Failed: Chrome (New): missing (failed)"
+    ],
+    "durationMs": 39365,
+    "profileDrift": []
+  },
+  {
+    "backend": "stealth",
+    "mode": "proxy-routed",
+    "strategy": "optimal",
+    "localScore": -1,
+    "fpComScore": -1,
+    "sannySoftPass": false,
+    "issues": [
+      "SKIPPED: No proxy pool configured (file missing)"
     ],
     "durationMs": 0,
     "profileDrift": []
   },
   {
-    "backend": "cloak-headless",
-    "mode": "proxy-routed",
-    "strategy": "optimal",
-    "localScore": 99,
-    "fpComScore": null,
-    "sannySoftPass": false,
-    "issues": [
-      "Launch Failed: checkAiFingerprint is not defined"
-    ],
-    "durationMs": 1,
-    "profileDrift": []
-  },
-  {
-    "backend": "cloak-headless",
-    "mode": "proxy-routed",
-    "strategy": "native-only",
-    "localScore": 99,
-    "fpComScore": null,
-    "sannySoftPass": false,
-    "issues": [
-      "Launch Failed: checkAiFingerprint is not defined"
-    ],
-    "durationMs": 1,
-    "profileDrift": []
-  },
-  {
-    "backend": "cloak-headless",
-    "mode": "proxy-routed",
-    "strategy": "full-stealth",
-    "localScore": 99,
-    "fpComScore": null,
-    "sannySoftPass": false,
-    "issues": [
-      "Launch Failed: checkAiFingerprint is not defined"
-    ],
-    "durationMs": 1,
-    "profileDrift": []
-  },
-  {
-    "backend": "stealth",
-    "mode": "direct",
-    "strategy": "optimal",
-    "localScore": 99,
-    "fpComScore": null,
-    "sannySoftPass": false,
-    "issues": [
-      "Launch Failed: Page acquisition timed out after 20s"
-    ],
-    "durationMs": 38353,
-    "profileDrift": []
-  },
-  {
-    "backend": "stealth",
-    "mode": "direct",
-    "strategy": "native-only",
-    "localScore": 99,
-    "fpComScore": null,
-    "sannySoftPass": false,
-    "issues": [
-      "SannySoft Failed: Chrome (New): missing (failed)"
-    ],
-    "durationMs": 77027,
-    "profileDrift": []
-  },
-  {
-    "backend": "stealth",
-    "mode": "direct",
-    "strategy": "full-stealth",
-    "localScore": 99,
-    "fpComScore": null,
-    "sannySoftPass": false,
-    "issues": [
-      "SannySoft Failed: Chrome (New): missing (failed)"
-    ],
-    "durationMs": 77650,
-    "profileDrift": []
-  },
-  {
-    "backend": "stealth",
-    "mode": "proxy-routed",
-    "strategy": "optimal",
-    "localScore": 99,
-    "fpComScore": null,
-    "sannySoftPass": false,
-    "issues": [
-      "Launch Failed: Page acquisition timed out after 20s"
-    ],
-    "durationMs": 42768,
-    "profileDrift": []
-  },
-  {
     "backend": "stealth",
     "mode": "proxy-routed",
     "strategy": "native-only",
-    "localScore": 99,
-    "fpComScore": null,
+    "localScore": -1,
+    "fpComScore": -1,
     "sannySoftPass": false,
     "issues": [
-      "SannySoft Failed: Chrome (New): missing (failed)"
+      "SKIPPED: No proxy pool configured (file missing)"
     ],
-    "durationMs": 84673,
+    "durationMs": 0,
     "profileDrift": []
   },
   {
     "backend": "stealth",
     "mode": "proxy-routed",
     "strategy": "full-stealth",
-    "localScore": 99,
-    "fpComScore": null,
+    "localScore": -1,
+    "fpComScore": -1,
     "sannySoftPass": false,
     "issues": [
-      "SannySoft Failed: Chrome (New): missing (failed)"
+      "SKIPPED: No proxy pool configured (file missing)"
     ],
-    "durationMs": 77129,
-    "profileDrift": []
-  },
-  {
-    "backend": "zendriver",
-    "mode": "direct",
-    "strategy": "optimal",
-    "localScore": 99,
-    "fpComScore": null,
-    "sannySoftPass": false,
-    "issues": [
-      "Launch Failed: Zendriver process exited with code 1 before endpoint was found"
-    ],
-    "durationMs": 6669,
-    "profileDrift": []
-  },
-  {
-    "backend": "zendriver",
-    "mode": "direct",
-    "strategy": "native-only",
-    "localScore": 99,
-    "fpComScore": null,
-    "sannySoftPass": false,
-    "issues": [
-      "Launch Failed: Zendriver process exited with code 1 before endpoint was found"
-    ],
-    "durationMs": 6682,
-    "profileDrift": []
-  },
-  {
-    "backend": "zendriver",
-    "mode": "direct",
-    "strategy": "full-stealth",
-    "localScore": 99,
-    "fpComScore": null,
-    "sannySoftPass": false,
-    "issues": [
-      "Launch Failed: Zendriver process exited with code 1 before endpoint was found"
-    ],
-    "durationMs": 6654,
-    "profileDrift": []
-  },
-  {
-    "backend": "zendriver",
-    "mode": "proxy-routed",
-    "strategy": "optimal",
-    "localScore": 99,
-    "fpComScore": null,
-    "sannySoftPass": false,
-    "issues": [
-      "Launch Failed: Zendriver process exited with code 1 before endpoint was found"
-    ],
-    "durationMs": 6497,
-    "profileDrift": []
-  },
-  {
-    "backend": "zendriver",
-    "mode": "proxy-routed",
-    "strategy": "native-only",
-    "localScore": 99,
-    "fpComScore": null,
-    "sannySoftPass": false,
-    "issues": [
-      "Launch Failed: Zendriver process exited with code 1 before endpoint was found"
-    ],
-    "durationMs": 6603,
-    "profileDrift": []
-  },
-  {
-    "backend": "zendriver",
-    "mode": "proxy-routed",
-    "strategy": "full-stealth",
-    "localScore": 99,
-    "fpComScore": null,
-    "sannySoftPass": false,
-    "issues": [
-      "Launch Failed: Zendriver process exited with code 1 before endpoint was found"
-    ],
-    "durationMs": 6596,
+    "durationMs": 0,
     "profileDrift": []
   }
 ]

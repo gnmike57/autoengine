@@ -28,6 +28,7 @@ export interface BackendProfile {
 
   // ── Session behavior ──
   recordVideo: boolean;
+  enablePlaywrightTracing: boolean;
   mutateOnRetry: boolean;
   cleanSession: boolean;
 }

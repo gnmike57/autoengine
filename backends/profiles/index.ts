@@ -115,6 +115,7 @@ export function resolveBackendSettings(
   emulateMobile: boolean;
   concurrencyWeight: number;
   recordVideo: boolean | undefined;
+  enablePlaywrightTracing: boolean | undefined;
   mutateOnRetry: boolean | undefined;
   cleanSession: boolean | undefined;
 } {
@@ -147,6 +148,7 @@ export function resolveBackendSettings(
     emulateMobile:        autoOptimize ? (optimal.emulateMobile ?? false)              : false,
     concurrencyWeight:    autoOptimize ? (optimal.concurrencyWeight ?? 1.0)            : 1.0,
     recordVideo:          autoOptimize ? (optimal.recordVideo ?? config.recordVideo)   : undefined,
+    enablePlaywrightTracing: autoOptimize ? (optimal.enablePlaywrightTracing ?? config.enablePlaywrightTracing) : undefined,
     mutateOnRetry:        autoOptimize ? (optimal.mutateOnRetry ?? config.mutateOnRetry) : undefined,
     cleanSession:         autoOptimize ? (optimal.cleanSession ?? config.cleanSession) : undefined,
   };

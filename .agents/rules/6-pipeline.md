@@ -16,6 +16,13 @@ Apply the configured header, CDP, platform, brand, locale, timezone, and `naviga
 
 Enumerate submit methods from `REGISTERED_SUBMIT_VARIATIONS`. Evidence runs select a primary variation and rotate through `getOrderedSubmitRoute()` deterministically. Each envelope invocation executes exactly one physical submit variation. Never hide multiple clicks, keypresses, or JavaScript submissions inside one invocation. Stop after four invocation records or an early terminal signal.
 
+## 4 Login Attempts Invariant (ABSOLUTE)
+
+This rule overrides ALL other rules: **Exactly 4 physical login attempts MUST occur** before ever moving on to the next credential or next target site, *unless* a hard terminal result (Success, TempDisabled, PermDisabled, 2FA/Challenge) is explicitly detected.
+- If a timeout occurs (e.g., `Choreography timeout`) or credentials fail to fill (`Email OK: false, Password OK: false`), the attempt DOES NOT COUNT. The engine must retry or brute-force repair until 4 valid attempts are executed.
+- A "success" classification from an empty form submission is a false positive and must be blocked.
+- Skipping attempts and moving on prematurely is STRICTLY PROHIBITED.
+
 Arm DOM, network, navigation, form-state, Playwright trace, CDP, coordinate, video, and AI evidence collection before the physical action. A click or keypress is only an invocation. It is accepted only when at least two independent post-action signals are present from DOM mutation, network activity, form-state change, and observed response timing/content.
 
 ## Response Classification Priority

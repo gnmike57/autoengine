@@ -38,13 +38,30 @@ async function trigger() {
     console.log("Applied batch settings");
   });
 
+  // Wait for WebSocket data to sync
+  await page.waitForTimeout(2000);
+
+  // Switch to credentials tab
+  await page.locator('#nav-credentials').click({ force: true });
+  await page.waitForTimeout(1000);
+
+  // Click the Master Select All checkbox
+  const check = page.locator('#credMasterCheck');
+  if (await check.count() > 0) {
+    await check.click({ force: true });
+  }
+
+  // Switch back to live view
+  await page.locator('#nav-liveview').click({ force: true });
+  await page.waitForTimeout(500);
+
   console.log("Settings applied. Starting batch...");
   
   // 4. Click start (force just in case)
   await page.locator('#btnStart').click({ force: true });
 
   console.log("Batch started successfully via CDP.");
-  await browser.disconnect();
+  await browser.close();
 }
 
 trigger().catch(console.error);

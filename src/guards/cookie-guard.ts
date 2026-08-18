@@ -87,7 +87,7 @@ export class CookieGuard {
     this.page = page;
     this.options = {
       maxWaitMs: options.maxWaitMs ?? 15000,
-      pollIntervalMs: options.pollIntervalMs ?? 200,
+      pollIntervalMs: options.pollIntervalMs ?? 100,
       formSelectors: options.formSelectors,
       siteName: options.siteName,
     };
@@ -239,7 +239,7 @@ export class CookieGuard {
       }, [...COOKIE_OVERLAY_SELECTORS] as string[]).catch(() => {});
 
       // Brief settle for CSS fade-outs
-      await new Promise((r) => setTimeout(r, 200));
+      await new Promise((r) => setTimeout(r, 100));
 
       // Verify dismissal
       const verified = await this.verifyDismissed();
@@ -395,7 +395,7 @@ export class CookieGuard {
         }
 
         // If dismiss failed, wait a bit and retry
-        await new Promise((r) => setTimeout(r, 500));
+        await new Promise((r) => setTimeout(r, 100));
         continue;
       }
 

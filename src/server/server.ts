@@ -19,9 +19,13 @@ import { fileURLToPath } from 'node:url';
 import { WebSocketServer, WebSocket } from 'ws';
 
 try {
+try {
   os.setPriority(os.constants.priority.PRIORITY_HIGH);
+} catch (e) {
+  // Ignore permission errors for priority
+}
 } catch (e: unknown) {
-  console.warn("Failed to set HIGH priority:", (e instanceof Error ? e.message : String(e)));
+  // Silenced terminal response error on EACCES
 }
 
 import {
@@ -3851,7 +3855,7 @@ async function startCdpObserver(dashUrl: string): Promise<void> {
               if (msg.method === "Log.entryAdded" && msg.params?.entry?.level === "error") {
                 const txt = msg.params.entry.text || "";
                 if (txt.includes("WebSocket") || txt.includes("connection")) {
-                  log.warn(`[CDP Observer] WS connection issue detected: ${txt.substring(0, 150)}`);
+                  log.debug(`[CDP Observer] WS connection issue detected: ${txt.substring(0, 150)}`);
                 }
               }
             } catch { /* intentional */ }
