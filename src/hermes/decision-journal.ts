@@ -69,6 +69,15 @@ export interface LogDecisionOpts {
 // ---------------------------------------------------------------------------
 
 let dbInstance: Database.Database | null = null;
+export function closeJournalDb(): void {
+  if (dbInstance) {
+    try {
+      dbInstance.close();
+    } catch {}
+    dbInstance = null;
+  }
+}
+
 function connect(): Database.Database {
   if (!dbInstance) {
     if (!fs.existsSync(DB_DIR)) {

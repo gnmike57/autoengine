@@ -107,6 +107,10 @@ export class NativePoWPool {
     }
     this.workers.clear();
     this.availableWorkers = [];
+
+    for (const task of this.currentTasks.values()) {
+      task.reject(new Error("PoW Pool closed"));
+    }
     this.currentTasks.clear();
 
     for (const task of this.taskQueue) {
