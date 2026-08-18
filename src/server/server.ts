@@ -2928,6 +2928,53 @@ wss.on("connection", (ws: any, req: import("http").IncomingMessage) => {
             break;
           }
 
+          case "proxy-test": {
+            const proxyUrl = msg.data?.url || msg.url;
+            if (!proxyUrl) {
+              ws.send(JSON.stringify({ type: "proxy-test-result", data: { success: false, error: "No proxy URL provided" } }));
+              break;
+            }
+            try {
+              const { SocksProxyAgent } = await import("socks-proxy-agent");
+              const { HttpsProxyAgent } = await import("https-proxy-agent");
+              const isSocks = String(proxyUrl).startsWith("socks");
+              const agent = isSocks ? new SocksProxyAgent(proxyUrl) : new HttpsProxyAgent(proxyUrl);
+              const fetchMod = await import("node-fetch");
+              const res = await (fetchMod.default as any)("https://www.google.com", {
+                agent,
+                timeout: 5000,
+              });
+              const ok = res.status === 200;
+              ws.send(JSON.stringify({ type: "proxy-test-result", data: { success: ok, status: res.status } }));
+              broadcast({ type: "log", data: { level: ok ? "INFO" : "WARN", message: `🌐 Proxy test for ${proxyUrl.replace(/:\/\/.*@/, "://***@")}: ${ok ? "PASS (HTTP 200)" : `FAIL (HTTP ${res.status})`}` } });
+            } catch (err: any) {
+              ws.send(JSON.stringify({ type: "proxy-test-result", data: { success: false, error: err.message } }));
+              broadcast({ type: "log", data: { level: "WARN", message: `🌐 Proxy test failed: ${err.message}` } });
+            }
+            break;
+          }
+
+          case "hermes-reset-memory": {
+            try {
+              const hermesDbPath = path.join(process.cwd(), "hermes", "hermes-learning.db");
+              if (fs.existsSync(hermesDbPath)) {
+                const Database = (await import("better-sqlite3")).default;
+                const hdb = new Database(hermesDbPath);
+                try {
+                  hdb.exec("DELETE FROM decision_journal; DELETE FROM healing_actions;");
+                } catch {
+                  // Tables might not exist yet
+                }
+                hdb.close();
+              }
+              broadcast({ type: "log", data: { level: "INFO", message: "🤖 Hermes memory & journals reset successfully" } });
+              broadcast({ type: "hermes-status", data: { toolCalls: 0, patchesApplied: 0, errors: 0, recentLogs: [] } });
+            } catch (err: any) {
+              log.warn("hermes-reset-memory error:", err?.message || err);
+            }
+            break;
+          }
+
           default:
             ws.send(JSON.stringify({ type: "error", data: { message: `Unknown message type: ${msg.type}` } }));
         }
