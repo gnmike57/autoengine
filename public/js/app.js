@@ -1013,7 +1013,7 @@
 
         if (c.useHttpCloak !== undefined) { const hc = document.getElementById('advUseHttpCloak'); if (hc) hc.checked = !!c.useHttpCloak; }
         if (c.stealthBypassHttpCloak !== undefined) { const sb = document.getElementById('advStealthBypass'); if (sb) sb.checked = !!c.stealthBypassHttpCloak; }
-        if (c.emulateMobile !== undefined) { setCheckbox('advEmulateMobile', c.emulateMobile); }
+        if (c.emulateMobile !== undefined) { const em = document.getElementById('advEmulateMobile'); if (em) em.checked = !!c.emulateMobile; }
         if (c.injectStealthJS !== undefined) { const js = document.getElementById('advInjectStealthJS'); if (js) js.checked = !!c.injectStealthJS; }
         if (c.ignitionVerifBypass !== undefined) { const ib = document.getElementById('advIgnitionVerifBypass'); if (ib) ib.checked = !!c.ignitionVerifBypass; }
         if (c.rotateOnFingerprint !== undefined) { const rf = document.getElementById('advRotateOnFP'); if (rf) rf.checked = !!c.rotateOnFingerprint; }
