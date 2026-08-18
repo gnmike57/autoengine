@@ -1,0 +1,157 @@
+# Project Rules
+
+## 1. strict-zero-sleep-polling
+Never inject arbitrary page.waitForTimeout() or sleep() commands. All DOM interactions must rely exclusively on deterministic event-based triggers (e.g., MutationObserver, waitForSelector) to eliminate wasted polling cycles.
+
+## 2. strict-shadow-dom-piercing
+When searching for dynamic error messages or success banners, always use deep TreeWalker shadow-DOM piercing techniques. Do not rely on brittle page.locator() queries that fail on modern web components.
+
+## 3. strict-toxic-session-burn
+Any terminal failure outcome (e.g., incorrect,  locked, honeypot) MUST instantly trigger the destruction of the Playwright context and proxy rotation. Never attempt to "salvage" or retry within a toxic session.
+
+## 4. strict-database-wal
+The SQLite database must unconditionally run in Write-Ahead Logging (WAL) mode. Never attempt to introduce asynchronous write buffering; Node.js synchronous blocking is expected and required for strict durability.
+
+## 5. strict-30s-watchdog
+Any new background navigation or asynchronous task must be mindful of the global 30-second idle watchdog. If no DOM mutations occur for 30 seconds, the context is flagged as deadlocked and instantly force-closed.
+
+## 6. autofill-preferred-ultrafast-typing
+Typing must always prefer autofill replication. If not possible, it must max at an ultrafast 30ms between characters using simulated keyboard typing. Random human behavior with long delays is banned in input pipelines.
+
+## 7. strict-identity-binding
+A specific credential (email) must always map to the exact same hardware fingerprint seed and proxy node across retries. Never randomize hardware profiles on retry loops for the same identity.
+
+## 8. strict-zombie-sweeping
+Any script that spawns a headless browser context must ensure its --user-data-dir maps to the tracked temporary folders. The process-cleaner relies on UNIX ps -axo/Windows WMI sweeps; untracked directories will leak memory.
+
+## 9. strict-cashier-promotion-only
+Status classifications can only be promoted (e.g., moving from a soft success to a hard cashier-verified). Never write logic that demotes a success classification back to a failure state based on late network noise.
+
+## 10. strict-backend-clarity
+When modifying the execution stack, strictly observe that the stealth backend uses camoufox-js, and the cloak backend uses cloakbrowser. Never attempt to inject puppeteer-extra-plugin-stealth into this project.
+
+## 11. [REMOVED]
+Reserved — formerly strict-background-right-click-noise (removed: context menu events during login flows are abnormal human behavior and a detection signal, not camouflage).
+
+## 12. stealth-equals-camoufox
+When referencing, debugging, or fixing the "stealth" backend, always explicitly remember that `stealth` = `camoufox`. The stealth backend relies entirely on the Camoufox browser binaries and API.
+
+## 13. strict-early-remember-me
+"Remember Me" checkboxes MUST be clicked asynchronously the moment they enter the DOM, before the password is even populated.
+
+## 14. strict-show-password
+The "Show Password" (or eye icon) button MUST be clicked unconditionally on every single run, on every single backend, every time, app-wide. There is absolutely no exception to this rule. Revealing the password simulates human trust behavior and prevents heuristic anomaly flags.
+
+## 15. strict-cookie-dismissal
+If a red top error banner appears during login (e.g., in a timeout state), it means the cookie notice must be dismissed BEFORE the submit attempt occurs. The cookie notice banner blocks the submit event from firing correctly. Always check for and dismiss cookie notices (like "Accept All Cookies" or "Got it") asynchronously.
+
+## 16. golden-credential-baseline-check
+When explicitly requested by the user, you may run a "golden credential" login check to confirm changes. STRICT RESTRICTION: This must be a SINGLE RUN (no continuous loops). It MUST ONLY target the "joe" site (Joe Fortune) and MUST ONLY use the credential "phuttasopit@hotmail.co.th". This establishes a pure baseline to guarantee the application is functioning and the login flow is not broken.
+
+## 17. clean-zombie-sessions
+Always clean all zombie browser sessions and contexts app-wide after making architectural changes to prevent memory leaks and stealth fingerprint degradation.
+
+## 18. strict-camoufox-tiling
+When enforcing window tiling via `node-window-manager`, ALWAYS use the `document.title` injection method (injecting a highly unique string like `Automati_Tiling_...`, waiting, and scanning `windowManager.getWindows()` for that title). DO NOT attempt to revert to PID matching for Firefox/Camoufox on Windows.
+
+## 19. strict-dynamic-viewports
+Never pass an explicit `viewport` object directly to `BrowserContext` or `launchPersistentContext` when running in headed or grid modes across ANY backend. The viewport parameter must remain `null` or `undefined` so the internal `innerWidth/innerHeight` perfectly synchronizes with the OS physical window bounds.
+
+## 20. strict-in-place-rotation
+Context wipes (cookie clearing/reloads) are strictly banned between password attempts on the same email. Rotation MUST happen by instantly replacing the DOM input value on the existing page instance.
+
+## 21. strict-no-warmup-directive
+Background navigation to search engines (Google, Yahoo, Bing) to "warm up" profiles is completely banned. The engine must proceed directly to the target URL for maximum speed.
+
+## 22. strict-golden-benchmark-isolation
+Benchmark scripts MUST spawn concurrently utilizing `.exec()` or `.fork()` to guarantee parallel hardware execution without thread-locking the main Node.js engine.
+
+## 23. strict-golden-review-visibility
+Any single-session baseline review ("Golden Joe Review") MUST suspend teardown for exactly 30 seconds upon a successful login detection to allow human visual verification.
+
+## 24. ultrafast-mouse-warping
+`humanMouseMove` MUST simulate an ultrafast max 200ms per movement. Use 5-15 steps to distribute the movement. The cursor MUST NOT teleport instantly in 1 step.
+
+## 25. strict-silent-swallow-resubmission
+If a submit click triggers no DOM variance in the error text above the form, the engine MUST decrement the attempt index and instantly resubmit the exact same password, natively handling UI glitches without consuming attempt slots.
+
+## 26. strict-dynamic-concurrency-hysteresis
+The engine MUST dynamically throttle active slots down to 1 upon detecting proxy burnout, and MUST hold that limit until a consecutive row succeeds.
+
+## 27. strict-no-wait-redirection
+If the form DOM completely vanishes (or the URL shifts) without an error string, it MUST be classified instantly as a "late success" without waiting for a specific dashboard element to render.
+
+## 28. strict-cashier-validation
+Unconfirmed successes MUST attempt a direct background `fetch()` to the Cashier/Wallet endpoint to guarantee auth-token validity before fully confirming the account is unlocked.
+
+## 29. strict-single-truth-triggers
+All vocabulary for classifications (e.g. "AUTHENTICATOR", "UPDATE YOUR PIN") MUST live exclusively in the `login-flow.ts` central definitions matrix.
+
+## 30. strict-atomic-configuration
+Configuration saves via the UI MUST atomically flush to `app-config.json` via file system writes before applying dynamically to the runtime state.
+
+## 31. strict-plaintext-credentials
+All credential passwords MUST be stored as plain text JSON in the SQLite database. Never introduce any encryption, hashing, or obfuscation layer for credential storage. The `encrypt()` and `decrypt()` functions in `database.ts` MUST remain identity pass-throughs (return the input unchanged). This ensures credentials are always readable, debuggable, and never corrupted by key rotation or mismatched encryption state.
+
+## 32. strict-per-backend-authoritative-settings
+The `BACKEND_OPTIMAL_SETTINGS` matrix in `engine.ts` holds the single source of truth for every backend's configuration. These per-backend values are architectural constraints that MUST override any global dashboard toggle. When `resolveBackendSettings()` is called, the matrix value always wins over the user-facing `EngineConfig`. Never allow a global toggle to flip a setting that the matrix has explicitly locked for a given backend.
+
+## 33. strict-camoufox-no-httpcloak
+The Camoufox (stealth) backend MUST always bypass httpCloak by keeping `useHttpCloak: false` and `stealthBypassHttpCloak: true`. Although httpCloak can produce a Firefox-consistent TLS profile via `firefox-latest`, it triggers SOCKS5 authentication hangs when paired with Camoufox's Firefox network stack. The stable fallback is the basic TCP proxy forwarder. Never re-enable httpCloak for Camoufox without first resolving the SOCKS5 auth hang.
+
+## 34. strict-camoufox-no-stealth-js
+Camoufox applies all anti-fingerprint patches (Canvas, WebGL, Audio, Navigator, Fonts) at the C++ engine level inside its modified Firefox binary. Injecting additional JavaScript stealth overrides via `addInitScript` or `injectStealthScripts` conflicts with Juggler's internal context state and risks creating inconsistent "Frankenstein profiles" that anti-bot systems flag. `injectStealthJS` MUST remain `false` for every Camoufox backend variant.
+
+## 35. strict-camoufox-geoip-manual
+Camoufox's built-in `geoip: true` feature performs an external API call during browser startup to validate the proxy's public IP. This check consistently times out or hangs when routed through SOCKS5 proxies. The engine MUST keep `geoip: false` in the Camoufox browser configuration and instead rely on the manual `alignGeoToProxy()` function to set timezone, locale, and geolocation coordinates from the proxy metadata.
+
+## 36. strict-cloakbrowser-defense-in-depth
+CloakBrowser (the cloak backend) is a Chromium fork with 50+ C++ source-level patches covering Canvas, WebGL, WebRTC, Audio, Fonts, and GPU fingerprinting. Despite these native patches, httpCloak MUST remain enabled to add network-level TLS/JA3 masking that Chromium does not handle natively. Additionally, `injectStealthJS` MUST remain `true` because the Apify fingerprint-injector provides supplementary JS-level spoofing (navigator overrides, permission queries, WebRTC leak prevention) that complements rather than conflicts with the C++ patches. This layered approach — engine patches plus TLS masking plus JS injection — provides maximum stealth coverage.
+
+## 37. strict-zendriver-mandatory-httpcloak
+Zendriver launches raw, unmodified Chromium via Python/CDP with zero C++ source patches. Without httpCloak, its default Chromium TLS handshake (JA3/JA4 signature) is trivially identifiable by anti-bot systems before a single byte of page content loads. httpCloak MUST remain `true` for all Zendriver variants. Similarly, `injectStealthJS` MUST remain `true` because fingerprint-injector JS is the primary and only anti-detect layer available, handling CDP trace removal and all browser-level fingerprint spoofing.
+
+## 38. strict-cache-injection-disabled
+Cache injection via `addInitScript` hooks MUST default to `false` for every backend. The `enableCacheInjection` setting in `app-config.json`, `config-store.ts`, and the `resolveCacheInjectionState()` fallback in `backends/index.ts` must all resolve to `false` when no explicit value is provided. The `addInitScript` mechanism used for cache injection creates a detectable surface that modern anti-bot systems probe for, and its localStorage-breadcrumb benefit is outweighed by the fingerprinting risk it introduces.
+
+## 39. strict-no-frankenstein-fingerprints
+When configuring any backend, never layer multiple fingerprint-override systems that operate on the same signal domain simultaneously (e.g., C++ canvas patches and JS canvas overrides on the same browser instance). Mismatched or redundant overrides produce internally inconsistent hardware profiles — screen resolution contradicting GPU reports, for example — which are strong bot-detection signals. Each backend must use exactly the fingerprint layers documented in the `BACKEND_OPTIMAL_SETTINGS` matrix and no additional ad-hoc overrides.
+
+## 40. strict-tls-ua-consistency
+The TLS fingerprint profile selected for any httpCloak-enabled session MUST match the browser engine's User-Agent family. Chrome-based backends (CloakBrowser, Zendriver) must use `chrome-latest` TLS profiles. Firefox-based backends (Camoufox) must use `firefox-latest` if httpCloak is ever re-enabled. Safari UA profiles must use `safari-18`. A mismatch between the TLS handshake signature and the declared User-Agent is one of the strongest bot-detection signals and will cause immediate blocking by Cloudflare, DataDome, and similar systems.
+
+## 41. strict-synchronous-db-backup
+All database backup operations MUST use the synchronous `VACUUM INTO` SQL command instead of the asynchronous `db.backup()` API. The async backup races with subsequent writes and DB close operations, risking incomplete or corrupt snapshots. `VACUUM INTO` executes in a single transaction and blocks until the self-contained snapshot is written to disk. This applies to both boot-time and shutdown backups.
+
+## 42. strict-project-local-user-data
+All browser profile directories (`--user-data-dir`), cache directories, and temporary storage MUST be rooted under the project working directory (e.g., `.cloak-profiles/`, `.chrome-dashboard/`) instead of the system temporary directory (`os.tmpdir()`). System temp directories are not tracked by the zombie process sweeper and create memory leaks when orphaned profiles survive process crashes. This rule is complementary to Rule 8 (strict-zombie-sweeping).
+
+## 43. strict-event-driven-page-attachment
+When a new browser context is created and a page handle is needed, the code MUST use `context.waitForEvent('page')` or listen for the `'page'` event rather than inserting an arbitrary fixed delay (e.g., `setTimeout(2000)`). Fixed delays waste time on fast launches and silently fail on slow ones. Event-driven attachment is deterministic and complies with Rule 1 (strict-zero-sleep-polling).
+
+## 44. strict-httpcloak-error-handling
+Every `LocalProxy` instance created by the httpCloak TCP forwarder MUST have an explicit `'error'` event handler attached immediately after creation. Node.js `net.Server` objects that emit `'error'` without a listener crash the process with an unhandled exception. A missing error handler on the proxy forwarder can take down the entire engine when a single upstream proxy connection fails.
+
+## 45. strict-outcome-vocabulary-centralization
+All outcome classification vocabulary arrays (e.g., `DEFINITIVE_OUTCOMES`, `TERMINAL_BAD`, `terminalOutcomes`) used anywhere in the codebase MUST be derived from the centralized constants (`CONFIDENT_OUTCOMES`, `TESTED_OUTCOMES`) exported from `database.ts`. Inline copies of these arrays in engine.ts, server.ts, or elsewhere create divergence risk when new outcomes are added. Import the canonical constant and construct local sets from it.
+
+## 46. strict-classification-phase-gate
+The four in-page trigger words (AUTHENTICATOR, VERIFY YOUR PHONE, UPDATE YOUR PIN, LOGIN VERIFICATION) MUST only be evaluated after the login form has demonstrably changed state — either the password input has been removed from the DOM or the URL has moved away from the original login path. This phase gate prevents static page chrome (headers, footers, customer support phone numbers, marketing copy) from firing false-positive verdicts before any credential submission has occurred.
+
+## 47. strict-no-outcome-demotion-at-db
+The `credential_status` upsert in the database layer SHOULD enforce promotion-only semantics at the SQL level, complementing the engine-side priority checks. A confirmed `success` or `2FA` outcome stored in the database must never be overwritten by a subsequent `incorrect` or `noaccount` write. While the engine currently prevents this scenario in application logic, the database itself has no guard against a bug introducing outcome demotion.
+
+## 48. strict-hermes-patch-validation
+AI-generated JavaScript patches produced by the Hermes self-improvement loop MUST be validated before injection into live browser sessions. Validation requirements: maximum patch size (10KB), no network API calls (`fetch`, `XMLHttpRequest`, `navigator.sendBeacon`), no navigation mutations (`location.href`, `window.open`), and an automatic time-to-live expiry (patches older than 24 hours are deleted from `learning/patches/`). Accumulated patches from prior cycles MUST be pruned to prevent unbounded growth.
+
+## 49. strict-structured-logging
+All application modules MUST use the project's `createLogger(moduleName)` factory function for log output instead of raw `console.log` or `console.warn`. The structured logger provides timestamps, log levels, and module prefixes that enable filtering and debugging. Files that currently use `console.log` (notably `login-flow.ts` and `hermes-review.ts`) must be migrated.
+
+## 50. strict-dead-code-removal
+Superseded functions and their associated duplicated data structures MUST be removed from the codebase rather than left alongside their replacements. Dead code creates confusion about which implementation is authoritative, increases maintenance burden, and risks being accidentally called. When a function is replaced (e.g., `buildLoginTriggerObserverScript` superseded by `installLoginTriggerObserver`), the old version must be deleted after verifying zero import sites.
+
+## 51. strict-sse-ws-channel-discipline
+High-frequency data streams (logs, vitals, screenshots, row-update events) MUST be routed through Server-Sent Events (SSE) with batched flushing (50ms buffer), not through WebSocket. WebSocket MUST be reserved for bidirectional control messages (start, stop, config changes, overrides). This channel discipline prevents WebSocket frame overhead from causing UI lockups under high concurrency and leverages SSE's natural backpressure for unidirectional data.
+
+## 52. strict-shutdown-ordering
+The graceful shutdown sequence MUST execute in strict order: (1) set shutdown flag to prevent restarts, (2) close all WebSocket clients, (3) terminate Hermes daemon, (4) stop CDP observer, (5) drain active engine sessions with a 10-second forced-exit ceiling, (6) flush XLSX results, (7) checkpoint WAL into main DB, (8) create VACUUM INTO backup, (9) sweep zombie browser processes, (10) save reinforcement learning ledger, (11) close database. Reordering these steps risks data loss (e.g., closing DB before WAL checkpoint) or resource leaks (e.g., skipping zombie sweep).

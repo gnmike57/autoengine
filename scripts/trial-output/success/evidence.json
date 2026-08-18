@@ -1,0 +1,24 @@
+[
+  {
+    "runId": "trial-SUCCESS-1785868761894",
+    "attemptId": "inv-1",
+    "invocationIndex": 1,
+    "variation": "locator_click",
+    "invoked": true,
+    "actionCount": 1,
+    "actionKind": "locator",
+    "domMutation": true,
+    "networkActivity": false,
+    "formStateChanged": true,
+    "responseObserved": true,
+    "responseClass": "success",
+    "evidence": "Welcome back!\n\nYou are now logged in.",
+    "accepted": true,
+    "acceptanceSignalCount": 3,
+    "acceptanceSignals": [
+      "dom_mutation",
+      "form_state_changed",
+      "response_observed"
+    ]
+  }
+]

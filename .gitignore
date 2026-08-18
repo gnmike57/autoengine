@@ -1,0 +1,135 @@
+# ── Dependencies & build artifacts ───────────────────────────────────────────
+node_modules/
+dist/
+build/
+__pycache__/
+*.py[cod]
+*.zip
+*.tar
+*.tar.gz
+
+# ── OS / IDE cruft ───────────────────────────────────────────────────────────
+.DS_Store
+**/.DS_Store
+.qodo/
+
+# ── Secrets & local config ───────────────────────────────────────────────────
+.env
+**/.env
+mcp.json
+run.bat
+test-account-map.json
+
+# ── Credentials & proxy lists (private data) ─────────────────────────────────
+*.csv
+liveproxies.txt
+liveproxies-clean.txt
+liveproxies-meta.json
+proxies.txt
+primary-proxies.txt
+
+# ── Run artifacts (regenerated every run) ────────────────────────────────────
+screenshots/
+recordings/
+cloak-profiles/
+.cloak-profiles/
+.chrome-dashboard/
+.cloak-static-cache/
+darwin-reports/
+eliminations/
+results.csv
+live-test-results.csv
+
+# ── Persistent operator state (must survive code updates) ────────────────────
+# These files accumulate across runs and encode permanent decisions (which
+# accounts/proxies/fingerprints are dead) or in-flight progress. They are
+# gitignored so `git pull` / redeploys never overwrite them.
+live-test-progress.json
+proxy-scores.json
+misdirection-denylist.json
+email-denylist.json
+bot-block-cooldown.json
+config/misdirection-denylist.json
+config/email-denylist.json
+
+# ── Databases (credentials, test results, run history) ───────────────────────
+# SQLite databases store all imported credentials and their test outcomes.
+# Must NEVER be overwritten by git pull / checkout / reset.
+data/
+backups/
+credentials/
+permdisabled/
+brain.db
+*.sqlite
+human-verdicts.jsonl
+progress.json
+credentials-results.xlsx
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+.aider*
+
+# ── Test artifacts (regenerated every run) ───────────────────────────────────
+coverage/
+playwright-report/
+test-results/
+
+# ── Stale IDE/agent config dirs (not tracked) ────────────────────────────────
+.codebuddy/
+.intent/
+.junie/
+.kilo/
+.kilocode/
+.kombai/
+.yoke/
+
+# ── Temporary & AI Output Files ──────────────────────────────────────────────
+tmp/
+temp/
+hermes/learning/idle_anomalies/
+hermes/reports/
+*.webm
+.npm-cache/
+server.log
+coverage-report.txt
+credentials-results.xlsx
+file_sizes.txt
+proxy-pool-6.txt
+requeue-pending.json.tmp
+rotation-ledger.json
+
+
+# Qodana generated reports
+qodana.sarif.json
+
+# -- Remaining AI & Data Caches -----------------------------------------
+learning/
+*.jsonl
+proxy-pool-*.txt
+.vscode/samurai-agent/
+*.gguf
+
+# ── Review Artifact Cleanup ────────────────────────────────────────────────────
+hermes/hermes-learning.db
+# SQLite WAL sidecars — NEVER commit these; without the parent .db they corrupt the database
+*.db-shm
+*.db-wal
+lifecycle-test-results/*
+!lifecycle-test-results/.gitkeep
+.traycer/
+
+# ── Temporary & Diagnostic Output Files ─────────────────────────────────────────
+failure-*.png
+desktop-verification*.png
+eslint-tiler*.txt
+*lint-results*.json
+fp-dump.json
+fingerprint-score-report.json
+wicketkeeper-tokens.json
+tile-screenshots/
+
+
+# Private key material must remain runtime-only
+key.pem
+*.key
+*.pem

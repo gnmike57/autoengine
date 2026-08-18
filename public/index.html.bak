@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ignition | Command Centre</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body style="min-height: 100000px !important;">
+
+  <!-- ═══════ HERO BANNER ═══════ -->
+  <div class="hero-banner">
+    <img src="/banner.jpg" alt="Command Centre" id="heroBanner">
+  </div>
+
+  <!-- ═══════ NAV BAR ═══════ -->
+  <nav class="nav-bar">
+    <div class="nav-left">
+      <div class="nav-tab active" onclick="switchTab('liveview')">📡 Command</div>
+      <div class="nav-tab" onclick="switchTab('dashboard')">📊 Dashboard</div>
+      <div class="nav-tab" onclick="switchTab('credentials')">🔑 Credentials</div>
+      <div class="nav-tab" onclick="switchTab('results')">🏆 Results</div>
+      <div class="nav-tab" onclick="switchTab('settings')">⚙ Settings</div>
+      <div class="nav-tab" onclick="switchTab('terminal')">💻 Terminal</div>
+      <div class="nav-tab" onclick="switchTab('analytics')">📊 Analytics & Vitals</div>
+      <div class="nav-tab" onclick="switchTab('tempdisabled')">🔒 Temp Disabled</div>
+      <div class="nav-tab" onclick="switchTab('hermes')"><span class="hermes-nav-indicator"><span class="hdot off" id="hermesNavDot"></span> 🤖 Hermes</span></div>
+    </div>
+    <div class="nav-right">
+      <button class="btn btn-ghost btn-sm" onclick="toggleHeroBanner()" title="Toggle Hero Banner View">👁️ BANNER</button>
+      <div class="vitals-box">
+        <div>CPU: <span id="vitalsCpu">0.00</span></div>
+        <div>RAM: <span id="vitalsRam">0.0MB</span></div>
+      </div>
+      <div class="status-chip chip-idle" id="globalStatusChip">
+        <div class="dot"></div><span id="statusPill">IDLE</span>
+      </div>
+      <button id="btnStart" class="btn btn-start" onclick="startAutomation()">▶ LAUNCH</button>
+      <button id="btnPause" class="btn btn-stop" onclick="togglePause()" disabled>⏸ PAUSE</button>
+      <button id="btnStop" class="btn btn-stop" onclick="stopAutomation()" disabled>⏹ STOP</button>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════
+       COMMAND CENTRE (Live View)
+       ═══════════════════════════════════════════════════ -->
+  <div id="tab-liveview" class="view active" style="padding:0; max-width:none;">
+    <div class="command-centre">
+      <!-- Active Config Strip -->
+      <div class="config-strip" id="configStrip">
+        <div class="config-tag tag-hot"><span class="tag-label">Backend</span><span class="tag-val"
+            id="cfgBackend">—</span></div>
+        <div class="config-tag"><span class="tag-label">Proxy</span><span class="tag-val" id="cfgProxy">—</span></div>
+        <div class="config-tag"><span class="tag-label">Concurrency</span><span class="tag-val" id="cfgConc"><span class="conc-gauge" id="concGauge"><span class="conc-gauge-text" id="concGaugeText">—</span><span class="conc-gauge-bar" id="concGaugeBar"></span></span></span>
+        </div>
+        <div class="config-tag"><span class="tag-label">Input</span><span class="tag-val" id="cfgInput">—</span></div>
+        <div class="config-tag"><span class="tag-label">OS</span><span class="tag-val" id="cfgOs">—</span></div>
+        <div class="config-tag"><span class="tag-label">Targets</span><span class="tag-val" id="cfgTargets">—</span>
+        </div>
+        <div class="config-tag"><span class="tag-label">Video</span><span class="tag-val" id="cfgVideo">—</span></div>
+        <div class="config-tag"><span class="tag-label">Mode</span><span class="tag-val" id="cfgMode">—</span></div>
+        <div class="config-tag" id="socks5Badge" style="display: none; border-color: rgba(34, 211, 238, 0.4); background: rgba(34, 211, 238, 0.1); box-shadow: 0 0 10px rgba(34, 211, 238, 0.2); transition: all 0.3s ease;">
+          <span class="tag-label" style="color: var(--cyan);">NET</span>
+          <span class="tag-val" style="color: #fff; text-shadow: 0 0 5px var(--cyan);">SOCKS5 ACTIVE</span>
+        </div>
+      </div>
+
+      <!-- ── Batch Summary Panel ── -->
+      <div id="batchSummaryPanel" class="batch-summary-panel" style="display:none;">
+        <div class="batch-summary-grid">
+          <div class="batch-stat">
+            <div class="batch-stat-label">TOTAL</div>
+            <div class="batch-stat-val" id="bsTotal">0</div>
+          </div>
+          <div class="batch-stat">
+            <div class="batch-stat-label">COMPLETED</div>
+            <div class="batch-stat-val" id="bsCompleted">0</div>
+          </div>
+          <div class="batch-stat">
+            <div class="batch-stat-label">ACTIVE</div>
+            <div class="batch-stat-val batch-active" id="bsActive">0</div>
+          </div>
+          <div class="batch-stat">
+            <div class="batch-stat-label">QUEUED</div>
+            <div class="batch-stat-val" id="bsQueued">0</div>
+          </div>
+          <div class="batch-stat batch-stat-green">
+            <div class="batch-stat-label">✅ SUCCESS</div>
+            <div class="batch-stat-val" id="bsSuccess">0</div>
+          </div>
+          <div class="batch-stat batch-stat-amber">
+            <div class="batch-stat-label">🔒 BLOCKED</div>
+            <div class="batch-stat-val" id="bsBlocked">0</div>
+          </div>
+          <div class="batch-stat batch-stat-blue">
+            <div class="batch-stat-label">🔑 2FA</div>
+            <div class="batch-stat-val" id="bs2FA">0</div>
+          </div>
+          <div class="batch-stat batch-stat-red">
+            <div class="batch-stat-label">❌ FAIL/N/A</div>
+            <div class="batch-stat-val" id="bsFail">0</div>
+          </div>
+        </div>
+        <div class="batch-meta-strip">
+          <div class="batch-meta">
+            <span class="batch-meta-label">ELAPSED</span>
+            <span class="batch-meta-val" id="bsElapsed">0s</span>
+          </div>
+          <div class="batch-meta" id="bsConcurrencyMeta">
+            <span class="batch-meta-label">LIVE CONCURRENCY</span>
+            <span class="batch-meta-val" id="bsLiveConc">—</span>
+          </div>
+          <div class="batch-meta">
+            <span class="batch-meta-label">RATE</span>
+            <span class="batch-meta-val" id="bsRate">—/min</span>
+          </div>
+          <div class="batch-meta">
+            <span class="batch-meta-label">PROGRESS</span>
+            <span class="batch-meta-val" id="bsProgress">0%</span>
+          </div>
+        </div>
+        <div class="batch-progress-bar">
+          <div class="batch-progress-fill" id="bsProgressBar" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- ── FP Audit Panel ── -->
+      <div id="fpAuditPanel" class="fp-audit-panel" style="display:none;">
+        <div class="fp-audit-header">
+          <div class="fp-audit-title">🔬 FINGERPRINT AUDIT — DUAL SDK LOOP</div>
+          <div class="fp-audit-round">ROUND <span id="fpRound">0</span></div>
+        </div>
+        <div id="fpAuditGrid" class="fp-audit-grid"></div>
+        <div class="fp-audit-summary">
+          <div>BEST: <span id="fpBest" class="fp-sum-good">—</span></div>
+          <div>AVG: <span id="fpAvg" class="fp-sum-val">—</span></div>
+          <div>WORST: <span id="fpWorst" class="fp-sum-val">—</span></div>
+          <div>UNIQUE FP: <span id="fpUnique" class="fp-sum-val">—</span></div>
+          <div>COHERENT: <span id="fpCoherent" class="fp-sum-good">—</span></div>
+        </div>
+        <div id="fpHistoryBar" class="fp-audit-history-bar"></div>
+      </div>
+
+      <div class="terminal-box">
+        <div class="terminal-header">
+          <span>SYS.OP // UPLINK TERMINAL</span>
+          <span class="feed-count"><span id="liveviewActiveCount">0</span> FEEDS ACTIVE</span>
+        </div>
+        <div id="logBody" class="log-body"></div>
+      </div>
+      <div class="feed-area" id="liveviewGrid"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       DASHBOARD
+       ═══════════════════════════════════════════════════ -->
+  <div id="tab-dashboard" class="view">
+    <div style="font-size: 14px; font-weight: bold; margin-bottom: 8px; color: var(--text);">Joe Fortune</div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Untested Credentials</div>
+        <div id="statJoeUntested" class="stat-val">0</div>
+        <div class="stat-bar"><div class="stat-bar-fill" id="barJoeUntested"></div></div>
+      </div>
+      <div class="stat-card s-green">
+        <div class="stat-label">Success</div>
+        <div id="statJoeSuccess" class="stat-val">0</div>
+        <div class="stat-bar"><div class="stat-bar-fill" id="barJoeSuccess"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">2FA Required</div>
+        <div id="statJoe2FA" class="stat-val">0</div>
+        <div class="stat-bar"><div class="stat-bar-fill" id="barJoe2FA"></div></div>
+      </div>
+      <div class="stat-card s-amber">
+        <div class="stat-label">Temp Disabled</div>
+        <div id="statJoeTempdisabled" class="stat-val">0</div>
+        <div class="stat-bar"><div class="stat-bar-fill" id="barJoeTemp"></div></div>
+      </div>
+      <div class="stat-card" style="border-color: #ff4d4f;">
+        <div class="stat-label" style="color: #ff4d4f;">Perm Disabled</div>
+        <div id="statJoePermdisabled" class="stat-val">0</div>
+        <div class="stat-bar"><div class="stat-bar-fill" id="barJoePerm" style="background: #ff4d4f;"></div></div>
+      </div>
+    </div>
+    
+    <div style="font-size: 14px; font-weight: bold; margin-bottom: 8px; margin-top: 16px; color: var(--text);">Ignition</div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Untested Credentials</div>
+        <div id="statIgnUntested" class="stat-val">0</div>
+        <div class="stat-bar"><div class="stat-bar-fill" id="barIgnUntested"></div></div>
+      </div>
+      <div class="stat-card s-green">
+        <div class="stat-label">Success</div>
+        <div id="statIgnSuccess" class="stat-val">0</div>
+        <div class="stat-bar"><div class="stat-bar-fill" id="barIgnSuccess"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">2FA Required</div>
+        <div id="statIgn2FA" class="stat-val">0</div>
+        <div class="stat-bar"><div class="stat-bar-fill" id="barIgn2FA"></div></div>
+      </div>
+      <div class="stat-card s-amber">
+        <div class="stat-label">Temp Disabled</div>
+        <div id="statIgnTempdisabled" class="stat-val">0</div>
+        <div class="stat-bar"><div class="stat-bar-fill" id="barIgnTemp"></div></div>
+      </div>
+      <div class="stat-card" style="border-color: #ff4d4f;">
+        <div class="stat-label" style="color: #ff4d4f;">Perm Disabled</div>
+        <div id="statIgnPermdisabled" class="stat-val">0</div>
+        <div class="stat-bar"><div class="stat-bar-fill" id="barIgnPerm" style="background: #ff4d4f;"></div></div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="panel glass-panel" style="margin-bottom:16px;">
+      <div class="panel-head">
+        <div class="panel-title">⚡ Quick Actions</div>
+        <span id="selectedCount" style="font-size:11px; color:var(--text2);">0 selected</span>
+      </div>
+      <div class="panel-body" style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="btnQuickLaunch" class="btn btn-start" onclick="startAutomation()" style="flex:1;min-width:180px;padding:10px;">▶ Launch
+          Automation</button>
+        <button id="btnViewAnalysis" class="btn btn-cyan" style="display:none;" onclick="toggleAnalysisModal()">🧪
+          Analysis</button>
+      </div>
+    </div>
+
+    <!-- Analytics -->
+    <div class="analytics-grid">
+      <div class="panel glass-panel">
+        <div class="panel-head">
+          <div class="panel-title">
+            <div class="chart-dot"></div> Success Rate (30m)
+          </div>
+          <span class="chart-rate" id="chartCurrentRate">0%</span>
+        </div>
+        <div class="panel-body"><canvas id="successRateCanvas"></canvas></div>
+      </div>
+      <div class="panel glass-panel">
+        <div class="panel-head">
+          <div class="panel-title">💰 Credits</div>
+        </div>
+        <div class="panel-body">
+          <div class="cost-grid">
+            <div class="cost-cell">
+              <div class="cost-lbl">Spent</div>
+              <div class="cost-val" id="costTotalSpent">—</div>
+              <div class="cost-sub" id="costTotalSpentSub">this run</div>
+            </div>
+            <div class="cost-cell">
+              <div class="cost-lbl">Remaining</div>
+              <div class="cost-val c-green" id="costRemaining">—</div>
+              <div class="cost-sub" id="costRemainingSub">available</div>
+            </div>
+            <div class="cost-cell">
+              <div class="cost-lbl">Avg/Cred</div>
+              <div class="cost-val" id="costPerCred">—</div>
+              <div class="cost-sub" id="costPerCredSub">each</div>
+            </div>
+            <div class="cost-cell">
+              <div class="cost-lbl">Projected</div>
+              <div class="cost-val c-amber" id="costProjected">—</div>
+              <div class="cost-sub" id="costProjectedSub">to complete</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Credentials Table -->
+    <div class="panel glass-panel" style="padding:0;">
+      <div class="filter-bar">
+        <div class="search-wrap"><input type="text" id="credFilter" placeholder="Search..."
+            oninput="applyCredFilter()"><span class="ico">🔍</span></div>
+        <select id="filterOutcome" style="width:auto;min-width:120px;" onchange="applyCredFilter()">
+          <option value="all">All</option>
+          <option value="success">✅ Success</option>
+          <option value="noaccount">❌ No Acct</option>
+          <option value="permdisabled">🔒 Perm</option>
+          <option value="tempdisabled">⏳ Temp</option>
+          <option value="2FA">🔐 2FA</option>
+          <option value="N/A">— N/A</option>
+          <option value="testing">🔄 Testing</option>
+          <option value="queued">📋 Queued</option>
+        </select>
+        <select id="filterSort" style="width:auto;min-width:120px;" onchange="applyCredSort()">
+          <option value="default">Default</option>
+          <option value="email-az">A→Z</option>
+          <option value="email-za">Z→A</option>
+          <option value="last-tested">Recent</option>
+          <option value="outcome">Outcome</option>
+        </select>
+        <label
+          style="display:flex;gap:4px;align-items:center;font-size:10px;color:var(--text2);cursor:pointer;white-space:nowrap;"><input
+            type="checkbox" id="optUntestedOnly" checked onchange="syncMasterSelectState()"> Untested</label>
+        <div class="filter-count" id="filterCount">0/0</div>
+      </div>
+      <div
+        style="padding:6px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:flex-end;gap:4px;flex-wrap:wrap;align-items:center;">
+        <button class="btn btn-ghost btn-sm" onclick="selectFiltered(true)">All</button>
+        <button class="btn btn-ghost btn-sm" onclick="selectFiltered(false)">Clear</button>
+        <span style="width:1px;height:14px;background:var(--border);margin:0 2px"></span>
+        <span style="font-size:9px;color:var(--text3);text-transform:uppercase;">Rnd:</span>
+        <button class="btn btn-ghost btn-sm" onclick="selectRandomN(50)">50</button>
+        <button class="btn btn-ghost btn-sm" onclick="selectRandomN(100)">100</button>
+        <button class="btn btn-ghost btn-sm" onclick="selectRandomN(200)">200</button>
+        <button class="btn btn-ghost btn-sm" onclick="selectRandomN(500)">500</button>
+      </div>
+      <div class="legend-strip">
+        <span class="legend-lbl">Key</span>
+        <span class="badge badge-success">OK</span><span class="badge badge-2FA">2FA</span><span
+          class="badge badge-noaccount">NoAcct</span><span class="badge badge-permdisabled">Perm</span><span
+          class="badge badge-tempdisabled">Temp</span><span class="badge badge-testing">Test</span><span
+          class="badge badge-queued">Queue</span>
+      </div>
+      <div style="max-height:460px;overflow-y:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:32px"><input type="checkbox" id="masterSelect" onchange="onMasterSelectToggle(event)">
+              </th>
+              <th class="hide-on-mobile" style="width:32px">#</th>
+              <th>Credential</th>
+              <th class="hide-on-mobile" style="width:80px">Batch</th>
+              <th>Results</th>
+              <th style="width:120px">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="credentialList"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       CREDENTIALS
+       ═══════════════════════════════════════════════════ -->
+  <div id="tab-credentials" class="view">
+    <!-- Mini Stats -->
+    <div class="cred-mini-stats">
+      <div class="cred-mini-stat s-total"><div class="ms-label">Total</div><div class="ms-val" id="credStatTotal">0</div><div class="ms-pct" id="credStatTotalPct">100%</div></div>
+      <div class="cred-mini-stat s-queued"><div class="ms-label">Queued</div><div class="ms-val" id="credStatQueued">0</div><div class="ms-pct" id="credStatQueuedPct">—</div></div>
+      <div class="cred-mini-stat s-testing"><div class="ms-label">Testing</div><div class="ms-val" id="credStatTesting">0</div><div class="ms-pct" id="credStatTestingPct">—</div></div>
+      <div class="cred-mini-stat s-success"><div class="ms-label">Success</div><div class="ms-val" id="credStatSucc">0</div><div class="ms-pct" id="credStatSuccPct">—</div></div>
+      <div class="cred-mini-stat s-failed"><div class="ms-label">Failed</div><div class="ms-val" id="credStatFail">0</div><div class="ms-pct" id="credStatFailPct">—</div></div>
+      <div class="cred-mini-stat s-blocked"><div class="ms-label">Blocked/Disabled</div><div class="ms-val" id="credStatBlock">0</div><div class="ms-pct" id="credStatBlockPct">—</div></div>
+    </div>
+
+    <!-- Toolbar: Search + Filters -->
+    <div class="cred-toolbar">
+      <select id="credDisplayToggle" onchange="renderCredentialsTab()">
+        <option value="both">Both Sites</option>
+        <option value="joe">JoeFortune Only</option>
+        <option value="ignition">Ignition Only</option>
+      </select>
+      <select id="credTestStatus" onchange="renderCredentialsTab()">
+        <option value="all">Tested & Untested</option>
+        <option value="untested">Untested Only</option>
+        <option value="resulted">Resulted Only</option>
+      </select>
+      <input class="search-box" id="credSearchBox" type="text" placeholder="🔍 Search email, domain, outcome..." oninput="renderCredentialsTab()">
+      <select id="credFilterOutcome" onchange="renderCredentialsTab()">
+        <option value="all">All Outcomes</option>
+        <option value="success">✓ Success</option>
+        <option value="failed">✗ Failed</option>
+        <option value="2FA">🔐 2FA</option>
+        <option value="testing">⏳ Testing</option>
+        <option value="queued">📋 Queued</option>
+        <option value="noaccount">👻 No Account</option>
+        <option value="tempdisabled">⏸ Temp Disabled</option>
+        <option value="permdisabled">🚫 Perm Disabled</option>
+        <option value="blocked">🛡 Blocked</option>
+      </select>
+      <select id="credSortBy" onchange="renderCredentialsTab()">
+        <option value="index">Sort: Default</option>
+        <option value="email">Sort: Email</option>
+        <option value="outcome">Sort: Outcome</option>
+        <option value="attempts">Sort: Attempts</option>
+        <option value="time">Sort: Last Tested</option>
+      </select>
+      <select id="credSortDir" onchange="renderCredentialsTab()">
+        <option value="asc">↑ Asc</option>
+        <option value="desc">↓ Desc</option>
+      </select>
+      <select id="credPageSize" onchange="credPage=0;renderCredentialsTab()">
+        <option value="25">25 / page</option>
+        <option value="50" selected>50 / page</option>
+        <option value="100">100 / page</option>
+        <option value="99999">All</option>
+      </select>
+    </div>
+
+    <!-- Bulk Actions -->
+    <div class="cred-bulk-bar" id="credBulkBar" style="display:none;">
+      <span class="bulk-count" id="credBulkCount">0 selected</span>
+      <button class="btn btn-ghost btn-sm" onclick="credBulkSelectAll()">Select All</button>
+      <button class="btn btn-ghost btn-sm" onclick="credBulkDeselectAll()">Deselect All</button>
+      <button class="btn btn-ghost btn-sm" onclick="credBulkRetest()">🔄 Retest Selected</button>
+      <button class="btn btn-ghost btn-sm" onclick="credBulkExport()">📋 Copy Emails</button>
+      <button class="btn btn-danger btn-sm" onclick="credBulkDelete()">🗑 Remove Selected</button>
+    </div>
+
+    <!-- Table -->
+    <div class="cred-table-wrap" style="max-height:calc(100vh - 380px);overflow-y:auto;">
+      <table class="cred-table">
+        <thead>
+          <tr>
+            <th style="width:36px;"><input type="checkbox" id="credMasterCheck" onchange="credToggleMasterCheck(this.checked)"></th>
+            <th onclick="credSetSort('index')"># <span class="sort-arrow">▾</span></th>
+            <th onclick="credSetSort('email')">Email <span class="sort-arrow">▾</span></th>
+            <th onclick="credSetSort('outcome')">Outcome <span class="sort-arrow">▾</span></th>
+            <th onclick="credSetSort('attempts')">Attempts <span class="sort-arrow">▾</span></th>
+            <th onclick="credSetSort('time')">Last Tested <span class="sort-arrow">▾</span></th>
+            <th>Batch</th>
+            <th>Proxy</th>
+            <th style="width:130px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="credTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="cred-pagination">
+      <div class="page-info" id="credPageInfo">Showing 0–0 of 0</div>
+      <div class="page-btns" id="credPageBtns"></div>
+    </div>
+
+    <!-- Export Bar -->
+    <div class="cred-export-bar">
+      <button class="btn btn-ghost btn-sm" onclick="credExportCSV()">⬇ Export CSV</button>
+      <button class="btn btn-ghost btn-sm" onclick="credExportSuccessEmails()">📋 Copy Success Emails</button>
+      <button class="btn btn-ghost btn-sm" onclick="credExportFailedEmails()">📋 Copy Failed Emails</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       RESULTS
+       ═══════════════════════════════════════════════════ -->
+  <div id="tab-results" class="view">
+    <div class="panel glass-panel">
+      <div class="panel-head">
+        <div class="panel-title">🏆 Results & Temp Disabled · <span
+            style="color:var(--cyan);font-family:'JetBrains Mono',monospace;font-size:12px;" id="resultsCount">0</span>
+          logged</div>
+        <button class="btn btn-ghost btn-sm" onclick="renderResults()">↻ Refresh</button>
+      </div>
+      <div class="panel-body">
+        <div class="results-grid scrollable" id="resultsList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SETTINGS
+       ═══════════════════════════════════════════════════ -->
+  <div id="tab-settings" class="view">
+    <div class="settings-cols">
+      <!-- Execution -->
+      
+      <!-- Effective Configuration Matrix -->
+      <div class="panel glass-panel" style="grid-column: 1 / -1; margin-bottom: 12px;">
+        <div class="panel-head">
+          <div class="panel-title" style="color: var(--amber);">⚡ Effective Configuration Matrix</div>
+        </div>
+        <div class="panel-body">
+          <div id="effectiveConfigPreview" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--green); white-space: pre-wrap;">
+            Awaiting configuration analysis...
+          </div>
+        </div>
+      </div>
+
+      <div class="panel glass-panel">
+        <div class="panel-head">
+          <div class="panel-title">⚙ Execution</div>
+        </div>
+        <div class="panel-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+            <div><label class="field-lbl">Proxy Pool</label><select id="advProxyPool">
+                <option value="6" selected>Flame Sticky AU</option>
+              </select></div>
+            <div><label class="field-lbl">Concurrency</label><input type="number" id="advConcurrency" value="5"></div>
+            <div><label class="field-lbl">Backend</label><select id="backendSelect" onchange="updateTilingVisibility(this.value)">
+                <option value="stealth" selected>Stealth (Headless)</option>
+                <option value="stealth-headed">Stealth (Headed)</option>
+                <option value="stealth-httpcloak">Stealth (HTTP Cloak)</option>
+                <option value="cloak-headless">Cloak (Headless)</option>
+                <option value="cloak-headed">Cloak (Headed)</option>
+                <option value="cloak-headless-nocloak">Cloak (Headless - NoCloak)</option>
+                <option value="cloak-headed-nocloak">Cloak (Headed - NoCloak)</option>
+                <option value="zendriver">Zendriver (HL)</option>
+                <option value="zendriver-headed">Zendriver (Headed)</option>
+                <option value="rotate-backends">🔄 Rotate All</option>
+                <option value="rotate-backends-headless">🔄 Rotate All Headless</option>
+                <option value="stealth-fortress">🛡️ Stealth Fortress</option>
+                <option value="speed-blitz">⚡ Speed Blitz</option>
+                <option value="headed-recon">🎭 Headed Recon</option>
+                <option value="darwin">🦎 Darwin (Natural Selection)</option>
+                <option value="golden-benchmark">Golden Benchmark</option>
+              </select></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;" id="tilingLayoutContainer">
+            <div><label class="field-lbl">Tiling Layout</label><select id="advTilingLayout">
+                <option value="auto" selected>Auto (Square/Aspect-Aware)</option>
+                <option value="cascading">Cascading (Messy Desk)</option>
+                <option value="snap">OS Snap (50/50 split)</option>
+                <option value="fibonacci">Golden Ratio (Fibonacci)</option>
+                <option value="chaos">Chaos Mode (Randomized)</option>
+                <option value="portrait-grid">Portrait Stack (Columns)</option>
+                <option value="1x2">1x2 (1 row, 2 cols)</option>
+                <option value="2x1">2x1 (2 rows, 1 col)</option>
+                <option value="2x2">2x2 (2 rows, 2 cols)</option>
+                <option value="1x3">1x3 (1 row, 3 cols)</option>
+                <option value="1x4">1x4 (1 row, 4 cols)</option>
+                <option value="4x1">4x1 (4 rows, 1 col)</option>
+                <option value="3x3">3x3 (3 rows, 3 cols)</option>
+              </select></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+            <div><label class="field-lbl">Fingerprint Strategy</label><select id="advFpStrategy">
+                <option value="optimal" selected>⚡ Optimal (Auto Per Backend)</option>
+                <option value="native-only">🔒 Native Only (Zero JS Injection)</option>
+                <option value="full-stealth">🛡️ Full Stealth (Max JS Injection)</option>
+              </select></div>
+            <div style="margin-top:20px;">
+              <label style="display:flex;gap:5px;align-items:center;cursor:pointer;font-size:12px;color:rgba(255,255,255,0.9);">
+                <label class="cyber-switch"><input type="checkbox" id="adv"><span class="cyber-slider"></span></label> 
+                📱 Emulate Mobile Device (Android OS + Touch Viewport)
+              </label>
+            </div>
+          </div>
+          <div style="margin-top:10px;"><label class="field-lbl">Mode</label><select id="advTestingMode"
+              onchange="toggleRunMode(this.value)">
+              <option value="sequential" selected>Sequential</option>
+              <option value="parallel">Parallel</option>
+            </select></div>
+          <div style="margin-top:10px;"><label class="field-lbl">Target Sites</label>
+            <div style="display:flex;gap:14px;padding:8px;background:rgba(0,0,0,0.15);border-radius:6px;">
+              <label style="display:flex;gap:5px;align-items:center;cursor:pointer;font-size:12px;"><input
+                  type="checkbox" id="targetJoe" checked onchange="enforceSettingsCompatibility()"> Joe</label>
+              <label style="display:flex;gap:5px;align-items:center;cursor:pointer;font-size:12px;"><input
+                  type="checkbox" id="targetIgnition" onchange="enforceSettingsCompatibility()"> Ignition</label>
+            </div>
+          </div>
+          <div style="margin-top:10px;padding:8px;background:rgba(0,0,0,0.15);border-radius:6px;">
+            <label style="display:flex;gap:8px;align-items:center;cursor:pointer;font-size:12px;">
+              <label class="cyber-switch"><input type="checkbox" id="adv"><span class="cyber-slider"></span></label>
+              <span>🔄 Rotate backend on fingerprint detection</span>
+            </label>
+            <div style="font-size:9px;color:var(--text3);margin-top:3px;margin-left:24px;">When a misdirection/fingerprint burn fires, automatically retry with a different backend</div>
+            <label style="display:flex;gap:8px;align-items:center;cursor:pointer;font-size:12px;margin-top:8px;">
+              <label class="cyber-switch"><input type="checkbox" id="adv"><span class="cyber-slider"></span></label>
+              <span>🔥 Only burn session on Perm Disabled</span>
+            </label>
+            <div style="font-size:9px;color:var(--text3);margin-top:3px;margin-left:24px;">Only destroy session history and rotate IP if "been disabled" is detected.</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+            <div><label class="field-lbl">Max Retries</label><input type="number" id="advMaxRetries" value="2"></div>
+                      <div><label class="field-lbl">Proxy Rotate URL</label><input type="text" id="advProxyRotateUrl" placeholder="http://api.proxy.com/rotate?session=[session]"></div>
+          </div>
+          <!-- Golden Benchmark -->
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+            <div class="panel-title" style="font-size:12px;margin-bottom:8px;">🏆 Golden Benchmark</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <div style="display:flex;gap:4px;align-items:center;"><label
+                  style="font-size:9px;color:var(--text3);width:30px;font-weight:700;">JOE</label><input type="text"
+                  id="goldenJoe" style="font-family:'JetBrains Mono',monospace;font-size:10px;"
+                  value=""></div>
+              <div style="display:flex;gap:4px;align-items:center;"><label
+                  style="font-size:9px;color:var(--text3);width:30px;font-weight:700;">IGN</label><input type="text"
+                  id="goldenIgnition" style="font-family:'JetBrains Mono',monospace;font-size:10px;"
+                  value=""></div>
+            </div>
+            <button id="btnGoldenBenchmark" class="btn btn-start" onclick="startGoldenBenchmark()"
+              style="width:100%;margin-top:8px;padding:8px;background:linear-gradient(135deg,#f59e0b,#ef4444);">🏆 Run
+              Benchmark</button>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Stealth & Maintenance -->
+      <div class="panel glass-panel">
+        <div class="panel-head">
+          <div class="panel-title">🛡 Stealth & Debug</div>
+        </div>
+        <div class="panel-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <label class="toggle-row" title="Automatically optimize all settings (OS profile, concurrency, video, etc.) per-session based on which backend is active. Essential for multi-backend rotation modes."><span style="color:var(--amber);font-weight:600;">⚡ Auto Best Native Per Backend</span><label class="cyber-switch"><input type="checkbox" id="advAutoOptimize"><span class="cyber-slider"></span></label></label>
+            <label class="toggle-row"><span>Record Video</span> <span class="cyber-tooltip" title="Captures a full WebM video stream of the session for forensic review.">(?)</span><label class="cyber-switch"><input type="checkbox" id="advRecordVideo"><span class="cyber-slider"></span></label></label>
+            <label class="toggle-row" title="Capture Playwright traces (.zip) for all sessions"><span>Enable Tracing</span><label class="cyber-switch"><input type="checkbox" id="advEnableTracing"><span class="cyber-slider"></span></label></label>
+            <label class="toggle-row"><span>Cache Injection</span> <span class="cyber-tooltip" title="Passes cookies and trust tokens between sessions to build session resilience.">(?)</span><label class="cyber-switch"><input type="checkbox" id="advCacheInjection"><span class="cyber-slider"></span></label></label>
+            <label class="toggle-row"><span>AI Verification</span><label class="cyber-switch"><input type="checkbox" id="advEnableVerification"><span class="cyber-slider"></span></label></label>
+            <label class="toggle-row"><span>Always Click Remember Me</span><label class="cyber-switch"><input type="checkbox" id="advAlwaysClickRememberMe"><span class="cyber-slider"></span></label></label>
+            <label class="toggle-row"><span style="color:var(--cyan);">Auto CDP Dump on Stalls</span><label class="cyber-switch"><input type="checkbox" id="advAutoCdp" checked><span class="cyber-slider"></span></label></label>
+            <label class="toggle-row"><span style="color:var(--amber);">Active WAF Fuzzing</span><label class="cyber-switch"><input type="checkbox" id="advWafFuzzing" onchange="toggleWafFuzzer(this.checked)"><span class="cyber-slider"></span></label></label>
+
+            <label class="toggle-row"><span>HttpCloak</span><label class="cyber-switch"><input type="checkbox" id="advUseHttpCloak"><span class="cyber-slider"></span></label></label>
+            <label class="toggle-row"><span>Mutate Fingerprint on Retry</span><label class="cyber-switch"><input type="checkbox" id="advMutateOnRetry"><span class="cyber-slider"></span></label></label>
+            <label class="toggle-row" title="Pause session indefinitely on CAPTCHA"><span>Manual CAPTCHA Mode</span><label class="cyber-switch"><input type="checkbox" id="advManualCaptchaMode"><span class="cyber-slider"></span></label></label>
+            <label class="toggle-row" title="Stealth bypasses HttpCloak"><span>Bypass (Stealth)</span><input
+                type="checkbox" id="advStealthBypass" checked></label>
+            <label class="toggle-row" title="Inject fingerprint script for Zendriver/Spider/Cloak"><span>Inject Stealth JS</span><label class="cyber-switch"><input type="checkbox" id="advInjectStealthJS"><span class="cyber-slider"></span></label></label>
+            <label class="toggle-row" title="Bypass Ignition login popup with random code"><span>Ignition Bypass</span><label class="cyber-switch"><input type="checkbox" id="advIgnitionVerifBypass"><span class="cyber-slider"></span></label></label>
+            <label class="toggle-row" title="Emulate mobile device profile for fingerprint evasion"><span>Mobile Emulation</span><label class="cyber-switch"><input type="checkbox" id="advEmulateMobile"><span class="cyber-slider"></span></label></label>
+          </div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+            <div class="panel-title" style="font-size:12px;margin-bottom:8px;">🔧 Maintenance</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <button class="btn btn-ghost" onclick="document.getElementById('uploadCsv').click()">⬆ Upload CSV</button>
+              <input type="file" id="uploadCsv" hidden accept=".csv" onchange="uploadCsv(this.files[0])">
+              <button class="btn btn-ghost" onclick="syncData()">🔄 Refresh Pool</button>
+              <button class="btn btn-danger" onclick="purgeFailed()">🗑 Purge Failed</button>
+              <button class="btn btn-danger" onclick="clearProgress()">🗑 Clear Progress</button>
+              <button class="btn btn-ghost" onclick="cleanOldRecords()" style="grid-column:span 2;">🧹 Purge Old Logs</button>
+              <button class="btn btn-cyan" onclick="saveSettingsAsDefault()">💾 Save as Default</button>
+              <button class="btn btn-cyan" onclick="saveSettingsToFile()">💾 Save to File</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Multi-Backend Settings Card -->
+  <div class="panel glass-panel" id="multiBackendPanel" style="display: none; border-left: 3px solid var(--amber); max-width: 800px; margin: 15px auto;">
+    <div class="panel-head">
+      <div class="panel-title" style="color: var(--amber);">⚡ Multi-Backend Optimal Settings</div>
+    </div>
+    <div class="panel-body" style="padding: 10px;">
+      <div style="font-size: 11px; color: var(--text2); margin-bottom: 12px; line-height: 1.4;">
+        When <strong>Auto Best Native Per Backend</strong> is enabled, the engine ignores your manual toggle settings below and dynamically enforces these architecturally correct limits per-browser to prevent honeypot flagging.
+      </div>
+      <div id="multiBackendTableContainer" style="overflow-x: auto;"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       TERMINAL
+       ═══════════════════════════════════════════════════ -->
+  
+  <!-- TEMP DISABLED TAB -->
+  <div id="tab-tempdisabled" class="view">
+    <div class="glass-panel" style="padding: 24px; min-height: 400px;">
+      <h2 style="margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px; color: var(--amber);">
+        🔒 Temporarily Disabled Accounts
+      </h2>
+      <div id="tempDisabledContainer" style="display: flex; flex-direction: column; gap: 20px;">
+        <div style="color: var(--text3); font-style: italic;">Awaiting data...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYTICS TAB -->
+  <div id="tab-analytics" class="view">
+    <div class="glass-panel" style="margin-bottom: 20px; padding: 20px;">
+      <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">⚡ Engine Vitals</h3>
+      <div style="display: flex; gap: 20px;">
+        <div class="stat-card" style="flex: 1;">
+          <div class="stat-label">CPU USAGE</div>
+          <div class="stat-val vitals-idle" id="vitals-cpu">— idle</div>
+        </div>
+        <div class="stat-card" style="flex: 1;">
+          <div class="stat-label">MEMORY (HEAP)</div>
+          <div class="stat-val vitals-idle" id="vitals-heap">— idle</div>
+        </div>
+        <div class="stat-card" style="flex: 1;">
+          <div class="stat-label">MEMORY (RSS)</div>
+          <div class="stat-val vitals-idle" id="vitals-rss">— idle</div>
+        </div>
+        <div class="stat-card" style="flex: 1;">
+          <div class="stat-label">UPTIME</div>
+          <div class="stat-val vitals-idle" id="vitals-uptime">— idle</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-panel" style="margin-bottom: 20px; padding: 20px;">
+      <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">📈 Target Success/Failure Trajectory</h3>
+      <div style="height: 300px; width: 100%; position: relative;">
+        <canvas id="analyticsChart" style="max-height: 100%; max-width: 100%;"></canvas>
+      </div>
+    </div>
+    
+    <div class="glass-panel" style="padding: 20px;">
+      <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">🌐 Proxy Pool Health Visualizer</h3>
+      <div id="proxy-pool-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px;">
+        <!-- Hydrated by JS -->
+        <div style="color: var(--text2); font-size: 13px;">Waiting for telemetry...</div>
+      </div>
+    </div>
+
+    <!-- Fingerprint Scorecard -->
+    <div class="glass-panel" style="margin-top: 20px; padding: 20px;">
+      <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">🔬 Fingerprint Scorecard — Live Per-Backend</h3>
+      <div id="fpScorecardGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;">
+        <div style="color: var(--text3); font-size: 13px; grid-column: 1 / -1;">Run a fingerprint audit to populate scores. Use the <code style="color: var(--cyan);">fp-matrix-audit</code> script or the FP Audit panel on the Command tab.</div>
+      </div>
+      <div style="margin-top: 16px; border-top: 1px solid var(--border); padding-top: 12px;">
+        <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 11px; color: var(--text2);">
+          <span>🟢 Score 0-5 = Excellent</span>
+          <span>🟡 Score 6-15 = Fair</span>
+          <span>🔴 Score 16+ = Poor</span>
+          <span style="color: var(--cyan);">📱 = Mobile</span>
+          <span style="color: var(--text);">🖥️ = Desktop</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div id="tab-terminal" class="view">
+    <div class="panel glass-panel" style="height: calc(100vh - 120px); display: flex; flex-direction: column;">
+      <div class="panel-head">
+        <div class="panel-title">💻 Live Terminal</div>
+        <div style="display: flex; gap: 8px;">
+           <select id="terminalLogLevel" onchange="filterTerminalLogs()" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);padding:4px 8px;border-radius:4px;font-size:11px;">
+              <option value="ALL">All Levels</option>
+              <option value="INFO">INFO & Above</option>
+              <option value="WARN">WARN & Above</option>
+              <option value="ERROR">ERROR Only</option>
+           </select>
+           <button class="btn btn-ghost btn-sm" onclick="document.getElementById('logBody').innerHTML=''">⊘ Clear</button>
+           <button class="btn btn-ghost btn-sm" onclick="downloadLogs()">💾 Download</button>
+           <label style="display:flex; align-items:center; gap:4px; font-size:11px; cursor:pointer;">
+             <input type="checkbox" id="autoScrollLogs" checked style="accent-color:var(--cyan);"> Auto-scroll
+           </label>
+        </div>
+      </div>
+      <div class="panel-body" style="flex-grow: 1; padding: 0; background: #0a0c10; overflow: hidden; position: relative;">
+        <div id="logBody" style="position:absolute; inset: 0; overflow-y: auto; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px; display: flex; flex-direction: column; gap: 4px;">
+          <div id="terminalEmptyState" style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--text3); font-size:13px; flex-direction:column; gap:8px;">
+            <span style="font-size:24px; opacity:0.3;">💻</span>
+            <span>Waiting for engine to start... Logs will stream here in real-time.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       HERMES AI SYSTEM
+       ═══════════════════════════════════════════════════ -->
+  <div id="tab-hermes" class="view">
+    <div class="hermes-grid">
+      <!-- Status & Controls -->
+      <div class="panel glass-panel">
+        <div class="panel-head">
+          <div class="panel-title">🤖 Hermes God Mode (Always-On)</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="hermes-status-dot dead" id="hermesStatusDot"></span>
+            <span id="hermesStatusLabel" style="font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;">OFFLINE</span>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div>
+              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;">Uptime</div>
+              <div class="hermes-uptime" id="hermesUptime">—</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;">Last Review</div>
+              <div id="hermesLastReview" style="font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;">—</div>
+            </div>
+          </div>
+          <div class="hermes-stat-grid">
+            <div class="hermes-stat-card">
+              <div class="stat-val" id="hermesReviewCount">0</div>
+              <div class="stat-label">Reviews</div>
+            </div>
+            <div class="hermes-stat-card">
+              <div class="stat-val" id="hermesToolCalls">0</div>
+              <div class="stat-label">Tool Calls</div>
+            </div>
+            <div class="hermes-stat-card">
+              <div class="stat-val" id="hermesPatchCount">0</div>
+              <div class="stat-label">Patches</div>
+            </div>
+            <div class="hermes-stat-card">
+              <div class="stat-val" id="hermesErrorCount">0</div>
+              <div class="stat-label">Errors</div>
+            </div>
+            <div class="hermes-stat-card">
+              <div class="stat-val" id="hermesActiveSessions" style="color: var(--cyan);">0</div>
+              <div class="stat-label">Active Tasks</div>
+            </div>
+          </div>
+          <div class="hermes-controls">
+            <button class="btn btn-cyan" onclick="hermesReviewNow()">🧠 Trigger Review</button>
+            <button class="btn btn-ghost" onclick="hermesRestart()">🔄 Restart Daemon</button>
+          </div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+            <div class="panel-title" style="font-size:12px;margin-bottom:8px;">⚙ Automation</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <label class="toggle-row">
+                <span>Auto-Review</span>
+                <label class="cyber-switch"><input type="checkbox" id="hermes"><span class="cyber-slider"></span></label>
+              </label>
+              <div>
+                <label class="field-lbl">Review Interval (min)</label>
+                <input type="number" id="hermesInterval" value="30" min="5" max="120" onchange="hermesSetInterval(this.value)">
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+            <div class="panel-title" style="font-size:12px;margin-bottom:8px;">🧬 Model & Identity</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div>
+                <label class="field-lbl">AI Model</label>
+                <div style="font-size:11px;color:var(--cyan);font-family:'JetBrains Mono',monospace;padding:6px;background:rgba(0,0,0,0.3);border-radius:6px;">google/gemini-2.0-flash-001</div>
+              </div>
+              <div>
+                <label class="field-lbl">Mode</label>
+                <div style="font-size:11px;color:var(--red);font-weight:700;font-family:'JetBrains Mono',monospace;padding:6px;background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.15);border-radius:6px;">⚡ GOD MODE</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Log Feed -->
+      <div class="panel glass-panel">
+        <div class="panel-head">
+          <div class="panel-title">📜 Hermes Log</div>
+          <span style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;" id="hermesLogCount">0 entries</span>
+        </div>
+        <div class="panel-body" style="padding:8px;">
+          <div class="hermes-log-feed" id="hermesLogFeed">
+            <div style="color:var(--text3);text-align:center;padding:20px;">Waiting for Hermes logs...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Capabilities -->
+    <div class="panel glass-panel" style="margin-top:16px;">
+      <div class="panel-head">
+        <div class="panel-title">🛠 Tool Capabilities</div>
+      </div>
+      <div class="panel-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;">
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text);">📂 read_file</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">Read workspace files for analysis</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text);">🔧 apply_code_patch</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">Syntax-checked live code edits</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text);">⚙ update_ui_settings</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">Tweak engine config via IPC</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text);">📸 analyze_screenshot</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">Vision AI on CAPTCHAs & blocks</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text);">🔍 search_codebase</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">Grep across all source files</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text);">🎭 execute_playwright_eval</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">Headless browser eval & selector test</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text);">🌐 probe_target_headers</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">Check WAF / CDN headers</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text);">🔄 rotate_proxy_subnet</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">Rotate IPs or ban subnets</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text);">💻 run_terminal_command</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">Execute shell commands (God Mode)</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text);">📄 manage_files</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">Create, append, delete files</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text);">⏪ revert_patch</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">Git revert if patch fails</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;">
+            <div style="font-size:11px;font-weight:600;color:var(--text);">🚀 restart_server</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">Hard restart for self-healing</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;border:1px solid rgba(34,211,238,0.3);">
+            <div style="font-size:11px;font-weight:600;color:var(--cyan);">🔍 inspect_cdp</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">Dump real-time DOM from stalled sessions</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;border:1px solid rgba(34,211,238,0.3);">
+            <div style="font-size:11px;font-weight:600;color:var(--cyan);">🗄 query_credentials_sqlite</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">Read-only telemetry & PRAGMA analysis</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;border:1px solid rgba(34,211,238,0.3);">
+            <div style="font-size:11px;font-weight:600;color:var(--cyan);">🪟 manage_grid_layout</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">Force UI refresh of headless debug tiles</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;border:1px solid rgba(34,211,238,0.3);">
+            <div style="font-size:11px;font-weight:600;color:var(--cyan);">🔥 generate_waf_heatmap</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">ASCII visualization of active honeypots</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;border:1px solid rgba(168,85,247,0.3);background:rgba(168,85,247,0.05);">
+            <div style="font-size:11px;font-weight:600;color:#a855f7;">🧠 live_screenshot_analysis</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">Vision LLM reads page after each attempt</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;border:1px solid rgba(168,85,247,0.3);background:rgba(168,85,247,0.05);">
+            <div style="font-size:11px;font-weight:600;color:#a855f7;">⏱ timing_telemetry</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">Phase-by-phase timing collection (P50/P95)</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;border:1px solid rgba(168,85,247,0.3);background:rgba(168,85,247,0.05);">
+            <div style="font-size:11px;font-weight:600;color:#a855f7;">📈 post_batch_analysis</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">LLM-powered batch insights & proposals</div>
+          </div>
+          <div class="hermes-stat-card" style="text-align:left;padding:8px 10px;border:1px solid rgba(168,85,247,0.3);background:rgba(168,85,247,0.05);">
+            <div style="font-size:11px;font-weight:600;color:#a855f7;">📸 response_screenshots</div>
+            <div style="font-size:9px;color:var(--text3);margin-top:2px;">Zoom + full-page capture after each attempt</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Observer Intelligence Panel ── -->
+    <div class="panel glass-panel" style="margin-top:16px;">
+      <div class="panel-head">
+        <div class="panel-title">🧠 Observer Intelligence (Live)</div>
+        <span style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;" id="observerStatus">STANDBY</span>
+      </div>
+      <div class="panel-body">
+        <div class="hermes-stat-grid" style="grid-template-columns: repeat(5, 1fr);">
+          <div class="hermes-stat-card">
+            <div class="stat-val" id="observerLlmCalls" style="color:#a855f7;">0</div>
+            <div class="stat-label">LLM Calls</div>
+          </div>
+          <div class="hermes-stat-card">
+            <div class="stat-val" id="observerInsights" style="color:#22d3ee;">0</div>
+            <div class="stat-label">Insights</div>
+          </div>
+          <div class="hermes-stat-card">
+            <div class="stat-val" id="observerScreenshots" style="color:#4ade80;">0</div>
+            <div class="stat-label">Screenshots</div>
+          </div>
+          <div class="hermes-stat-card">
+            <div class="stat-val" id="observerAnomalies" style="color:#f59e0b;">0</div>
+            <div class="stat-label">Anomalies</div>
+          </div>
+          <div class="hermes-stat-card">
+            <div class="stat-val" id="observerAvgLatency" style="color:var(--text2);">—</div>
+            <div class="stat-label">Avg LLM ms</div>
+          </div>
+        </div>
+
+        <!-- Proposals -->
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div class="panel-title" style="font-size:12px;">📋 Timing Proposals</div>
+            <span style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;" id="proposalCount">0 pending</span>
+          </div>
+          <div id="proposalsList" style="max-height:200px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:11px;">
+            <div style="color:var(--text3);text-align:center;padding:12px;">No proposals yet — run batches to generate data</div>
+          </div>
+        </div>
+
+        <!-- Recent LLM Insights -->
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div class="panel-title" style="font-size:12px;">💡 Recent LLM Insights</div>
+            <span style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;" id="insightCount">0 total</span>
+          </div>
+          <div id="insightsFeed" style="max-height:200px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.5;">
+            <div style="color:var(--text3);text-align:center;padding:12px;">Waiting for Observer intelligence...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- ═══════ MODALS ═══════ -->
+  <div id="screenshotLoupe" style="display:none;"></div>
+
+  <!-- Screenshot Lightbox -->
+  <div id="ssLightbox" class="ss-lightbox" onclick="if(event.target===this)closeLightbox()">
+    <div class="ss-lightbox-inner">
+      <button class="ss-lightbox-close" onclick="closeLightbox()">✕</button>
+      <button class="ss-lightbox-nav prev" onclick="navLightbox(-1)">‹</button>
+      <button class="ss-lightbox-nav next" onclick="navLightbox(1)">›</button>
+      <span class="ss-lightbox-counter" id="lbCounter"></span>
+      <div class="ss-lightbox-split" id="lbSplitContainer">
+        <div class="ss-lightbox-pane" id="lbPanePrimary">
+           <img id="lbImagePrimary" src="" alt="" onerror="this.src=''; this.alt='Image Missing'">
+           <div class="ss-lightbox-pane-label" id="lbLabelPrimary"></div>
+        </div>
+        <div class="ss-lightbox-pane" id="lbPaneSecondary" style="display:none;">
+           <img id="lbImageSecondary" src="" alt="" onerror="this.src=''; this.alt='Image Missing'">
+           <div class="ss-lightbox-pane-label" id="lbLabelSecondary"></div>
+        </div>
+      </div>
+      <div class="ss-lightbox-caption" id="lbCaption"></div>
+    </div>
+  </div>
+
+  <div id="videoModalBackdrop" class="modal-bg" onclick="if(event.target===this)closeVideoModal()">
+    <div id="videoModal" class="modal-box video-modal" data-size="medium">
+      <div class="modal-head">
+        <div class="title" id="videoModalTitle">recording.webm</div><button class="modal-close"
+          onclick="closeVideoModal()">✕</button>
+      </div>
+      <div style="background:#000;"><video id="videoModalPlayer" controls preload="metadata"></video></div>
+      <div class="modal-foot">
+        <div class="size-group"><button class="size-btn video-size-btn"
+            onclick="setVideoSize('small')">S</button><button class="size-btn video-size-btn active"
+            onclick="setVideoSize('medium')">M</button><button class="size-btn video-size-btn"
+            onclick="setVideoSize('large')">L</button><button class="size-btn video-size-btn"
+            onclick="setVideoSize('theater')">T</button></div>
+        <div class="path-pill" id="videoPathPill"></div>
+        <div class="spacer"></div>
+        <button class="btn btn-ghost btn-sm" onclick="copyVideoPath()">📋 Copy</button>
+        <button class="btn btn-ghost btn-sm" onclick="openVideoExternal()">▶ External</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="analysisModalOverlay" class="overlay-bg" onclick="toggleAnalysisModal()"></div>
+  <div id="analysisModal" class="analysis-modal">
+    <button class="analysis-modal-close" onclick="toggleAnalysisModal()">✕</button>
+    <div style="padding:16px 16px 0;border-bottom:1px solid var(--border);">
+      <h2 style="font-size:16px;">🧪 Experimental Analysis</h2>
+      <p style="color:var(--text2);font-size:11px;margin:4px 0 12px;">Backend performance tracking.</p>
+    </div>
+    <div class="analysis-table-container">
+      <table id="analysisTable">
+        <thead>
+          <tr>
+            <th>Config</th>
+            <th>Status</th>
+            <th>Att/Succ</th>
+            <th>Avg</th>
+            <th>Blocks</th>
+            <th>Fails</th>
+            <th>Errors</th>
+          </tr>
+        </thead>
+        <tbody id="analysisTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="cmdPaletteBg" class="modal-bg" onclick="if(event.target===this) toggleCmdPalette()">
+    <div id="cmdPalette" class="modal-box" style="width: 500px; padding: 0; background: var(--bg); margin-top: -20vh;">
+      <input type="text" id="cmdPaletteInput" placeholder="Type a command or search... (e.g. 'run', 'clear')" style="width:100%; background:transparent; border:none; border-bottom: 1px solid var(--border); padding: 16px; font-size: 16px; color: #fff; outline:none;" onkeyup="handleCmdPaletteKey(event)">
+      <div id="cmdPaletteList" style="max-height: 300px; overflow-y: auto;"></div>
+    </div>
+  </div>
+
+  <div id="bulkActionBar" class="bulk-bar">
+    <div class="bulk-bar-text"><span id="bulkActionCount">0</span> selected</div><button class="btn btn-start btn-sm"
+      onclick="requeueSelected()">🔄 Re-queue</button>
+  </div>
+
+  <!-- ═══════ ALL JAVASCRIPT ═══════ -->
+  <script src="js/app.js"></script>
+
+<!-- Keyboard Shortcut Overlay -->
+<div class="kbd-overlay" id="kbdOverlay" onclick="if(event.target===this)this.classList.remove('visible')">
+  <div class="kbd-card">
+    <h3>⌨ Keyboard Shortcuts</h3>
+    <div class="kbd-row"><span>Command</span><kbd>Ctrl+1</kbd></div>
+    <div class="kbd-row"><span>Dashboard</span><kbd>Ctrl+2</kbd></div>
+    <div class="kbd-row"><span>Credentials</span><kbd>Ctrl+3</kbd></div>
+    <div class="kbd-row"><span>Results</span><kbd>Ctrl+4</kbd></div>
+    <div class="kbd-row"><span>Settings</span><kbd>Ctrl+5</kbd></div>
+    <div class="kbd-row"><span>Terminal</span><kbd>Ctrl+6</kbd></div>
+    <div class="kbd-row"><span>Analytics</span><kbd>Ctrl+7</kbd></div>
+    <div class="kbd-row"><span>Temp Disabled</span><kbd>Ctrl+8</kbd></div>
+    <div class="kbd-row"><span>Hermes</span><kbd>Ctrl+9</kbd></div>
+    <div style="border-top:1px solid var(--border); margin: 8px 0;"></div>
+    <div class="kbd-row"><span>Launch / Stop Engine</span><kbd>Ctrl+Enter</kbd></div>
+    <div class="kbd-row"><span>Clear Terminal</span><kbd>Ctrl+L</kbd></div>
+    <div class="kbd-row"><span>Command Palette</span><kbd>Ctrl+P</kbd></div>
+    <div class="kbd-row"><span>Close / Dismiss</span><kbd>Esc</kbd></div>
+    <div style="border-top:1px solid var(--border); margin: 8px 0;"></div>
+    <div class="kbd-row" style="opacity:0.5"><span>Show this overlay</span><kbd>?</kbd></div>
+  </div>
+</div>
+
+</body>
+
+</html>

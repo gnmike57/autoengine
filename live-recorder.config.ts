@@ -1,0 +1,10 @@
+// Playwright Live Recorder config (unused - template only)
+// Commented out due to missing optional dependency @dnvgl/playwright-live-recorder
+
+// import type { PlaywrightLiveRecorderConfigFile } from '@dnvgl/playwright-live-recorder';
+// const recorderConfig: PlaywrightLiveRecorderConfigFile = {
+//     /* overrides go here */
+// };
+// export default recorderConfig;
+
+export { };

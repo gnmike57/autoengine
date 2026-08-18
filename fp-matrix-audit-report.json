@@ -1,0 +1,119 @@
+{
+  "timestamp": "2026-07-22T01:17:22.903Z",
+  "mobileMode": false,
+  "totalCells": 3,
+  "backends": [
+    "stealth"
+  ],
+  "strategies": [
+    "optimal",
+    "native-only",
+    "full-stealth"
+  ],
+  "results": [
+    {
+      "backend": "stealth",
+      "fpStrategy": "optimal",
+      "fpjsHash": null,
+      "thumbmarkHash": null,
+      "coherent": false,
+      "issues": [
+        "Launch failed: Cannot read properties of undefined (reading 'screenX')"
+      ],
+      "suspectScore": 99,
+      "fpComScore": null,
+      "durationMs": 12,
+      "error": "Launch failed: Cannot read properties of undefined (reading 'screenX')",
+      "mobileMode": false,
+      "keySignals": {
+        "webdriver": true,
+        "platform": "N/A",
+        "timezone": "N/A",
+        "webglRenderer": "N/A",
+        "pluginCount": 0,
+        "screenWidth": 0,
+        "screenHeight": 0,
+        "devicePixelRatio": 1,
+        "automationTraces": [
+          "launch_failed"
+        ]
+      }
+    },
+    {
+      "backend": "stealth",
+      "fpStrategy": "native-only",
+      "fpjsHash": null,
+      "thumbmarkHash": null,
+      "coherent": false,
+      "issues": [
+        "Launch failed: Cannot read properties of undefined (reading 'screenX')"
+      ],
+      "suspectScore": 99,
+      "fpComScore": null,
+      "durationMs": 1,
+      "error": "Launch failed: Cannot read properties of undefined (reading 'screenX')",
+      "mobileMode": false,
+      "keySignals": {
+        "webdriver": true,
+        "platform": "N/A",
+        "timezone": "N/A",
+        "webglRenderer": "N/A",
+        "pluginCount": 0,
+        "screenWidth": 0,
+        "screenHeight": 0,
+        "devicePixelRatio": 1,
+        "automationTraces": [
+          "launch_failed"
+        ]
+      }
+    },
+    {
+      "backend": "stealth",
+      "fpStrategy": "full-stealth",
+      "fpjsHash": null,
+      "thumbmarkHash": null,
+      "coherent": false,
+      "issues": [
+        "Launch failed: Cannot read properties of undefined (reading 'screenX')"
+      ],
+      "suspectScore": 99,
+      "fpComScore": null,
+      "durationMs": 0,
+      "error": "Launch failed: Cannot read properties of undefined (reading 'screenX')",
+      "mobileMode": false,
+      "keySignals": {
+        "webdriver": true,
+        "platform": "N/A",
+        "timezone": "N/A",
+        "webglRenderer": "N/A",
+        "pluginCount": 0,
+        "screenWidth": 0,
+        "screenHeight": 0,
+        "devicePixelRatio": 1,
+        "automationTraces": [
+          "launch_failed"
+        ]
+      }
+    }
+  ],
+  "recommendations": {
+    "stealth": {
+      "best": "optimal",
+      "score": 99,
+      "fpComScore": null,
+      "allScores": {
+        "optimal": 99,
+        "native-only": 99,
+        "full-stealth": 99
+      },
+      "allFpComScores": {
+        "optimal": null,
+        "native-only": null,
+        "full-stealth": null
+      },
+      "scoreRange": 0,
+      "mobile": false
+    }
+  },
+  "scrapflyCoverage": {}
+}

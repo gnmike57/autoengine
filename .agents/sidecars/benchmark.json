@@ -1,0 +1,6 @@
+{
+  "name": "benchmark",
+  "description": "Trigger the golden benchmark suite and tail the results.",
+  "command": "npm run benchmark",
+  "arguments": []
+}

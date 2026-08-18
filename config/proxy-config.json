@@ -1,0 +1,6 @@
+{
+  "pools": [
+    { "id": "off", "label": "Off / Managed / Fallback" },
+    { "id": "6", "label": "Flame Sticky AU (Pool 6)" }
+  ]
+}

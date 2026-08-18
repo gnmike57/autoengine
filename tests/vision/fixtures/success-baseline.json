@@ -1,0 +1,8 @@
+{
+  "outcome": "success",
+  "domTrigger": "success",
+  "httpStatus": 200,
+  "recordedAt": "2026-08-12T17:19:47.907Z",
+  "engineVersion": "2.0.0",
+  "fixture": "success-baseline.webm"
+}

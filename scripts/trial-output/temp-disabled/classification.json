@@ -1,0 +1,14 @@
+{
+  "outcome": "TEMP_DISABLED_ACCOUNT_EXISTS",
+  "invocationCount": 1,
+  "acceptedSubmitCount": 1,
+  "acceptedIncorrectCount": 0,
+  "terminalInvocationIndex": 1,
+  "reason": "terminal-temp_disabled",
+  "label": "TEMP_DISABLED",
+  "expectedClass": "TEMP_DISABLED_ACCOUNT_EXISTS",
+  "passed": true,
+  "durationMs": 1549,
+  "loginFlowIssues": [],
+  "recordedAt": "2026-08-04T18:39:23.887Z"
+}

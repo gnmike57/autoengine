@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internal Fingerprint Audit — 26 Vector Comprehensive Test</title>
+    <style>
+        body { background: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', system-ui, sans-serif; padding: 20px; }
+        h1 { color: #58a6ff; font-size: 18px; }
+        .pass { color: #3fb950; } .fail { color: #f85149; } .warn { color: #d29922; }
+        pre { font-size: 11px; line-height: 1.4; white-space: pre-wrap; }
+        #suspect-score { font-size: 24px; font-weight: bold; margin: 10px 0; }
+        .score-good { color: #3fb950; } .score-mid { color: #d29922; } .score-bad { color: #f85149; }
+    </style>
+    <!-- SDK scripts must load BEFORE runAudit() checks for them -->
+    <script src="/fp.js" onerror="console.warn('fp.js not available')"></script>
+    <script src="/thumbmark.js" onerror="console.warn('thumbmark.js not available')"></script>
+</head>
+<body>
+    <h1>🔬 26-Vector Comprehensive Fingerprint Audit</h1>
+    <div id="suspect-score">Loading...</div>
+    <pre id="log"></pre>
+
+    <script>
+        function log(msg, cls) {
+            const el = document.getElementById('log');
+            const span = document.createElement('span');
+            span.className = cls || '';
+            span.textContent = msg + '\n';
+            el.appendChild(span);
+        }
+
+        async function runAudit() {
+            const result = { vectors: {}, coherence: {}, fpjs: {}, thumbmark: {}, scrapflyVectors: {} };
+            const startTime = Date.now();
+            const ua = navigator.userAgent || '';
+            let totalVectors = 0;
+            let passedVectors = 0;
+            let suspectPoints = 0;
+
+            function grade(name, passed, detail, weight) {
+                weight = weight || 1;
+                totalVectors++;
+                if (passed) {
+                    passedVectors++;
+                    log(`  ✅ [${name}] PASS — ${detail}`, 'pass');
+                } else {
+                    suspectPoints += weight * 3;
+                    log(`  ❌ [${name}] FAIL — ${detail}`, 'fail');
+                }
+                result.vectors[name] = { passed, detail, weight };
+            }
+
+            function gradeWarn(name, detail) {
+                totalVectors++;
+                passedVectors++; // Warnings count as pass
+                log(`  ⚪ [${name}] N/A — ${detail}`, 'warn');
+                result.vectors[name] = { passed: true, detail, weight: 0 };
+            }
+
+            // ══════════════════════════════════════════════════════════
+            // SECTION 1: Automation Traces (Critical — instant bot flag)
+            // ══════════════════════════════════════════════════════════
+            log('── AUTOMATION TRACES (Critical) ──');
+
+            // V1: navigator.webdriver
+            grade('webdriver', navigator.webdriver !== true,
+                `navigator.webdriver = ${navigator.webdriver}`, 5);
+
+            // V2: Playwright globals
+            const pwTrace = !!window.__playwright || !!window._playwright || !!window.__pwlive;
+            grade('playwright-trace', !pwTrace,
+                `__playwright: ${!!window.__playwright}, _playwright: ${!!window._playwright}`, 5);
+
+            // V3: Selenium traces
+            const selTrace = !!document.querySelector('[selenium-evaluate]') || !!window._selenium;
+            grade('selenium-trace', !selTrace,
+                `selenium-evaluate: ${!!document.querySelector('[selenium-evaluate]')}, _selenium: ${!!window._selenium}`, 5);
+
+            // V4: CDP traces (cdc_)
+            const cdcTrace = Object.keys(window).some(k => k.startsWith('cdc_'));
+            grade('cdp-trace', !cdcTrace,
+                `cdc_ globals found: ${cdcTrace}`, 5);
+
+            // V5: WebDriver Chrome traces ($wdc_)
+            const wdcTrace = Object.keys(document).some(k => k.startsWith('$wdc_'));
+            grade('wdc-trace', !wdcTrace,
+                `$wdc_ document keys: ${wdcTrace}`, 3);
+
+            // V6: Chrome object presence (Chromium should have window.chrome)
+            if (ua.includes('Chrome') && !ua.includes('Firefox')) {
+                grade('chrome-object', !!window.chrome,
+                    `Chrome UA but window.chrome = ${!!window.chrome}`, 3);
+            }
+
+            // ══════════════════════════════════════════════════════════
+            // SECTION 2: 16 Scrapfly Core Fingerprint Vectors
+            // ══════════════════════════════════════════════════════════
+            log('\n── SCRAPFLY CORE VECTORS (16) ──');
+
+            // V7: Canvas fingerprinting
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 200; canvas.height = 50;
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#f60';
+                ctx.fillRect(0, 0, 200, 50);
+                ctx.fillStyle = '#069';
+                ctx.fillText('Fingerprint Test 🎨', 2, 15);
+                const canvasData = canvas.toDataURL();
+                grade('canvas', canvasData.length > 100,
+                    `${canvasData.length} bytes rendered`, 2);
+                result.scrapflyVectors.canvas = { present: true, hash: canvasData.substring(0, 40) };
+            } catch(e) { grade('canvas', false, e.message, 2); }
+
+            // V8: WebGL vendor/renderer
+            try {
+                const gl = document.createElement('canvas').getContext('webgl') || document.createElement('canvas').getContext('experimental-webgl');
+                const debugInfo = gl ? gl.getExtension('WEBGL_debug_renderer_info') : null;
+                const vendor = debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : 'N/A';
+                const renderer = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'N/A';
+                const swiftshader = (renderer || '').toLowerCase().includes('swiftshader');
+                const vbox = (renderer || '').toLowerCase().includes('virtual');
+                const vmware = (renderer || '').toLowerCase().includes('vmware');
+                const llvmpipe = (renderer || '').toLowerCase().includes('llvmpipe');
+                const isVM = swiftshader || vbox || vmware || llvmpipe;
+                grade('webgl', !!gl && !isVM,
+                    `${renderer ? renderer.substring(0, 60) : 'N/A'}${isVM ? ' [VM DETECTED]' : ''}`, 3);
+                result.scrapflyVectors.webgl = { present: !!gl, vendor, renderer };
+            } catch(e) { grade('webgl', false, e.message, 3); }
+
+            // V9: AudioContext
+            try {
+                const ac = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 44100, 44100);
+                grade('audio', true, `sampleRate=${ac.sampleRate}`, 2);
+                result.scrapflyVectors.audio = { present: true, sampleRate: ac.sampleRate };
+            } catch(e) { grade('audio', false, e.message, 2); }
+
+            // V10: Font enumeration
+            try {
+                const testFonts = ['Arial', 'Courier New', 'Georgia', 'Times New Roman', 'Verdana', 'Comic Sans MS', 'Impact'];
+                const detected = [];
+                const span = document.createElement('span');
+                span.style.position = 'absolute'; span.style.left = '-9999px'; span.style.fontSize = '72px';
+                span.textContent = 'mmmmmmmmmmlli';
+                document.body.appendChild(span);
+                span.style.fontFamily = 'monospace';
+                const baseWidth = span.offsetWidth;
+                for (const font of testFonts) {
+                    span.style.fontFamily = `'${font}', monospace`;
+                    if (span.offsetWidth !== baseWidth) detected.push(font);
+                }
+                document.body.removeChild(span);
+                grade('fonts', detected.length >= 3,
+                    `${detected.length} fonts detected (${detected.join(', ')})`, 1);
+                result.scrapflyVectors.fonts = { present: true, count: detected.length, detected };
+            } catch(e) { grade('fonts', false, e.message, 1); }
+
+            // V11: Storage
+            try {
+                const lsAvail = typeof localStorage !== 'undefined';
+                const ssAvail = typeof sessionStorage !== 'undefined';
+                grade('storage', lsAvail && ssAvail,
+                    `localStorage=${lsAvail}, sessionStorage=${ssAvail}`, 1);
+            } catch(e) { grade('storage', false, e.message, 1); }
+
+            // V12: Plugins & MIMETypes
+            try {
+                const pluginCount = navigator.plugins ? navigator.plugins.length : 0;
+                const hasPdfViewer = navigator.pdfViewerEnabled !== undefined ? navigator.pdfViewerEnabled : pluginCount > 0;
+                grade('plugins', pluginCount > 0 || hasPdfViewer,
+                    `${pluginCount} plugins, pdfViewer=${hasPdfViewer}`, 1);
+            } catch(e) { grade('plugins', false, e.message, 1); }
+
+            // V13: Screen dimensions
+            try {
+                const sw = screen.width, sh = screen.height;
+                const iw = window.innerWidth, ih = window.innerHeight;
+                const ow = window.outerWidth, oh = window.outerHeight;
+                const dpr = window.devicePixelRatio;
+                const sane = sw >= 320 && sh >= 320 && dpr >= 0.5 && dpr <= 4;
+                const outerSane = ow > 50 && oh > 50; // outerWidth 1x1 is a classic headless leak
+                grade('screen', sane && outerSane,
+                    `${sw}x${sh} inner:${iw}x${ih} outer:${ow}x${oh} DPR:${dpr}`, 2);
+                result.scrapflyVectors.screen = { width: sw, height: sh, innerWidth: iw, innerHeight: ih, outerWidth: ow, outerHeight: oh, dpr };
+            } catch(e) { grade('screen', false, e.message, 2); }
+
+            // V14: Crypto
+            try {
+                const cryptoAvail = typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function';
+                const subtleAvail = typeof crypto !== 'undefined' && typeof crypto.subtle !== 'undefined';
+                grade('crypto', cryptoAvail,
+                    `getRandomValues=${cryptoAvail}, subtle=${subtleAvail}`, 1);
+            } catch(e) { grade('crypto', false, e.message, 1); }
+
+            // V15: Hardware
+            try {
+                const cores = navigator.hardwareConcurrency;
+                const mem = navigator.deviceMemory || 'N/A';
+                const platform = navigator.platform;
+                const coresSane = cores >= 2 && cores <= 128;
+                grade('hardware', coresSane,
+                    `${cores} cores, ${mem}GB RAM, platform=${platform}`, 1);
+                result.scrapflyVectors.hardware = { cores, memory: mem, platform, maxTouchPoints: navigator.maxTouchPoints };
+            } catch(e) { grade('hardware', false, e.message, 1); }
+
+            // V16: Clipboard
+            try {
+                const clipAvail = !!navigator.clipboard;
+                grade('clipboard', clipAvail, `present=${clipAvail}`, 0.5);
+            } catch(e) { grade('clipboard', false, e.message, 0.5); }
+
+            // V17: CSS @supports
+            try {
+                const gridSupport = CSS.supports('display', 'grid');
+                const backdropSupport = CSS.supports('backdrop-filter', 'blur(1px)');
+                grade('css-supports', gridSupport,
+                    `grid=${gridSupport}, backdrop-filter=${backdropSupport}`, 0.5);
+            } catch(e) { grade('css-supports', false, e.message, 0.5); }
+
+            // V18: Geolocation API
+            try {
+                const geoAvail = !!navigator.geolocation;
+                grade('geolocation', geoAvail, `present=${geoAvail}`, 0.5);
+            } catch(e) { grade('geolocation', false, e.message, 0.5); }
+
+            // V19: IndexedDB
+            try {
+                const idbAvail = !!window.indexedDB;
+                grade('indexeddb', idbAvail, `present=${idbAvail}`, 0.5);
+            } catch(e) { grade('indexeddb', false, e.message, 0.5); }
+
+            // V20: Timezone/Intl
+            try {
+                const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+                grade('timezone', tz && tz.length > 0,
+                    `${tz} (locale: ${locale})`, 1);
+                result.scrapflyVectors.timezone = { timezone: tz, locale };
+            } catch(e) { grade('timezone', false, e.message, 1); }
+
+            // V21: USB
+            try {
+                if (ua.includes('Firefox')) {
+                    gradeWarn('usb', 'Not available in Firefox (expected)');
+                } else {
+                    grade('usb', !!navigator.usb, `present=${!!navigator.usb}`, 0.5);
+                }
+            } catch(e) { grade('usb', false, e.message, 0.5); }
+
+            // V22: Battery
+            try {
+                if (navigator.getBattery) {
+                    const battery = await navigator.getBattery();
+                    grade('battery', battery.level >= 0 && battery.level <= 1,
+                        `charging=${battery.charging}, level=${battery.level}`, 1);
+                    result.scrapflyVectors.battery = { present: true, charging: battery.charging, level: battery.level };
+                } else {
+                    gradeWarn('battery', 'getBattery not available (Firefox/Camoufox — expected)');
+                }
+            } catch(e) { grade('battery', false, e.message, 1); }
+
+            // ══════════════════════════════════════════════════════════
+            // SECTION 3: Advanced Detection Vectors (10 new)
+            // ══════════════════════════════════════════════════════════
+            log('\n── ADVANCED VECTORS (10) ──');
+
+            // V23: WebRTC IP leak
+            try {
+                if (window.RTCPeerConnection) {
+                    const pc = new RTCPeerConnection({ iceServers: [] });
+                    pc.createDataChannel('test');
+                    const offer = await pc.createOffer();
+                    await pc.setLocalDescription(offer);
+                    // Only check a=candidate lines for private IP leaks
+                    // o= and c= headers always contain 127.0.0.1/0.0.0.0 in all browsers (not a real leak)
+                    const sdp = pc.localDescription ? pc.localDescription.sdp : '';
+                    const candidateLines = sdp.split('\n').filter(l => l.trim().startsWith('a=candidate:'));
+                    const privateIPRegex = /(?:192\.168\.|10\.|172\.(?:1[6-9]|2[0-9]|3[0-1])\.)\d/;
+                    const hasRealLeak = candidateLines.some(l => privateIPRegex.test(l));
+                    pc.close();
+                    grade('webrtc-leak', !hasRealLeak,
+                        hasRealLeak ? 'Private IP leaked in SDP candidate' : 'No private IP leak in candidates', 2);
+                } else {
+                    gradeWarn('webrtc-leak', 'RTCPeerConnection not available');
+                }
+            } catch(e) { grade('webrtc-leak', true, `WebRTC blocked (good): ${e.message}`, 2); }
+
+            // V24: Client Hints (navigator.userAgentData)
+            try {
+                if (navigator.userAgentData) {
+                    const uad = navigator.userAgentData;
+                    const brands = uad.brands || [];
+                    const hasBrands = brands.length > 0;
+                    const platformMatch = (uad.platform || '').length > 0;
+                    // Verify brands contain Chromium-like entries
+                    const hasChromium = brands.some(b => b.brand && (b.brand.includes('Chromium') || b.brand.includes('Chrome')));
+                    grade('client-hints', hasBrands && platformMatch && hasChromium,
+                        `brands=${brands.length}, platform=${uad.platform}, mobile=${uad.mobile}`, 2);
+                } else if (ua.includes('Firefox')) {
+                    gradeWarn('client-hints', 'Not available in Firefox (expected)');
+                } else {
+                    grade('client-hints', false, 'userAgentData missing on Chromium', 2);
+                }
+            } catch(e) { grade('client-hints', false, e.message, 2); }
+
+            // V25: Permissions API
+            try {
+                if (navigator.permissions && navigator.permissions.query) {
+                    const notifPerm = await navigator.permissions.query({ name: 'notifications' });
+                    const validStates = ['granted', 'denied', 'prompt'];
+                    const stateValid = validStates.includes(notifPerm.state);
+                    grade('permissions-api', stateValid,
+                        `notifications.state=${notifPerm.state}`, 1);
+                } else {
+                    gradeWarn('permissions-api', 'Permissions API not available');
+                }
+            } catch(e) { grade('permissions-api', false, e.message, 1); }
+
+            // V26: Performance.memory (Chromium only)
+            try {
+                if (performance.memory) {
+                    const mem = performance.memory;
+                    const sane = mem.jsHeapSizeLimit > 0 && mem.totalJSHeapSize > 0;
+                    grade('performance-memory', sane,
+                        `heap=${(mem.totalJSHeapSize / 1048576).toFixed(1)}MB, limit=${(mem.jsHeapSizeLimit / 1048576).toFixed(0)}MB`, 1);
+                } else if (ua.includes('Firefox')) {
+                    gradeWarn('performance-memory', 'Not available in Firefox (expected)');
+                } else {
+                    grade('performance-memory', false, 'performance.memory missing', 1);
+                }
+            } catch(e) { grade('performance-memory', false, e.message, 1); }
+
+            // V27: navigator.connection (Network Information API)
+            try {
+                if (navigator.connection) {
+                    const conn = navigator.connection;
+                    const validTypes = ['bluetooth', 'cellular', 'ethernet', 'wifi', 'wimax', 'none', 'other', 'unknown', '4g', '3g', '2g', 'slow-2g'];
+                    const typeValid = !conn.effectiveType || validTypes.includes(conn.effectiveType);
+                    grade('connection-api', typeValid,
+                        `type=${conn.type || 'N/A'}, effectiveType=${conn.effectiveType || 'N/A'}, downlink=${conn.downlink || 'N/A'}Mbps`, 1);
+                } else if (ua.includes('Firefox')) {
+                    gradeWarn('connection-api', 'Not available in Firefox (expected)');
+                } else {
+                    grade('connection-api', false, 'navigator.connection missing', 1);
+                }
+            } catch(e) { grade('connection-api', false, e.message, 1); }
+
+            // V28: DevTools detection
+            try {
+                const devtoolsOpen = window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 200;
+                const firebug = !!window.Firebug || !!window.__firebug;
+                grade('devtools', !devtoolsOpen && !firebug,
+                    `outerW-innerW=${window.outerWidth - window.innerWidth}, firebug=${!!window.Firebug}`, 1);
+            } catch(e) { grade('devtools', true, 'Check failed (acceptable)', 1); }
+
+            // V29: VM WebGL renderer check
+            try {
+                const gl = document.createElement('canvas').getContext('webgl');
+                const debugInfo = gl ? gl.getExtension('WEBGL_debug_renderer_info') : null;
+                const renderer = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : '';
+                const vmPatterns = /virtual|vmware|vbox|qemu|parallels|hyperv|bhyve|kvm|xen|swiftshader|llvmpipe|softpipe/i;
+                const isVM = vmPatterns.test(renderer);
+                grade('vm-detection', !isVM,
+                    isVM ? `VM renderer detected: ${renderer.substring(0, 40)}` : 'No VM patterns in renderer', 3);
+            } catch(e) { grade('vm-detection', true, 'WebGL unavailable (acceptable for Firefox)', 3); }
+
+            // V30: Speech voices OS consistency
+            try {
+                if (window.speechSynthesis) {
+                    const voices = speechSynthesis.getVoices();
+                    const voiceCount = voices.length;
+                    if (voiceCount === 0) {
+                        // Voices may not be loaded yet — this is normal
+                        gradeWarn('speech-voices', `${voiceCount} voices (may still be loading)`);
+                    } else {
+                        // Check if voice names match declared OS
+                        const voiceNames = voices.map(v => v.name).join(', ');
+                        const hasMicrosoftVoices = voices.some(v => v.name.includes('Microsoft'));
+                        const hasMacVoices = voices.some(v => ['Alex', 'Samantha', 'Victoria', 'Daniel'].includes(v.name));
+                        const isWindowsUA = ua.includes('Windows');
+                        const isMacUA = ua.includes('Macintosh');
+                        const isLinuxUA = ua.includes('Linux');
+                        
+                        let osMatch = true;
+                        if (isWindowsUA && hasMacVoices && !hasMicrosoftVoices) osMatch = false;
+                        if (isMacUA && hasMicrosoftVoices && !hasMacVoices) osMatch = false;
+                        
+                        grade('speech-voices', osMatch,
+                            `${voiceCount} voices${!osMatch ? ' [OS MISMATCH]' : ''}: ${voiceNames.substring(0, 80)}`, 1);
+                    }
+                } else {
+                    gradeWarn('speech-voices', 'speechSynthesis not available');
+                }
+            } catch(e) { grade('speech-voices', true, `Check error: ${e.message}`, 1); }
+
+            // V31: Incognito detection (storage quota)
+            try {
+                if (navigator.storage && navigator.storage.estimate) {
+                    const estimate = await navigator.storage.estimate();
+                    const quotaMB = (estimate.quota || 0) / 1048576;
+                    // Incognito typically has very low quota (<200MB)
+                    // Normal mode has GB-level quota
+                    const likelyIncognito = quotaMB < 200 && quotaMB > 0;
+                    grade('incognito', !likelyIncognito,
+                        `quota=${quotaMB.toFixed(0)}MB${likelyIncognito ? ' [LIKELY INCOGNITO]' : ''}`, 1);
+                } else {
+                    gradeWarn('incognito', 'storage.estimate not available');
+                }
+            } catch(e) { grade('incognito', true, `Check error (acceptable): ${e.message}`, 1); }
+
+            // V32: Process isolation (SharedArrayBuffer availability)
+            try {
+                const sabAvail = typeof SharedArrayBuffer !== 'undefined';
+                // SharedArrayBuffer requires cross-origin isolation (COOP/COEP headers)
+                // Its presence/absence is a signal but not definitive
+                gradeWarn('cross-origin-isolation',
+                    `SharedArrayBuffer=${sabAvail}, crossOriginIsolated=${self.crossOriginIsolated}`);
+            } catch(e) { gradeWarn('cross-origin-isolation', e.message); }
+
+            // ══════════════════════════════════════════════════════════
+            // SECTION 4: Coherence Checks (Cross-Signal Consistency)
+            // ══════════════════════════════════════════════════════════
+            log('\n── COHERENCE CHECKS ──');
+            const issues = [];
+
+            // Platform vs UA
+            const platform = navigator.platform || '';
+            if (ua.includes('Windows') && !platform.includes('Win')) {
+                issues.push('UA=Windows but platform=' + platform);
+            }
+            if (ua.includes('Macintosh') && !platform.includes('Mac')) {
+                issues.push('UA=Mac but platform=' + platform);
+            }
+            if (ua.includes('Linux') && !platform.includes('Linux') && !platform.includes('Android')) {
+                issues.push('UA=Linux but platform=' + platform);
+            }
+            if (ua.includes('Android') && !platform.includes('Linux')) {
+                issues.push('UA=Android but platform=' + platform);
+            }
+
+            // Mobile coherence
+            if (navigator.maxTouchPoints > 0 && !ua.includes('Mobile') && !ua.includes('Android') && !ua.includes('iPad')) {
+                issues.push('Touch points present but no mobile UA');
+            }
+            if (ua.includes('Android') && navigator.maxTouchPoints === 0) {
+                issues.push('Android UA but maxTouchPoints=0');
+            }
+
+            // DPR sanity
+            const dpr = window.devicePixelRatio;
+            if (dpr > 3.5 || dpr < 0.5) {
+                issues.push('Unusual DPR: ' + dpr);
+            }
+
+            // Screen dimensions sanity
+            if (screen.width < 100 || screen.height < 100) {
+                issues.push('Tiny screen: ' + screen.width + 'x' + screen.height);
+            }
+
+            // Timezone vs locale
+            const tz = result.scrapflyVectors.timezone;
+            if (tz && tz.timezone && tz.timezone.includes('Australia') &&
+                navigator.language && !navigator.language.startsWith('en')) {
+                issues.push('AU timezone but non-English locale: ' + navigator.language);
+            }
+
+            result.coherence = { coherent: issues.length === 0, issues, score: issues.length * 3 };
+            suspectPoints += issues.length * 3;
+
+            for (const issue of issues) {
+                log(`  ⚠️ ${issue}`, 'warn');
+            }
+            if (issues.length === 0) {
+                log(`  ✅ All coherence checks passed`, 'pass');
+            }
+
+            // ══════════════════════════════════════════════════════════
+            // SECTION 5: FingerprintJS Hash
+            // ══════════════════════════════════════════════════════════
+            log('\n── FINGERPRINTJS ──');
+            try {
+                if (typeof FingerprintJS !== 'undefined') {
+                    const fp = await FingerprintJS.load();
+                    const fpResult = await fp.get();
+                    result.fpjs = { hash: fpResult.visitorId, components: Object.keys(fpResult.components).length };
+                    log(`  ✅ Hash: ${fpResult.visitorId} (${Object.keys(fpResult.components).length} components)`, 'pass');
+                } else {
+                    result.fpjs = { error: 'FingerprintJS not loaded' };
+                    log(`  ❌ FingerprintJS not loaded`, 'fail');
+                }
+            } catch(e) { result.fpjs = { error: e.message }; log(`  ❌ FPJS: ${e.message}`, 'fail'); }
+
+            // ══════════════════════════════════════════════════════════
+            // SECTION 6: ThumbmarkJS Hash
+            // ══════════════════════════════════════════════════════════
+            log('\n── THUMBMARKJS ──');
+            try {
+                const tm = window.ThumbmarkJS || window.thumbmark;
+                if (tm) {
+                    const hash = await tm.getFingerprint();
+                    result.thumbmark = { hash };
+                    log(`  ✅ Hash: ${hash}`, 'pass');
+                } else {
+                    result.thumbmark = { error: 'ThumbmarkJS not loaded' };
+                    log(`  ❌ ThumbmarkJS not loaded`, 'fail');
+                }
+            } catch(e) { result.thumbmark = { error: e.message }; log(`  ❌ TM: ${e.message}`, 'fail'); }
+
+            // ══════════════════════════════════════════════════════════
+            // FINAL SCORE
+            // ══════════════════════════════════════════════════════════
+            result.suspectScore = suspectPoints;
+            result.totalVectors = totalVectors;
+            result.passedVectors = passedVectors;
+            result.failedVectors = totalVectors - passedVectors;
+            result.passRate = totalVectors > 0 ? ((passedVectors / totalVectors) * 100).toFixed(1) : '0';
+            result.elapsedMs = Date.now() - startTime;
+
+            const scoreEl = document.getElementById('suspect-score');
+            scoreEl.textContent = `Suspect Score: ${suspectPoints} | Vectors: ${passedVectors}/${totalVectors} (${result.passRate}%)`;
+            scoreEl.className = suspectPoints === 0 ? 'score-good' : suspectPoints < 10 ? 'score-mid' : 'score-bad';
+
+            log(`\n── SUMMARY ──`);
+            log(`  Suspect Score: ${suspectPoints} (lower is better)`, suspectPoints === 0 ? 'pass' : suspectPoints < 10 ? 'warn' : 'fail');
+            log(`  Vectors: ${passedVectors}/${totalVectors} passed (${result.passRate}%)`, passedVectors === totalVectors ? 'pass' : 'warn');
+            log(`  Coherence issues: ${issues.length}`, issues.length === 0 ? 'pass' : 'fail');
+            log(`  Elapsed: ${result.elapsedMs}ms`);
+
+            // Expose for Playwright to capture
+            window.__auditResult = result;
+        }
+
+        runAudit();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "outcome": "2fa",
+  "domTrigger": "2fa",
+  "httpStatus": 428,
+  "recordedAt": "2026-08-12T17:19:57.580Z",
+  "engineVersion": "2.0.0",
+  "fixture": "2fa-baseline.webm"
+}

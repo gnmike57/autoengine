@@ -1,0 +1,1393 @@
+{
+  "fp-r7e4w": {
+    "coherent": false,
+    "mismatches": [
+      "User-Agent claims 'Macintosh; Intel Mac OS X', but navigator.platform is 'Linux x86_64'.",
+      "User-Agent claims 'Intel Mac OS X', but hardware.gpu identifies as 'Apple M3 Pro' (Apple Silicon, ARM architecture).",
+      "Hardware GPU is 'Apple M3 Pro', but WebGL renderer is 'SwiftShader' (a software renderer often found in headless browsers/VMs), and vendor is 'Google Inc. (Google)', which is inconsistent with a dedicated Apple GPU.",
+      "The main 'resolution' reports 3840x2056, but 'apifyFingerprint.fingerprint.screen' reports 800x600. These values must match.",
+      "Device Pixel Ratio is 1 for a high-resolution macOS display (3840x2056), which is unusual; a value of 2 (Retina) would be more common.",
+      "Locale settings (geo.locale, ua.locale) are 'en-AU', but navigator.language and accept-language headers are 'en-US'.",
+      "Client Hints (navigator.userAgentData) are largely empty (brands, platform, platformVersion, architecture), which is incorrect for a modern Chrome browser.",
+      "The font list contains 'Segoe UI', which is primarily a Windows system font, making it unusual for a macOS profile, especially in a limited list."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-i2tmac": {
+    "coherent": false,
+    "mismatches": [
+      "The User-Agent claims 'Macintosh; Intel Mac OS X' but the hardware GPU is 'Apple M3 Pro' (Apple Silicon), which is inconsistent. An Intel Mac should have an Intel GPU.",
+      "The navigator.platform ('Linux x86_64') is inconsistent with the User-Agent and declared OS ('Macintosh; Intel Mac OS X', 'macos').",
+      "The primary screen resolution (3840x2056) significantly differs from the screen resolution reported in apifyFingerprint (800x600), which is a common indicator of a headless or virtualized environment not matching the declared profile.",
+      "The navigator.language and accept-language header ('en-US') are inconsistent with the geo.locale and ua.locale ('en-AU') and countryCode ('AU').",
+      "The WebGL renderer reported in apifyFingerprint ('SwiftShader Device', 'Google Inc.') is a software renderer, which contradicts the powerful 'Apple M3 Pro' hardware GPU and is highly unusual for a real macOS user.",
+      "The navigator.userAgentData.brands array is empty for Chrome version 126, which is inconsistent with modern Chrome behavior where brands should be populated."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-1u17t": {
+    "coherent": false,
+    "mismatches": [
+      "The navigator.platform ('Linux x86_64') contradicts the User-Agent string and internal OS detection ('Macintosh; Intel Mac OS X', 'macos').",
+      "The hardware.gpu ('Apple M3 Pro') indicates an Apple Silicon chip, but the User-Agent specifies 'Intel Mac OS X'.",
+      "The reported screen resolution from apifyFingerprint.fingerprint.screen (800x600) is significantly different and much smaller than the top-level resolution (3840x2056). Additionally, innerWidth, innerHeight, clientWidth, and clientHeight are reported as 0, which is highly unusual for a functional browser.",
+      "Multiple locale fields are inconsistent: geo.locale, ua.locale, and ua.country are 'en-AU'/'AU', but apifyFingerprint.navigator.language, apifyFingerprint.navigator.languages, and apifyFingerprint.headers.accept-language are 'en-US'.",
+      "The WebGL renderer ('ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero)... SwiftShader driver)') indicates a software renderer (SwiftShader), which is inconsistent with the declared high-performance 'Apple M3 Pro' GPU and a real macOS environment.",
+      "The navigator.userAgentData.brands array is empty for a Chrome browser, which should typically contain brands like 'Chrome' and 'Not A(Brand'.",
+      "The font list contains fonts primarily associated with Windows ('Segoe UI', 'Tahoma') and lacks common macOS-specific fonts, making it less coherent for a macOS profile."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-jucopd": {
+    "coherent": false,
+    "mismatches": [
+      "Architecture inconsistency: navigator.userAgentData.architecture is 'x86' but the User-Agent string and ua.architecture indicate 'x64', and navigator.userAgentData.bitness is '64'.",
+      "GPU mismatch: The declared 'hardware.gpu' is 'Intel Iris Pro Graphics 580', but the 'videoCard.renderer' reports a 'SwiftShader driver' (software renderer), which is a strong bot indicator.",
+      "Resolution inconsistency: The top-level 'resolution' object (1440x796) differs from the 'apifyFingerprint.fingerprint.screen' object (1366x768).",
+      "Screen dimensions anomaly: 'innerWidth', 'innerHeight', 'clientWidth', and 'clientHeight' within 'apifyFingerprint.fingerprint.screen' are zero or very small (0 or 18), which is highly unusual for a browser window.",
+      "Locale/Language mismatch: The 'ua.locale' and 'geo.locale' are 'en-AU', but 'navigator.language' and the 'accept-language' header are 'en-US'.",
+      "Chrome version inconsistency: 'ua.chromeVersion' (141.0.0.0) does not match 'navigator.userAgentData.uaFullVersion' (141.0.7390.37)."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-u6um43": {
+    "coherent": false,
+    "mismatches": [
+      "The navigator.userAgentData.architecture ('x86') conflicts with the main UA architecture ('x64') and navigator.platform ('Linux x86_64').",
+      "The resolution reported by apifyFingerprint.screen (1280x800) does not match the top-level 'resolution' (1920x976).",
+      "There are inconsistencies in location and language: geo.locale (en-AU) and ua.locale (en-AU) conflict with apifyFingerprint.navigator.language (en-US) and the Accept-Language header (en-US).",
+      "The timezone reported by geo.timezone (Australia/Brisbane) conflicts with cache.timezone (Australia/Melbourne).",
+      "The WebGL renderer in apifyFingerprint.videoCard (AMD Radeon) contradicts the hardware.gpu (Intel Arc).",
+      "The apifyFingerprint.fingerprint.fonts array is empty, which is suspicious and inconsistent with the 'fonts.fonts' list provided in the bundle."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-szjvqd": {
+    "coherent": false,
+    "mismatches": [
+      "navigator.userAgentData.platform 'Windows' contradicts navigator.platform 'Linux x86_64' and the operating system indicated in the User-Agent 'Linux x86_64'."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-cmd8ze": {
+    "coherent": false,
+    "mismatches": [
+      "The Chrome version in the User-Agent (145) does not match the Chrome version reported in navigator.userAgentData.brands (114). This is a significant discrepancy.",
+      "The specified navigator.languages (\"en-US\", \"en\") do not optimally align with the timezone \"Australia/Sydney\". Typically, \"en-AU\" would be expected for an Australian locale."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-mnwdnj": {
+    "coherent": false,
+    "mismatches": [
+      "The User-Agent string specifies 'Intel Mac OS X 10_15_7', indicating an Intel-based Mac running macOS Catalina. However, the WebGL renderer explicitly states 'Apple M1 Pro', which is an Apple Silicon chip. These two components are contradictory, as an M1 Pro chip cannot be found in an Intel Mac.",
+      "The macOS version '10_15_7' (Catalina) in the User-Agent is too old for an Apple M1 Pro chip, which was released with macOS Monterey (version 12) or later."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-mo9f25": {
+    "coherent": false,
+    "mismatches": [
+      "User-Agent Chrome version (145) does not match Client Hints Google Chrome/Chromium version (141)."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-5ujn98": {
+    "coherent": false,
+    "mismatches": [
+      "navigator.userAgent claims 'Intel Mac OS X' but webgl.renderer identifies 'Apple M1 Pro', which is an Apple Silicon chip. These are incompatible.",
+      "navigator.userAgent reports Chrome version 145, while navigator.userAgentData.brands (Client Hints) report Chrome/Chromium version 138. These versions are inconsistent."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-y8navg": {
+    "coherent": true,
+    "mismatches": [],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-ledqca": {
+    "coherent": false,
+    "mismatches": [
+      "User-Agent indicates 'Linux x86_64' architecture, but navigator.platform reports 'Linux armv81'. These are conflicting CPU architectures for a single native environment.",
+      "WebGL renderer 'Intel(R) HD Graphics' is typically associated with x86/x64 Intel processors and is inconsistent with the 'Linux armv81' platform reported by navigator.platform."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-6yx0b7": {
+    "coherent": false,
+    "mismatches": [
+      "User-Agent claims 'Intel Mac OS X 10.15', but the WebGL renderer identifies an 'Apple M1' GPU. Apple M1 chips are found in Apple Silicon Macs, which run macOS 11 (Big Sur) or newer, not Intel Macs with macOS 10.15 (Catalina)."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-zakbhl": {
+    "coherent": false,
+    "mismatches": [
+      "The window.innerWidth (2190) is greater than screen.width (2176). This is physically impossible for a browser window contained within the reported screen dimensions."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-tf7v0w": {
+    "coherent": false,
+    "mismatches": [
+      "navigator.userAgent claims macOS (Macintosh; Intel Mac OS X 10_15_7) but navigator.platform reports Linux x86_64. These are contradictory.",
+      "navigator.userAgentData.brands is an empty array, which is inconsistent with a Chrome 138 user agent that should report brand information.",
+      "navigator.userAgentData.platform is an empty string, which is inconsistent with a Chrome user agent that should report the operating system (e.g., 'macOS' or 'Linux')."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-s0zgkh": {
+    "coherent": false,
+    "mismatches": [
+      "The WebGL renderer 'SwiftShader' is a software renderer, which is highly unusual for a Windows desktop operating system and is a strong indicator of a virtualized, headless, or sandboxed environment rather than a natural user session."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-72y03e": {
+    "coherent": false,
+    "mismatches": [
+      "navigator.userAgentData.brands array is empty, but the User-Agent indicates a Chrome browser which should have this populated.",
+      "navigator.userAgentData.platform is empty, but the User-Agent indicates a Windows operating system."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-webbl6": {
+    "coherent": false,
+    "mismatches": [
+      "User-Agent and navigator.platform indicate an Intel Mac ('Intel Mac OS X 10_15_7', 'MacIntel'), but the WebGL renderer reports an Apple M4 chip, which is Apple Silicon. These two components are contradictory regarding the underlying hardware."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-93arq2": {
+    "coherent": false,
+    "mismatches": [
+      "screen.innerWidth (1366) is greater than screen.width (1280), which is a logical impossibility for a browser viewport within a screen. The viewport dimensions are inconsistent with the reported screen resolution."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-bbqv7m": {
+    "coherent": false,
+    "mismatches": [
+      "The Chrome version in the User-Agent string (145.0.0.0) does not match the versions reported in navigator.userAgentData.brands (141). This indicates an inconsistency in the reported browser version."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-g2c36k": {
+    "coherent": false,
+    "mismatches": [
+      "The Chrome version in the User-Agent string (145) does not match the Chrome/Chromium versions reported in navigator.userAgentData.brands (147)."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-dl3yca": {
+    "coherent": false,
+    "mismatches": [
+      "navigator.userAgent claims Chrome version 145, but navigator.userAgentData.brands list Chrome/Chromium version 137. These versions must be consistent.",
+      "The navigator.languages ('en-US') do not perfectly align with the 'Australia/Sydney' timezone. While possible, 'en-AU' would be more typical for a primary language setting."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-1c8gck": {
+    "coherent": false,
+    "mismatches": [
+      "The navigator.userAgent and navigator.platform indicate an Intel-based Mac (Macintosh; Intel Mac OS X 10_15_7, MacIntel), which is inconsistent with the webgl.renderer identifying an Apple M1 Pro GPU (Apple Silicon).",
+      "The Chrome version in the navigator.userAgent (145.0.0.0) does not match the Chrome versions reported in navigator.userAgentData.brands (143)."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-ui79x8": {
+    "coherent": false,
+    "mismatches": [
+      "User-Agent claims Intel Mac OS X 10_15_7 and navigator.platform is 'MacIntel', but WebGL renderer identifies an 'Apple M1 Pro' GPU, which is an Apple Silicon chip. This is a direct hardware platform mismatch.",
+      "User-Agent string reports Chrome version 145, but navigator.userAgentData.brands report Chrome/Chromium version 144. These versions should align.",
+      "The primary language 'en-US' is inconsistent with the 'Australia/Sydney' timezone. While possible, it's a common flag for non-organic profiles."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-ipksv2": {
+    "coherent": true,
+    "mismatches": [],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-wy0o65": {
+    "coherent": true,
+    "mismatches": [],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-ntj8y9": {
+    "coherent": false,
+    "mismatches": [
+      "Primary language 'en-US' is inconsistent with 'Australia/Sydney' timezone. Users in Australia typically have 'en-AU' as their primary language."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-10xsh8": {
+    "coherent": false,
+    "mismatches": [
+      "The primary language 'en-US' in navigator.languages does not typically align with the 'Australia/Sydney' timezone. A user in Sydney would more commonly have 'en-AU' as a preferred language."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-i7hgj3": {
+    "coherent": false,
+    "mismatches": [
+      "User-Agent claims 'Intel Mac OS X 10.15' but WebGL renderer 'Apple M1' indicates an ARM-based chip. Apple M1 systems run macOS 11 (Big Sur) or later, not macOS 10.15 (Catalina).",
+      "The primary language 'en-US' in navigator.languages is inconsistent with the 'Australia/Sydney' timezone. For an Australian timezone, 'en-AU' would be more typical."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-e1nd5w": {
+    "coherent": false,
+    "mismatches": [
+      "The Chrome version in navigator.userAgent (145.0.0.0) does not match the versions reported in navigator.userAgentData.brands (Chromium 137, Google Chrome 137)."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-8y1nnx": {
+    "coherent": false,
+    "mismatches": [
+      "navigator.languages (en-US) is inconsistent with timezone (Australia/Sydney). Typically, an Australian timezone would be paired with 'en-AU' or a generic 'en' language.",
+      "navigator.userAgentData.brands (Chrome/Chromium 141) does not match the version found in navigator.userAgent (Chrome 145). These versions should be consistent."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-wql4kn": {
+    "coherent": false,
+    "mismatches": [
+      "User-Agent (Chrome 145) and Client Hints (Chrome 147) versions do not match for Google Chrome and Chromium."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-a5gtlg": {
+    "coherent": true,
+    "mismatches": [],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-ptz26d": {
+    "coherent": false,
+    "mismatches": [
+      "The primary language 'en-US' is inconsistent with the 'Australia/Sydney' timezone. A natural user in Sydney would typically have 'en-AU' or a more generalized 'en' as their primary language, rather than 'en-US'."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-li08dv": {
+    "coherent": false,
+    "mismatches": [
+      "The User-Agent string and navigator.platform indicate an Intel-based Mac (Mac OS X 10.15, MacIntel), but the WebGL renderer identifies an 'Apple M1' chip, which is an ARM-based Apple Silicon processor. These components are contradictory."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-8zzi3l": {
+    "coherent": false,
+    "mismatches": [
+      "navigator.languages ['en-US', 'en'] does not align with 'Australia/Sydney' timezone; 'en-AU' would typically be present, ideally as the primary language."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-hbaswf": {
+    "coherent": true,
+    "mismatches": [],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-nsi52p": {
+    "coherent": true,
+    "mismatches": [],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-e3orwg": {
+    "coherent": false,
+    "mismatches": [
+      "The primary language 'en-US' does not naturally align with the 'Australia/Sydney' timezone. For a user in Sydney, 'en-AU' would typically be expected as the preferred language."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-lhdqn7": {
+    "coherent": false,
+    "mismatches": [
+      "The WebGL renderer 'SwiftShader' is a software rasterizer, which is atypical for a desktop Linux x86_64 system. This often indicates a virtualized environment or a headless browser, rather than a natural user session with a dedicated or integrated GPU."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-z90b84": {
+    "coherent": false,
+    "mismatches": [
+      "The WebGL renderer string \"Intel Iris OpenGL Engine\" is highly characteristic of macOS systems, not Linux x86_64 as specified in the User-Agent and platform.",
+      "The navigator.userAgentData.brands array is empty, which is inconsistent with a modern Chrome browser (version 137.0.0.0) as indicated in the User-Agent. A real Chrome browser would populate this array with brand information."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-vh0c09": {
+    "coherent": false,
+    "mismatches": [
+      "The Chrome version in navigator.userAgent (145.0.0.0) is a future/unrealistic version number.",
+      "The Chrome version in navigator.userAgent (145) is inconsistent with the Chrome version reported in navigator.userAgentData.brands (116). These versions should match or be very close."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-j7mx4b": {
+    "coherent": false,
+    "mismatches": [
+      "The Chrome version in the User-Agent (145.0.0.0) does not match the Chromium/Google Chrome versions reported in navigator.userAgentData.brands (138)."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-o27pn3": {
+    "coherent": true,
+    "mismatches": [],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-t1tnkb": {
+    "coherent": false,
+    "mismatches": [
+      "User-Agent reports Chrome version 145.0.0.0, which is an unrealistic and futuristic version.",
+      "The Chrome version in the User-Agent (145) contradicts the Chrome version reported in navigator.userAgentData.brands (123)."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-sv10qb": {
+    "coherent": true,
+    "mismatches": [],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-tdm2ys": {
+    "coherent": false,
+    "mismatches": [
+      "The Chrome version in the User-Agent (145) does not match the Chrome version in the User-Agent Client Hints (105).",
+      "The primary language 'en-US' is inconsistent with the 'Australia/Sydney' timezone."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-uwodov": {
+    "coherent": false,
+    "mismatches": [
+      "The primary language 'en-US' is inconsistent with the 'Australia/Sydney' timezone. A user in Sydney would typically have 'en-AU' or 'en' as their primary language.",
+      "The Chrome version in the User-Agent string (145) is inconsistent with the 'Google Chrome' and 'Chromium' versions reported in navigator.userAgentData.brands (144)."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-1jv22o": {
+    "coherent": false,
+    "mismatches": [
+      "Primary language (en-US) does not align with the specified timezone (Australia/Sydney).",
+      "Chrome version in the User-Agent string (145) does not match the version reported in Client Hints (142)."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-4ks5bn": {
+    "coherent": false,
+    "mismatches": [
+      "The Chrome version in navigator.userAgent (145.0.0.0) does not match the versions reported in navigator.userAgentData brands (130 for Chromium and Google Chrome)."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-1v9djm": {
+    "coherent": false,
+    "mismatches": [
+      "navigator.userAgent reports Chrome version 145.0.0.0, but navigator.userAgentData.brands reports Chrome/Chromium version 120. This is a significant version mismatch between the User-Agent string and Client Hints."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-58vvna": {
+    "coherent": false,
+    "mismatches": [
+      "User-Agent Chrome version (145) does not match client hints brands version (120)."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-axmlal": {
+    "coherent": false,
+    "mismatches": [
+      "The Chrome version in the User-Agent (145) does not match the Chrome/Chromium versions reported in User-Agent Client Hints (132)."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-g80jir": {
+    "coherent": false,
+    "mismatches": [
+      "The primary language (en-US) is inconsistent with the declared timezone (Australia/Sydney).",
+      "The Chrome version in the User-Agent string (145) does not match the versions reported in the User-Agent Client Hints brands (142)."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-3lug7n": {
+    "coherent": false,
+    "mismatches": [
+      "Chrome version in navigator.userAgent (145.0.0.0) does not match the Google Chrome/Chromium version in navigator.userAgentData.brands (116). Additionally, Chrome 145 does not currently exist, indicating a manipulated User-Agent string."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-keqyj3": {
+    "coherent": false,
+    "mismatches": [
+      "The primary language 'en-US' is not the most natural choice for a user in 'Australia/Sydney'. 'en-AU' would be more typical for a naturally occurring Australian user session."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-hb63o0": {
+    "coherent": false,
+    "mismatches": [
+      "User-Agent Chrome version (145) does not match Client Hints Chrome version (132)."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-qjroo8": {
+    "coherent": false,
+    "mismatches": [
+      "The Chrome version in navigator.userAgent (145) does not match the version reported in navigator.userAgentData.brands for 'Chromium' (143) and 'Google Chrome' (143). This is a strong inconsistency."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-sg97fq": {
+    "coherent": true,
+    "mismatches": [],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-91qe28": {
+    "coherent": false,
+    "mismatches": [
+      "The Chrome version '145.0.0.0' in the User-Agent string is non-existent and significantly newer than current stable releases, indicating potential spoofing.",
+      "The Chrome version in the User-Agent string (145) does not match the versions reported in navigator.userAgentData.brands (123 for 'Chromium' and 'Google Chrome')."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-sa62n7": {
+    "coherent": false,
+    "mismatches": [
+      "The Chrome version in navigator.userAgent (145.0.0.0) does not match the versions reported by navigator.userAgentData.brands for Chromium (142) and Google Chrome (142)."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-lu1gux": {
+    "coherent": false,
+    "mismatches": [
+      "navigator.languages ('en-US', 'en') is inconsistent with timezone ('Australia/Sydney'). While possible, 'en-AU' or 'en' would typically be expected for an Australian timezone, or the timezone should be changed to reflect a US locale."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-2q9th2": {
+    "coherent": false,
+    "mismatches": [
+      "The primary language 'en-US' is inconsistent with the 'Australia/Sydney' timezone. Users in Australia typically have 'en-AU' or 'en-GB' as their primary language."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-t42u6q": {
+    "coherent": true,
+    "mismatches": [],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-5akos": {
+    "coherent": false,
+    "mismatches": [
+      "Primary language 'en-US' is inconsistent with timezone 'Australia/Sydney'. While English is spoken, 'en-AU' would be a more natural primary language setting for this timezone."
+    ],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-950cwh": {
+    "coherent": true,
+    "mismatches": [],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-cihxak": {
+    "coherent": true,
+    "mismatches": [],
+    "fixSuggestions": {},
+    "modelUsed": "gemini-2.5-flash"
+  },
+  "fp-3lw16g": {
+    "coherent": false,
+    "mismatches": [
+      "Hardware GPU vendor does not match OS (NVIDIA on Windows vs AMD Radeon on Windows)",
+      "Video card description contains NVIDIA vendor and code (NVIDIA GeForce GTX 980) conflicting with AMD hardware in 'hardware.gpu'",
+      "System fonts (Webkit built-in) inconsistent with narrow list of installed fonts in 'fonts'",
+      "Fonts array does not match standard Windows 10 font installations (e.g., missing Segoe UI, Arial Black)",
+      "Windows architecture is x64 but Windows versions are p64 compatibility paths",
+      "Chrome Version 135.0 matches Firefox UA but is high for Firefox that uses Gecko 20100101 polyfill",
+      "Chrome Major version missing in 'hardware' section despite being in UA",
+      "DevicePixelRatio of 1 not typical for modern displays with 2x/3x scaling"
+    ],
+    "fixSuggestions": {
+      "hardware.gpu.vendor": "NVIDIA",
+      "hardware.gpu.renderer": "NVIDIA GeForce GTX 980 Direct3D11",
+      "fonts.minimal.fonts": [
+        "Arial",
+        "Courier New",
+        "Georgia",
+        "Times New Roman",
+        "Verdana",
+        "Segoe UI",
+        "Arial Black"
+      ],
+      "cleanse": "remove deprecated UA components",
+      "chromeVersion": "Chrome 135.0"
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-q72joj": {
+    "coherent": false,
+    "mismatches": [
+      "Microsoft Edge PDF Viewer and WebKit built-in PDF listed in a Firefox profile which should only have PDF Viewer",
+      "n-Mozilla 5.0 UA string conflicting with Firefox 150 branding",
+      "en-US accept-language matching locale-en-AU mismatch",
+      "Windows NT 6.1 platform vs Windows 10.0 architecture",
+      "Windows 10 OS with Radeon RX 6600 GPU which only supports Windows 11"
+    ],
+    "fixSuggestions": {
+      "osVersion": "Windows 11 10.0.22621",
+      "gpu": "Intel Iris Xe Graphics",
+      "pdfViewer": "Remove Edge/Chromium/WebKit PDF entries, leave only Firefox PDF Viewer"
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-syarpj": {
+    "coherent": true,
+    "mismatches": [],
+    "fixSuggestions": {},
+    "modelUsed": "llama3"
+  },
+  "fp-k9g1zi": {
+    "coherent": false,
+    "mismatches": [
+      "User-Agent does not reflect Chrome version: UA states Firefox 150.0 while hardware lists chromeMajor 150, implying Chrome usage",
+      "Resolution width 2560x1440 with client/inner dimensions (0x19) suggests browser extension or automation interference",
+      "Empty sec-ch-ua instances for chrome in headers/localStorage mismatch declared Chrome version",
+      "Proxy location (US) conflicts with geolocation data (Australia)",
+      "locale (en-AU) vs accept-language (en-US) mismatch",
+      "browser.useragent version mismatch: stated Firefox version in UA string vs navigator.appVersion format mismatch",
+      "Non-standard Alejandro font included in Firefox profile",
+      "WebGL renderer claim for AMD Ryzen 7 (cores=12) exceeds typical Ryzen 7 GPU capabilities"
+    ],
+    "fixSuggestions": {
+      "osProfile": "windows",
+      "chromeVersion": "150.0",
+      "slim": true,
+      "clientHeight": 800,
+      "locale": "en-AU",
+      "battery": {
+        "charging": false,
+        "chargingTime": null,
+        "fullCharge": false
+      },
+      "webdriver": false
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-pu7mz2": {
+    "coherent": true,
+    "mismatches": [
+      "alternate_user_agent_type"
+    ],
+    "fixSuggestions": {
+      "userAgentType": "laptop"
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-3udcwr": {
+    "coherent": false,
+    "mismatches": [
+      "User-Agent discrepancy: Firefox/150.0 claims Windows 32-bit ('platform': 'Win32'), conflicting with OS claim of Win64 ('architecture': 'x64', 'os': 'windows')",
+      "WebGL renderer inconsistency: Claims AMD GPU with 'Radeon R9 200 Series' but hardware profile lists 'Radeon RX 6600' (older GPU model vs modern hardware)",
+      "Browser/path mismatch: Firefox user-agent references 'Chrome PDF Viewer' plugins which don't exist in Firefox"
+    ],
+    "fixSuggestions": {
+      "uaPlatform": "Windows NT 10.0; Win64; x64",
+      "apifyFingerprint.plugins": [
+        "internal-pdf-viewer"
+      ],
+      "hardware.gpu.renderer": "Radeon RX 6600"
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-e0pte5": {
+    "coherent": false,
+    "mismatches": [
+      "Browser (Firefox) gecko/processor identified as Gecko with version 20100101, but user-agent ChromeVersion claims Chrome 147.0 (inconsistent browser identification)",
+      "WindowsOSplatformVersion10.0.0impliesWindows10, butWindowsLabelisWIN10which is inconsistent (WIN10 corresponds to Windows 10 S)",
+      "Geolocation region code 'VIC' is a state (Vermont) in the USA, not a valid region in Australia where the countryCode is AU",
+      "WebGL renderer 'ANGLE (NVIDIA, NVIDIA GeForce GTX 980)' reported byGPU, but hardware list claims AMD Radeon RX 6600 (conflicting GPU vendors)"
+    ],
+    "fixSuggestions": {
+      "uaChromeVersion": "Chrome 97.0.4774.76 (Firefox-specific identifier)",
+      "winLabel": "10 0 0 (standard Windows 10 label)",
+      "geoRegion": "Melbourne (city level region instead of state code)",
+      "hardware.gpuVendor": "NVIDIA (match WebGL renderer vendor)",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4774.76 Safari/537.36 (to match browser)",
+      "osProfile": "windows"
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-t0200p": {
+    "coherent": true,
+    "mismatches": [],
+    "fixSuggestions": {},
+    "modelUsed": "llama3"
+  },
+  "fp-seqe5z": {
+    "coherent": false,
+    "mismatches": [
+      "Apify fingerprint screen dimensions (1920x1080) mismatch with outerWidth/outerHeight (1936x1048) by 16px/16px, indicating potential rounding issues or conflated metrics.",
+      "WebGL renderer claims NVIDIA GeForce GTX 980 (NVIDIA vendor), but OS is Windows 10 which typically uses AMD/NVIDIA/Intel; however, the hardware GPU field specifies AMD Radeon RX 6600, creating a vendor conflict (NVIDIA vs AMD).",
+      "Chrome version 135 is not the current browser version (as of 2023), making the ua.uniqueChrome parameter outdated and inconsistent with current browser identification standards.",
+      "Font lists in apifyFingerprint.fonts and hardware.fonts differ significantly, with system fonts (Georgia/Times New Roman) missing from apify's list and web fonts (Leelawadee) present there but not in hardware.fonts.",
+      "OS field is 'windows' but oscpu specifies 'Windows NT 10.0', which should be reflected as 'Windows 10' in OS metadata for consistency with browser vendor standards.",
+      "Device pixel color depth (apifyFingerprint.screen.pixelDepth=24, colorDepth=24) is accurate for Windows 10, but the presence of multiple PDF viewers in plugins may indicate browser fingerprint spoofing attempts.",
+      "Proxy country (assumed FlameProxies.com = Netherlands) conflicts with geolocation country Australia (AU/VIC), creating geolocation-proxy alignment mismatch.",
+      "Chrome PDF Viewer plugins appear multiple times, while real browsers typically show one internal viewer; duplicate entries may suggest automated fingerprint generation."
+    ],
+    "fixSuggestions": {
+      "hardware_gpu_vendor": "NVIDIA",
+      "ua_uniqueChrome": "latest version (current browser version)",
+      "apifyFingerprint.screen.outerWidth": "1920",
+      "apifyFingerprint.screen.outerHeight": "1080",
+      "hardware_fonts": [
+        "Arial",
+        "Courier New",
+        "Georgia",
+        "Times New Roman",
+        "Verdana"
+      ]
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-d9og4z": {
+    "coherent": false,
+    "mismatches": [
+      "GPU vendor Intel with Firefox (unusual; Firefox typically uses Gecko/angle or NVIDIA).",
+      "Client hints (e.g., 'en-US' language) vs locale 'en-AU' (AU typically uses 'en-AU' explicitly).",
+      "Email 'slr5000cjp' suggests no melody (@gmail.com domains usually use pop music names)."
+    ],
+    "fixSuggestions": {
+      "osspecificindicators": "windows",
+      "gpuacconsistency": "angle; nvidia software driver number",
+      "pronounlawscriptions": "melody-based term"
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-tfhhuw": {
+    "coherent": false,
+    "mismatches": [
+      "Chrome version 150 in Firefox UA string creates inconsistency",
+      "Windows platformVersion '10.0.0' format doesn't align with NT 10.0; Win64; x64",
+      "GPU vendor 'Google Inc.' conflicts with AMD Radeon hardware",
+      "Non-Firefox OS fonts listed in fonts array",
+      "Screen dimensions irregular (19 pixels height is unusually narrow)",
+      "Chrome Major version 150 mentioned in cache while browser is Firefox",
+      "Device memory null in navigator despite known 32GB system memory",
+      "Plugin duplication shows Firefox's PDF viewer masquerading as Chrome/Edge/Webkit",
+      "clientX/screenX mismatch (102) in 2560px wide screen creates suspicion"
+    ],
+    "fixSuggestions": {
+      "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0",
+      "browserProfile": {
+        "name": "Firefox",
+        "version": "150.0"
+      },
+      "os": "Windows 10",
+      "platformVersion": "10.0.1",
+      "gpu": {
+        "vendor": "AMD",
+        "renderer": "Radeon RX 6600"
+      },
+      "fonts": {
+        "name": "typical-windows",
+        "fonts": [
+          "Arial",
+          "Courier New",
+          "Georgia",
+          "Segoe UI",
+          "Tahoma",
+          "Times New Roman",
+          "Trebuchet MS",
+          "Verdana"
+        ]
+      },
+      "resolution": {
+        "width": 2560,
+        "height": 1440
+      },
+      "cache": {
+        "chromeMajor": null,
+        "browserMajor": 150
+      }
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-17t2ga": {
+    "coherent": false,
+    "mismatches": [
+      "WebDriver false while Chrome PDF Viewers are present - This can indicate automation/headless/old Chrome versions, creating inconsistency for modern bot detection",
+      "Windows NT 10.0 UA with NVIDIA GTX 980 GPU (DX11) - Modern Windows 10+ systems typically use DX12 (DXUT11 is uncommon), showing outdated OS/GPU synergy",
+      "Intel UHD Graphics 630 in hardware but NVIDIA listed in UA - GPU brand mismatch across codefaces",
+      "Fragmented GPU vendor handling (Google Inc. vs Apple Inc.) - YY-registerments with modern browsers contradict claimed Nutshell version 135",
+      "muxika-bedra sync inconsistencies - Audio/Video contingent experiment planes need unification"
+    ],
+    "fixSuggestions": {
+      "proxy": "chrome-native-history.com:3128",
+      "osProfile": "Linux",
+      "gpu": "NVIDIA UHD Graphics",
+      "headers": {
+        "sec-ch-ua": "\"Google Chrome\";v=\"135\", \"Chromium\";v=\"135\", \"Not;A_Branding\""
+      }
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-wdj8zw": {
+    "coherent": false,
+    "mismatches": [
+      "WebGL identifier claims NVIDIA GPU on Windows while hardware specifies AMD GPU",
+      "Client Hints 'chromeMajor' (147) matches browser version but does not reflect hardware acceleration capabilities from WebGL data",
+      "Zoom level mismatch: Device size (1707x1067) is ~150% of screen size (1204x769), suggesting browser window not in natural workflow",
+      "Proxy location (France) conflicts with geolocation (Melbourne, AU)",
+      "Chrome version 147 lacks known issues seen in Accelerated Mobile Pages (AMP) use, which could be a bot bot TELL",
+      "Fonts list includes less common system fonts (Courier New, Impact) with unsystemic file size (no.)",
+      "Socks5 protocol with dynamic IP (flameproxies.com) may not align NAT traversal expected in Australia"
+    ],
+    "fixSuggestions": {
+      "osProfile": "windows",
+      "gpu": "Intel UHD Graphics 620",
+      "resolution": {
+        "width": 1920,
+        "height": 1080
+      },
+      "timezone": "Australia/Melbourne",
+      "locale": "en-AU",
+      "proxy": "socks5://realproxy.com.au:8080",
+      "chromeMajor": 115,
+      "headers": {
+        "accept-language": "en-AU,en;q=0.9",
+        "accept-encoding": "gzip, deflate, br"
+      },
+      "clientCache": {
+        "lastVisitDaysAgo": 30,
+        "clientId": "au-local-session-id"
+      }
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-6nouml": {
+    "coherent": false,
+    "mismatches": [
+      "CORS user_agent vs navigator.userAgent within apifyFingerprint (Chrome 150 vs Firefox) inconsistent pair",
+      "OS: Windows 10 paired with 'Windows NT 10.0; Win64; x64' UA - redundant but valid",
+      "GPU claim: Radeon RX 6600 (AMD) vs devicePixelRatio 1.5 - inconsistent GPU capability",
+      "Windows fonts: Missing Win10 defaults (Calibri, Segoe UI) not aligned with Windows 10 typical fonts",
+      "X64 Windows OS requires NVIDIA/Vendor GPU - AMD Radeon RX 6600 mismatch",
+      "Geo: en-AU locale vs en-US in navigator.userAgentData mismatch",
+      "serviceWorkerHint: true in cache but false in client hints (inconsistent state)",
+      "clientId mismatch between cache (UUID) and session properties",
+      "Apify fingerprint headers empty despite presence in bundle"
+    ],
+    "fixSuggestions": {
+      "chromeVersion": "Chrome/150.0",
+      "osProfile": "Windows 10",
+      "gpu": "NVIDIA GeForce RTX 3060",
+      "fonts": [
+        "Calibri",
+        "Segoe UI",
+        "Arial",
+        "Times New Roman",
+        "Courier New"
+      ],
+      "navigatorPlatform": "Win64",
+      "dnt": "1"
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-1xegb": {
+    "coherent": false,
+    "mismatches": [
+      "Hardware cores (12) and memory (32) are unrealistic for consumer Windows 10 hardware",
+      "Detected GPU (NVIDIA Quadro P6200) does not match claimed OS hardware (AMD/Radeon RX 6600)",
+      "Proxy country (US) mismatches reported geolocation (Australia)",
+      "Fonts list missing OS-specific fonts (e.g., Segoe UI, Constantia)"
+    ],
+    "fixSuggestions": {
+      "hardware": {
+        "cores": 8,
+        "memory": 16,
+        "gpu": "NVIDIA GeForce GTX 1650"
+      },
+      "proxy": "null",
+      "fonts": [
+        "Segoe UI",
+        "Constantia",
+        "Georgia",
+        "Tahoma"
+      ]
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-9qm39r": {
+    "coherent": false,
+    "mismatches": [
+      "User-Agent specifies Firefox 150.0, but chromeVersion is 150.0 (Chrome/Firefox hybrid inconsistency)",
+      "UA claims Windows 10 but platformVersion 10.0.0 lacks build number complexity expected in real Windows installations",
+      "User-Agent specifies rv:150.0 (Firefox), but chromeMajor version 150 (Chrome) conflicts with Gecko-based browser claim",
+      "Windows 10 x64 OS combined with useragent.platform = 'Win32' (Linux MacOS convention)",
+      "Screen resolution 2560x1440 with clientWidth=0 appears artificially exaggerated with suspicious pageXOffset/pageYOffset values",
+      "Proxy location (USA) mismatches timezone/locale/country set to Australia (AU)",
+      "Fonts list includes Windows OS default fonts but omits Firefox-specific defaults (e.g., DejaVu Sans)"
+    ],
+    "fixSuggestions": {
+      "browserEngine": "Firefox",
+      "chromeMajorVersion": null,
+      "platformVersion": "10.0.19044.2000",
+      "userAgentData": {
+        "rp": "desktop",
+        "ua": "Mozilla/5.0 (Windows NT 10...)",
+        "gpuDescription": "ANGLE (AMD Radeon RX 6600), WDDM 2.9",
+        "additionalFonts": [
+          "DejaVu Sans",
+          "STReturning"
+        ]
+      },
+      "proxyLocation": "AU",
+      "timezoneOffset": 600,
+      "screen.maxTouchPoints": 0,
+      "secChPreload": [
+        "nonce=OPQ...",
+        "font=Fira Code 1.0%7Cwt-wght@400,700"
+      ]
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-bi835r": {
+    "coherent": false,
+    "mismatches": [
+      "WebGL vendor mismatch: GPU vendor is Intel while NVIDIA GeForce GTX 980 is reported",
+      "Language discrepancy: navigator.language is 'en-US' while locale is 'en-AU'",
+      "Timezone inconsistency: 'Australia/Melbourne' conflicts with GPU driver indicating Windows Desktop on Intel hardware (common in AU)",
+      "PDF viewer plugins mismatch: Three PDF viewer plugins (Chrome, Chromium, Edge) are listed for Firefox"
+    ],
+    "fixSuggestions": {
+      "gpu": "Intel Iris Plus",
+      "navigatorComponents": {
+        "language": "en-AU",
+        "languages": [
+          "en-AU"
+        ]
+      },
+      "pdfPlugins": [
+        "Firefox PDF Viewer"
+      ]
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-vymbqk": {
+    "coherent": false,
+    "mismatches": [
+      "Proxy SOCKS5 address 'proxy.flameproxies.com' is a known proxy service, suggesting deliberate obfuscation",
+      "Proxy setup is common for bots but lacks typical bot-buster protections (e.g., malware, sandboxing)",
+      "User-Agent claims Gecko/20100101 (Firefox 147) but userAgentData suggests newer Firefox with EDGE version string",
+      "Windows NT version 10.0 mismatch with Windows 10 Label",
+      "Chrome version 147.0 conflicts with Firefox-based User-Agent",
+      "Windows NT 10 (x64) OS claim conflicts with AMD GPU (NVIDIA GPUs are common in Windows, but AMD GPUs are valid; however, the proxy may raise suspicion)",
+      "UserAgentData may not match the declared browser version (Firefox/147 claims Gecko but userAgentData might reference Edge)"
+    ],
+    "fixSuggestions": {
+      "proxy": "REMOVE_PROXY_OR_USE_NATIVE_RESIDENTIAL_PROXY",
+      "userAgent": "Ensure userAgentData aligns with Firefox/147, possibly by using a modern Firefox profile",
+      "osLabel": "Correct Windows NT version without mismatched OS patch level including win64 in platformVersion",
+      "location": "Use non-proxy residential location or omit proxy information for natural user behavior",
+      "browserVersion": "Validate the browser version matches the Gecko and userAgentData properly with the claimed version."
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-x87ad3": {
+    "coherent": false,
+    "mismatches": [
+      "Hardware cores/memory do not match high-end consumer GPU (NVIDIA GTX 980 with only 4 cores/8GB RAM)",
+      "WebGL renderer claims 'NVIDIA/Google' vendor which is invalid (verified list on browserleaks.com/tos)",
+      "DeviceMemory available is 8GB but edge cases with NVIDIA drivers in browsers could cause instability",
+      "Screen dimensions (1707x1067) conflict with 147.0 Firefox runtime (regression tracking mandates resolution validation)"
+    ],
+    "fixSuggestions": {
+      "cores": 8,
+      "memory": 16,
+      "hardware.concurrency": 32,
+      "gpu.vendor": "Intel",
+      "gpu.renderer": "Intel Iris Plus Graphics 630",
+      "screen.width": 1366,
+      "screen.height": 768
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-k1c1ai": {
+    "coherent": false,
+    "mismatches": [
+      "Browser rendering engine mismatch: Gecko (Firefox) vs Chromium styles in nav.unitletData.format and renderer strings",
+      "Driver version discrepancy: userAgentData contains 'Chrome/147.0.0' despite Firefox browser",
+      "Device Memory inconsistency: 'deviceMemory' specified as integer 8 while Firefox typically reports strings like '8MiB' or '16MB'",
+      "WebGL renderer vendor mismatch: NVIDIA listed under Google Inc. vendor",
+      "Audio codec mismatch: Firefox 147+ introduced aac/opus support not reflected in JSON",
+      "Platform version misrepresentation: Win32 in nav.unitletData.format while UA and hardware.json claim Win10"
+    ],
+    "fixSuggestions": {
+      "nav.unitletData.format": "'(Not A-Brand;Not A-Model;Chrome/147.0.0)'",
+      "deviceMemory": "8Alfonsn",
+      "fingerprint.videoCard.vendor": "NVIDIA",
+      "fingerprint.audioCodecs.aac": "probably",
+      "nav UniteData.platform": "Win64",
+      "browser": "Firefox 147"
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-kqdocx": {
+    "coherent": true,
+    "mismatches": [],
+    "fixSuggestions": {},
+    "modelUsed": "llama3"
+  },
+  "fp-r30kf6": {
+    "coherent": false,
+    "mismatches": [
+      "Hardware GPU mismatch: NVIDIA GeForce RTX 3060 reported in hardware, but Firefox navigator.vendor is 'Google Inc. (NVIDIA - NG-11.5.52-ige17)', which is inconsistent with OS platform",
+      "Resolution size mismatch: 1707x1067 desktop resolution could indicate a headless browser or automated setup, real users rarely have such high-resolution monitors",
+      "Font list completeness: Missing common Windows 10 fonts like Segoe UI Symbol and Microsoft YaHei commonly found on AU systems",
+      "Proxy country mismatch: SOCKS5 proxy in AU (Melbourne timezone) but using IP from flameproxies.com pool which may route through non-AU nodes",
+      "ChromeClientHints inconsistency: UA specifies Chrome 147 but Firefox should report ChromeClientHints as 'Not A Brand' in navigator platformData",
+      "Screen metrics precision: Pixel-perfect screen offsets (avail/availLeft=0) suggest automated tracking rather than normal user session",
+      "Hardware concurrency mismatch: 32 reported in navigator.hardwareConcurrency vs 12 cores detected in hardware",
+      "WebGLRendererType3 inconsistency: Reliance on ANGLE software rendering indicates VM/container rather than native Windows setup",
+      "Proxy list probability: Flameproxies.com is known to be a botnet proxy provider, creating high suspicion"
+    ],
+    "fixSuggestions": {
+      "fixHardware": {
+        "os": "windows",
+        "gpu": "Intel Iris Xe Graphics NG",
+        "cores": 12,
+        "memory": "32GB DDR4",
+        "vendorSub": "Intel Iris Xe Graphics NG mapping"
+      },
+      "fixClientHints": {
+        "remove_proxy_flameproxies": true,
+        "set_service_worker_throttle": true,
+        "enable_virtual_gpu": false,
+        "adjust_core_count": 12,
+        "install_real_windows_fonts": true
+      }
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-uu39q6": {
+    "coherent": false,
+    "mismatches": [
+      "Firefox UA claims Chrome version 135 in extraProperties",
+      "Chrome PDF Viewer plugin mismatch for Firefox",
+      "Hardware GPU (NVIDIA) conflicts with AMD GPU",
+      "WebGL renderer vendor mismatch (Google vs AMD)",
+      "Chrome brand reported in Chrome Hints despite Firefox UA"
+    ],
+    "fixSuggestions": {
+      "chromeVersion": "none",
+      "chromeMajor": "none",
+      "extraProperties": "remove Chrome-specific flags",
+      "pluginsData": [
+        "PDF Viewer",
+        "WebKit built-in PDF"
+      ],
+      "gpu": {
+        "vendor": "AMD",
+        "renderer": "AMD Radeon RX 6600"
+      },
+      "videoCard": {
+        "vendor": "AMD",
+        "renderer": "AMD Radeon RX 6600"
+      },
+      "chrome": "none"
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-85iidw": {
+    "coherent": false,
+    "mismatches": [
+      "The hardware reports AMD GPU (Radeon RX 6600) but the browser's videoCard shows NVIDIA GeForce GTX 980, which conflicts with the RETAINED_OS probable device class.",
+      "Window dimensions (1707x1067) are too tall for typical desktop monitors, with aspect ratio 1.6:1 deviating from standard 16:9 or 4:3.",
+      "The Client Hint sec-ch-ua-form-factor value is missing and should be present for modern browsers",
+      "WebGL video decoding capabilities show partial alignment with Chrome 147 vs. Edge/Epic leaks (needs h264/hevc support)",
+      "DNS prefetch list is empty (empty string in browsers <109), while Chrome 147 typically has 8-32 entries for MTRP domains"
+    ],
+    "fixSuggestions": {
+      "gpu": {
+        "browser": "ANGLE (NVIDIA, NVIDIA GeForce GTX 980 Direct3D11 vs_5_0 ps_5_0), Intel UHD Graphics 630",
+        "os": "Intel Iris Xe Graphics",
+        "webdriverMode": true
+      },
+      "resolution": {
+        "width": 1440,
+        "height": 900,
+        "availWidth": 1440,
+        "availHeight": 873,
+        "devicePixelRatio": 2
+      },
+      "proxy": "115.121.218.120:3128",
+      "dnsPrefetch": [
+        "facebook.net",
+        "google-analytics.com",
+        "cloudflare.com",
+        "cdnjs.cloudflare.com",
+        "cf-pebble.com",
+        "cookie.cat",
+        "github.com",
+        "coderedkty.com"
+      ],
+      "clientHints": {
+        "sec-ch-ua": "\"Google Chrome\";v=\"147\", \"Not;ABrand\";v=\"8\"",
+        "sec-ch-ua-platform-version": "\"Version 147.0.0.0\""
+      }
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-bnh6yh": {
+    "coherent": false,
+    "mismatches": [
+      "Chrome-based user agent claims Firefox (Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0)",
+      "Browser hardware concurrency (8) lower than system hardware cores (12)",
+      "Discrepancy between navigator.platform ('Win32') and chrome.oscpu ('Windows NT 10.0; Win64; x64')",
+      "GPU vendor mismatch: hardware declares NVIDIA GPU, browser claims AMD Radeon GPU",
+      "Missing deviceMemory in navigator object common in real browsers",
+      "Font lists differ between browser (specific Asian/Windows fonts) and typical-user fonts",
+      "Chrome version 150.0 not publicly available/open-source (unlike Firefox/150.0)",
+      "Screen dimensions (2560x1440) unusually wide for typical Windows desktop setups",
+      "Multiple PDF viewer plugins from different browsers listed (edge cases in real scenarios)",
+      "Geolocation for Melbourne should match AEDT/AEST timezone usage",
+      "Invalid 'audioCodecs' format - expected descriptive strings like 'probably', 'maybe' or ''’"
+    ],
+    "fixSuggestions": {
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.7444.87 Safari/537.36",
+      "navigator": {
+        "platform": "Win64",
+        "deviceMemory": 32,
+        "hardwareConcurrency": 12
+      },
+      "gpu": {
+        "vendor": "NVIDIA",
+        "renderer": "GeForce RTX 3060"
+      },
+      "liveFonts": [
+        "Calibri",
+        "Segoe UI",
+        "Arial",
+        "Times New Roman",
+        "Courier New",
+        "Verdana"
+      ],
+      "timezone": "Australia/Adelaide",
+      "battery": {
+        "charging": true,
+        "level": 0.65
+      }
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-24qdad": {
+    "coherent": false,
+    "mismatches": [
+      "Hardware/cores/memory values (12 cores, 32GB memory) are unrealistically high for a typical Windows 10 system, especially with GPU rendering hints suggesting mid-range GPU capabilities.",
+      "WebGL renderer claims 'ANGLE (NVIDIA, NVIDIA GeForce GTX 980)' which conflicts with Windows 10 OS typical drivers (modern NVIDIA drivers use WDDM/RadeonSIM for Windows, not ANGLE).",
+      "Fonts array contains non-standard entries like 'HELV' and 'Gill Sans' not typically bundled with Windows 10.",
+      "4K (1920x1080) resolution paired with Windows 10 system with pharmacom-computer outdated integration (despite DXVA 2.0 support).",
+      "APPCP-VN 13190 being the specific version string despite being released in 2022 (conflict: Firefox 135 was released July 2022; Windows 10's pharmacom integration at that time was pharmacom develops 19063).",
+      "Headers' sec-ch-ua entries are compressed instead of using standardized Web SDK values.",
+      "Proxy location 'proxy.flameproxies.com' (SOCKS5) claims Australia timezone/geo but SOCKS5 proxies typically don't handle geolocation metadata - actual server might be in a different country.",
+      "Windows 10 system claiming Chrome (not Edge) as primary browser with pharmacom-computer outdated branding in some values.",
+      "Audio codec metrics show conditional 'maybe' support without hardware flags indicating full codec capabilities."
+    ],
+    "fixSuggestions": {
+      "osProfile": "windows",
+      "gpu": {
+        "vendor": "NVIDIA",
+        "renderer": "NVIDIA WDDM Driver QuantMac (RTX Series)"
+      },
+      "cores": 6,
+      "memory": 16,
+      "proxy": "none",
+      "headers": {
+        "sec-ch-ua": "Chrome 135",
+        "sec-ch-ua-platform-version": "Windows NT 10.0",
+        "sec-ch-ua-full-version-list": [
+          "Chrome/135.0.6725.105"
+        ]
+      },
+      "fonts": [
+        "Arial",
+        "Georgia",
+        "Times New Roman",
+        "Verdana",
+        "Calibri",
+        "Courier New"
+      ],
+      "deviceMemory": 16
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-h6wdlf": {
+    "coherent": false,
+    "mismatches": [
+      "The Gecko User-Agent claims Firefox 150.0 on Windows 10 but the hardware lists 16 cores, 32GB RAM, and Arc A770 GPU (Intel), which contradicts a high-end desktop hardware builder report claiming HX770 Pro (Intel Core) and discrete GPU.",
+      "Fonts list contains 'Calibri', 'HELV', and 'Marlett' typical for Windows, but 'Kolibri', 'TeX Gyre Termes', and 'Taxo Pro' are exotic and uncommon in real Windows 10 installations, reducing naturalness.",
+      "resolution (2560x1440) matches a 32-inch monitor at 2560x1440, but proxy usage and browser configuration suggest a more mid-range desktop setup.",
+      "The proxy (socks5://proxy.flameproxies.com:1080) might imply a configuration inconsistent with a user in Melbourne (Australia) using Windows 10 (typically home-based).",
+      "Audio codecs like 'probably' for MP3 and 'maybe' for others suggest a browser updated via official channels, but the Mayor安渐 flange and ambient lighting settings might be more ambient-sensitive."
+    ],
+    "fixSuggestions": {
+      "hardware": {
+        "cores": 8,
+        "memory": 16,
+        "gpu": {
+          "vendor": "AMD",
+          "render": "Radeon RX 7900"
+        }
+      },
+      "fonts": {
+        "updateFonts": [
+          "Arial",
+          "Times New Roman",
+          "Courier New",
+          "Georgia",
+          "Verdana",
+          "Segoe UI",
+          "Tahoma",
+          "Trebuchet MS"
+        ]
+      },
+      "proxy": "No proxy or update to a Melbourne-based IP.",
+      "browserConfig": {
+        "webDriverMode": false,
+        "headless": false
+      }
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-93mrwj": {
+    "coherent": false,
+    "mismatches": [
+      "Proxy country (US) does not match browser geolocation (Australia)",
+      "Windows hardware with NVIDIA videoCard conflicts with Mac GPU explanation in audits",
+      "Chrome 150 should use \"Chromium PDF Viewer\" instead of \"PDF Viewer\" plugin name",
+      "Windows 10 browser claims \"platform\": \"Win32\" which should be \"Win64\"",
+      "Screen geometry suggests laptop but Windows hardware mentions desktop GPU"
+    ],
+    "fixSuggestions": {
+      "proxy": "Random US-based proxy would align geolocation consistency",
+      "gpu": "Intel Iris Xe Graphics (desktop parts)",
+      "plugins": [
+        {
+          "name": "Chromium PDF Viewer",
+          "version": "150.0.0.0"
+        }
+      ],
+      "audit": "Choose consistent \"Platform\" values (e.g., \"Windows Win64 x64 10...\" not \"Win32 x64\" or Mac audits)",
+      "screen": "Select \"netbook\" or \"notebook\" family for laptop-appropriate resolution"
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-puq2jv": {
+    "coherent": false,
+    "mismatches": [
+      "WebGL renderer vendor mismatch: GeForce GTX 980 is NVIDIA, but OS is Windows with GPU vendor AMD and renderer Radeon RX 6600",
+      "Fonts discrepancy: Two conflicting font lists exist (one with 14 fonts, another with 5)"
+    ],
+    "fixSuggestions": {
+      "webglRenderer": "AMD Radeon RX 6600",
+      "fonts": [
+        "Arial",
+        "Courier New",
+        "Georgia",
+        "Times New Roman",
+        "Verdana"
+      ]
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-em69vr": {
+    "coherent": false,
+    "mismatches": [
+      "There is no vendor in the audioCodecs.videoCodecs.pluginsData.videoCard. However, WebGL vendor is shown as Google Inc. (AMD).",
+      "The declared cores are set too high for a Windows system. They are set at 12 whereas typical Windows systems have 12.",
+      "The declared GPU is set as NVIDIA whereas the videoCard/vendor is set at AMD.",
+      "User-Agent claims a Firefox browser running on the Windows, but the WebGL vendor is set at Google Chrome.",
+      "The declared browsers is set as Firefox 150.0, but the pdf viewer is detected as Chrome/Edge/Webkit."
+    ],
+    "fixSuggestions": {
+      "osProfile": "windows",
+      "gpu": "Intel Iris Plus",
+      "cores": "4",
+      "videoCard": {
+        "vendor": "Google Inc. (NVIDIA)",
+        "renderer": "GeForce RTX 360"
+      },
+      "pdfViewer": "Firefox PDF Viewer"
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-tq687d": {
+    "coherent": false,
+    "mismatches": [
+      "proxy_geo_mismatch: proxy IP is Netherlands while browser claims Australia",
+      "proxy_dnt_mismatch: DNT=1 while using commercial proxy",
+      "dnt_inconsistency: DNT=1 conflicts with commercial proxy usage",
+      "fonts_geo_conflict: Australian locale but includes non-default German/Anglo fonts",
+      "headers_geo_conflict: Accept-Language=en-US vs locale=en-AU",
+      "device_memory_inconsistency: 32 threads vs 8-core CPU"
+    ],
+    "fixSuggestions": {
+      "userLanguage": "en-AU",
+      "acceptLanguage": "en-AU",
+      "geoCountry": "AU",
+      "removeDnt": true,
+      "fontsRemove": [
+        "Lucida Console",
+        "Palatino Linotype"
+      ],
+      "hardwareConcurrency": 24
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-qhewzt": {
+    "coherent": false,
+    "mismatches": [
+      "Chrome version 150 does not exist for Firefox/Gecko-based browsers. Chrome uses Blink engine, while Firefox uses Gecko. The User-Agent refers to Firefox, but the Chrome version is incompatible.",
+      "The GPU vendor is listed as NVIDIA while the hardware identifier in the VideoCard section is AMD Radeon. This is a hardware inconsistency.",
+      "The VideoCard renderer claims to be 'ANGLE (AMD, Radeon R9 200 Series...)' but the Hardware section lists an NVIDIA GPU. AMD and NVIDIA components typically do not coexist in a real system's reported hardware profile.",
+      "The Hardware GeForce GTX 1650 is a consumer-grade NVIDIA GPU, but the VideoCard vendor is listed as 'Google Inc. (AMD)', which is conflicting and not a real GPU vendor identifier.",
+      "The Hardware memory is listed as 16 (assumed GB) while the VideoCard GPU (if real) would require up to 8-16 GB of dedicated VRAM, making 16 GB system memory plausible for a dedicated GPU. This is not a critical contradiction but could raise questions."
+    ],
+    "fixSuggestions": {
+      "uaHeadersChromeVersion": "remove or correct to match Blink-based browsers",
+      "hardware": "update GPU vendor to align with VideoCard (e.g., replace NVIDIA with AMD)",
+      "videoCard": "remove Google Inc. vendor and correct"
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-23dr5l": {
+    "coherent": false,
+    "mismatches": [
+      "User-Agent contains User-Agent-Data header which is not typically included in the UA string itself",
+      "NVIDIA GPU reported in hardware while User-Agent indicates Firefox, which typically does not list GPU vendors in UA",
+      "Chrome version 135 claimed in UA but hardware attributes show AMD Radeon GPU not typically associated with Chrome for Windows",
+      "Proxy country (US) timezone (VIC/Australia) mismatch"
+    ],
+    "fixSuggestions": {
+      "gpu": "Intel UHD Graphics 630",
+      "proxy": "socks5://proxy.example.com:1080",
+      "hardware": {
+        "cores": 4,
+        "memory": 8,
+        "gpu": {
+          "vendor": "Intel",
+          "renderer": "UHD Graphics 630"
+        }
+      }
+    },
+    "modelUsed": "llama3"
+  },
+  "fp-j18h7f": {
+    "coherent": false,
+    "mismatches": [
+      "User-Agent (Chrome 150.0) does not match the Firefox browser claimed in the User-Agent string (rv:150.0).",
+      "\"Product\" in navigator is 'Gecko' (Firefox) but 'mimeTypes' include 'Chrome PDF Viewer', which is Chrome-specific.",
+      "Device pixel ratio (1.5) is unusually high for a typical desktop monitor (~1.0 is standard).",
+      "Fonts include non-standard/non-default entries (e.g., 'HELV', 'MS UI Gothic', 'Marlett') for a Windows OS fatal typo (Win10 vs Win11).",
+      "DeviceMemory is null in navigator, but hardwareMemory is 32GB (expected ~32GB in reality).",
+      "Screen resolution (2560x1440) exceeds most standard monitors but matches a single monitor setup, which is plausible but uncommon.",
+      "Proxy country (flameproxies.com, non-AU) conflicts with geolocation (Melbourne, AU), raising suspicion.",
+      "navigator.languages is ['en-US'] but locale is 'en-AU' (Australia uses EN-US variants).",
+      "WebGL renderer (Radeon R9 200 Series) does not match hardware_gpu (Radeon RX 6600).",
+      "HTTP Accept-Language (en-US) conflicts with browser locale (en-AU).",
+      "User-Agent's 'appVersion' ('Windows') does not match OS 'Windows NT 10.0' specificity.",
+      "Cores (12) mismatch device_memory (32GB) for a typical consumer GPU (Radeon RX 6600 uses 8 cores)."
+    ],
+    "fixSuggestions": {
+      "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+      "navigator.platform": "Win32",
+      "navigator.userAgentData": {
+        "brands": [
+          {
+            "brand": "Not A-Brand",
+            "version": "16.0.0.0",
+            "platform": "Win32",
+            "platformVersion": "10.0.0.0"
+          }
+        ]
+      },
+      "hardware.cores": 8,
+      "proxy": null,
+      "font": [
+        "Arial",
+        "Times New Roman",
+        "Courier New",
+        "Cambria",
+        "Calibri",
+        "Trebuchet MS"
+      ]
+    },
+    "modelUsed": "llama3"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "outcome": "noaccount",
+  "domTrigger": "noaccount",
+  "httpStatus": 200,
+  "recordedAt": "2026-08-12T17:19:44.696Z",
+  "engineVersion": "2.0.0",
+  "fixture": "no-account-baseline.webm"
+}

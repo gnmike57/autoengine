@@ -1,0 +1,8 @@
+{
+  "outcome": "incorrect",
+  "domTrigger": "incorrect",
+  "httpStatus": 200,
+  "recordedAt": "2026-08-12T17:20:00.806Z",
+  "engineVersion": "2.0.0",
+  "fixture": "incorrect-baseline.webm"
+}

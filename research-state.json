@@ -1,0 +1,13 @@
+{
+  "targets": [
+    {
+      "url": "ignitioncasino.ooo",
+      "domain": "ignitioncasino.ooo",
+      "knownVectors": [
+        "recaptcha_high_risk"
+      ],
+      "arcFailCount": 0
+    }
+  ],
+  "blacklistedDomains": []
+}

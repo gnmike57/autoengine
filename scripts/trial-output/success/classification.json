@@ -1,0 +1,14 @@
+{
+  "outcome": "SUCCESSFUL_LOGIN",
+  "invocationCount": 1,
+  "acceptedSubmitCount": 1,
+  "acceptedIncorrectCount": 0,
+  "terminalInvocationIndex": 1,
+  "reason": "terminal-success",
+  "label": "SUCCESS",
+  "expectedClass": "SUCCESSFUL_LOGIN",
+  "passed": true,
+  "durationMs": 1641,
+  "loginFlowIssues": [],
+  "recordedAt": "2026-08-04T18:39:22.117Z"
+}

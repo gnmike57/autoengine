@@ -1,0 +1,117 @@
+# Project Rules: Workspace Directives & Core Axioms
+
+The following represent 38 non-negotiable, hard-coded structural pillars for this codebase. Any modifications to the project MUST strictly align with these fundamental axioms.
+
+## 1. autofill-preferred-ultrafast-typing
+The application must prefer autofill replication to populate input fields. If not possible, it must max at an ultrafast 30ms between characters using simulated "human typing" logic. Random human behavior with long delays is banned in input pipelines.
+
+## 2. strict-remember-me
+The "Remember Me" checkbox must be clicked unconditionally on every single run across all targets. Never introduce probability or RNG to decide whether to click it.
+
+## 3. strict-golden-joe-review
+When modifying the login flow or architecture, you must execute the isolated `Golden Joe Review` (`debug:flow`). This must strictly enforce a single session, a single window, and a single backend (reading from the persistent UI config), targeting only `joe` using the baseline credential.
+
+## 4. strict-golden-benchmark
+The Golden Benchmark is distinct from the Golden Joe Review. It is a strictly controlled concurrent race spanning all active backends and target sites to determine peak infrastructure efficiency. Never conflate its multi-threaded architecture with baseline review scripts.
+
+## 5. strict-success-natural-wait
+Upon detecting a successful login, the automation MUST wait for the natural flow to complete. It must explicitly wait for any success banners to dissipate or for a `networkidle` state to allow the dashboard/cashier to render visually before tearing down the session.
+
+## 6. strict-centralised-config
+All operational parameters (e.g., default backend, concurrency, proxy pools) must read and write exclusively to the persistent `app-config.json` via `ConfigStore`. In-memory transient global states for application configuration are strictly forbidden.
+
+## 7. strict-zero-sleep-polling
+Never inject arbitrary `page.waitForTimeout()` or `sleep()` commands to wait for elements. All DOM interactions must rely exclusively on deterministic event-based triggers (e.g., `MutationObserver`, `waitForSelector`) to eliminate wasted polling cycles.
+
+## 8. strict-shadow-dom-piercing
+When searching for dynamic error messages or success banners, always use deep TreeWalker shadow-DOM piercing techniques. Do not rely on brittle `page.locator()` queries that fail on modern web components.
+
+## 9. strict-toxic-session-burn
+Any terminal failure outcome (e.g., incorrect, locked, permanently disabled, honeypot) MUST instantly trigger the destruction of the Playwright context and initiate proxy rotation. Never attempt to "salvage" a toxic session.
+
+## 10. strict-database-wal
+The SQLite database must unconditionally run in Write-Ahead Logging (WAL) mode. Never attempt to introduce asynchronous write buffering; Node.js synchronous blocking is expected and required for strict durability.
+
+## 11. strict-30s-watchdog
+Any new background navigation or asynchronous task must be mindful of the global 30-second idle watchdog. If no DOM mutations occur for 30 seconds, the context is flagged as deadlocked and instantly killed by Hermes.
+
+## 12. autofill-preferred-ultrafast-typing
+Typing must prefer autofill replication or, if not possible, use simulated `keyboard.type(text, {delay: X})` maxing at 30ms between keystrokes.
+
+## 13. strict-identity-binding
+A specific credential (email) must always rigidly map to the exact same hardware fingerprint seed and proxy node across retries. Never randomize hardware profiles on retry loops for the same identity.
+
+## 14. strict-zombie-sweeping
+Any script that spawns a headless browser context must ensure its `--user-data-dir` maps to tracked temporary folders. The `clean:zombies` utility relies on UNIX `ps -axo` sweeps; untracked directories will permanently leak memory.
+
+## 15. strict-cashier-promotion-only
+Status classifications can only be promoted (e.g., moving from a soft success to a hard cashier-verified). Never write logic that demotes a success classification back to a failure state.
+
+## 16. strict-backend-clarity
+When referencing, debugging, or fixing the "stealth" backend, always explicitly remember that `stealth = camoufox`. The `stealth` backend relies entirely on the Camoufox browser binaries and API (`camoufox-js`), and the `cloak` backend utilizes `cloakbrowser`. Never attempt to inject `puppeteer-extra-plugin-stealth` into this project.
+
+## 17. strict-background-right-click-noise
+The automation must simulate human unpredictability by firing asynchronous, non-blocking right-clicks (context menu triggers) randomly across the viewport starting within the first 100ms of page load. These actions must NEVER block the main thread.
+
+## 18. strict-domcontentloaded-init
+Initial target page navigations must strictly rely on `domcontentloaded` instead of `networkidle`. This prevents infinite loading hangups caused by unresolving web sockets or external tracking beacons.
+
+## 19. strict-cookie-banner-arming
+All initial interactions must dynamically arm coordinate-based dismissal for cookie banners and promotional overlays via background MutationObservers, ensuring popups are swatted away without breaking the main execution flow.
+
+## 20. strict-email-denylist-isolation
+"Terminal-bad" outcomes (such as permanently disabled accounts) must aggressively write the identity to the localized CSV denylists. Future loops must rigidly respect these lists to instantly prune dead credentials.
+
+## 21. strict-spider-api-exhaustion
+When executing the Spider REST API fallback flow, the engine must methodically exhaust all designated fallback URLs sequentially before conceding an API-level failure.
+
+## 22. strict-bot-challenge-rotation
+Encountering explicit "Verify you are human" or Cloudflare Challenge screens must instantly throw a `BurnedFingerprintError`. This guarantees an immediate IP and hardware profile rotation.
+
+## 23. strict-drift-repair-escalation
+If native `.fill()` injection diverges from the evaluated text read-back, the engine must immediately escalate to deep brute-force repair cycles (native setter clears -> re-fill -> character injection), strictly bypassing simulated keystrokes.
+
+## 24. strict-golden-no-overhead
+To eliminate infrastructure overhead, AI verification and video recording MUST be forcibly disabled during the Golden Joe baseline review executions.
+
+## 25. strict-graceful-shutdown-hooks
+All standalone testing loops and backend controllers must implement a `process.once('SIGINT')` intercept hook to guarantee the automation engine halts cleanly and successfully cleans up active memory contexts.
+
+## 26. strict-defer-canonical-screenshot
+The canonical success screenshot must not be prematurely snapped on the login path payload. It must be strictly deferred until the dashboard or cashier root redirect successfully completes.
+
+## 27. strict-dashboard-websocket-sync
+Any configuration changes originating from the dashboard UI must instantly serialize to the persistent `ConfigStore` and broadcast via WebSocket to sync all active automation nodes identically.
+
+## 28. strict-multi-target-parallelism-ban
+When executing the Golden Joe Review or targeted singular debugging scripts, `parallelSiteTesting` must be strictly enforced to `false` to isolate variables.
+
+## 29. strict-truth-source-isolation
+All modifications to the explicit order of operations for form manipulation must reside strictly within `executeUnifiedLoginChoreography` inside `login-flow.ts`. Never distribute login injection logic across fragmented utility files.
+
+## 30. strict-mutation-submit-gate
+Never use static `setTimeout` to await form submission transitions. You must unconditionally utilize the `SubmitMutationObserver` to gate logic based on explicit DOM disappearance or URL mutations.
+
+## 31. strict-calibrated-cookie-dismissal
+Never use generic scanning or text search for "Accept All" buttons. Cookie dismissal must utilize a strictly targeted and calibrated coordinate-based/exact-selector approach tailored for the exact target site.
+
+## 32. strict-network-dom-settle
+The application must never begin the injection or automation sequence until both the DOM and Network layers have completely settled.
+
+## 33. strict-viewport-activation
+To accelerate cookie banner appearance, the automation must fire a random click anywhere on the viewport exactly as the page initially appears.
+
+## 34. strict-camoufox-context-preservation
+When using the Camoufox (`stealth`) backend, you MUST use the default context (`browser.contexts()[0]`). Do not attempt to force `browser.newContext()` to inject Playwright features like `recordVideo`. Doing so will hang or break Camoufox's deeply integrated stealth profiles. Accept that native Playwright `.webm` recording is technically impossible for Camoufox in this architecture.
+
+## 35. strict-css-zoom-fingerprint-protection
+If the user requests to scale, zoom, or resize the viewport visibility in headful mode, NEVER use Playwright's `page.setViewportSize()` or alter the `viewport: {width, height}` context options. This will fatally alter the `window.innerWidth`/`innerHeight` fingerprint. You must exclusively use `page.evaluate(() => { document.body.style.zoom = '...'; })` to scale the visual UI while protecting the underlying fingerprint math.
+
+## 36. strict-title-injection-tiling
+Never attempt to tile or position browser windows using Playwright launch args (e.g., `--window-position`) or raw PID matching. Window tiling MUST use the `document.title` injection method: inject a unique title string (e.g., `Automati_Tiling_...`), wait for the OS to register it, then scan `windowManager.getWindows()` for that title and call `setBounds()`. This works universally across both Chromium and Firefox/Camoufox backends. Falls back to the native C# `resizer.exe` helper when available.
+
+## 37. strict-zendriver-cdp-limitations
+Zendriver is executed entirely out-of-band via a standalone Python process and connected strictly via `chromium.connectOverCDP()`. Never attempt to pass Playwright `browserType.launch()` arguments or `recordVideo` configurations to Zendriver, as Playwright does not control its binary execution.
+
+## 38. strict-per-backend-auto-optimization
+When `autoOptimizePerBackend` is enabled (default), `BACKEND_OPTIMAL_SETTINGS` in `engine.ts` is the single authoritative source for all per-backend session configuration (httpCloak, stealthJS, osProfile, concurrencyWeight, recordVideo, fpStrategy, mutateOnRetry, cleanSession). The resolver function `resolveBackendSettings()` MUST be called for every session creation. Matrix values override global dashboard config for architectural constraint settings. Extended settings (osProfile, concurrencyWeight, etc.) are gated by the `autoOptimize` parameter so they can be disabled by the operator without affecting core stealth constraints.

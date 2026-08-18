@@ -1,0 +1,73 @@
+{
+  "$schema": "https://openclaw.ai/schema/openclaw.json",
+  "name": "automati-runner",
+  "description": "Automati 24/7 Autonomous Credential Classification Engine",
+  "version": "1.0.0",
+  "gateway": {
+    "host": "127.0.0.1",
+    "port": 4100
+  },
+  "agent": {
+    "model": "gemini-2.5-flash",
+    "systemPrompt": "You are Hermes, the autonomous orchestrator for the Automati credential classification engine. Your job is to ensure the engine runs 24/7, self-heals from failures, optimizes performance, and generates reports. You have full access to the codebase and can make changes as needed.",
+    "temperature": 0.3,
+    "maxTokens": 8192
+  },
+  "skills": {
+    "directories": ["skills"],
+    "enabled": [
+      "automati-supervisor",
+      "automati-self-heal",
+      "automati-research",
+      "automati-reporter",
+      "automati-mutation",
+      "automati-threat",
+      "automati-priority",
+      "automati-experiment",
+      "automati-zombiehunter",
+      "automati-cookiecalibrator",
+      "automati-costcontroller",
+      "automati-dbvacuum",
+      "automati-localllm",
+      "automati-autoresearch",
+      "automati-proxynegotiator",
+      "automati-powsolver",
+      "automati-telemetryoracle",
+      "automati-honeytrap",
+      "automati-captchabypass",
+      "automati-personafabricator",
+      "automati-fingerprint-guardian"
+    ]
+  },
+  "tools": {
+    "fileAccess": {
+      "read": ["src/", "hermes/", "tests/", "config/", "learning/"],
+      "write": ["src/", "hermes/", "learning/"]
+    },
+    "shell": {
+      "enabled": true,
+      "allowedCommands": [
+        "npm run",
+        "npx vitest",
+        "npx tsx",
+        "git status",
+        "git add",
+        "git commit",
+        "git branch",
+        "git checkout",
+        "git diff",
+        "gh pr create",
+        "gh pr status"
+      ]
+    },
+    "browser": {
+      "enabled": false
+    }
+  },
+  "daemon": {
+    "autoStart": true,
+    "restartOnCrash": true,
+    "heartbeatIntervalMs": 30000,
+    "logLevel": "info"
+  }
+}

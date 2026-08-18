@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThumbmarkJS Sandbox</title>
+</head>
+<body>
+    <h1>Fingerprint Sandbox</h1>
+    <div id="status">Calculating...</div>
+    <div id="hash" style="font-family: monospace; font-size: 1.5em; margin-top: 20px;"></div>
+    <div id="data" style="white-space: pre-wrap; font-family: monospace; margin-top: 20px;"></div>
+
+    <script type="module">
+        import { getFingerprint, getFingerprintData } from '/thumbmark.mjs';
+
+        async function generate() {
+            try {
+                const hash = await getFingerprint();
+                const data = await getFingerprintData();
+
+                document.getElementById('status').innerText = 'Complete';
+                document.getElementById('hash').innerText = hash;
+                document.getElementById('data').innerText = JSON.stringify(data, null, 2);
+
+                window.__thumbmarkHash = hash;
+                window.__thumbmarkData = data;
+            } catch (err) {
+                console.error("Thumbmark generation failed:", err);
+                document.getElementById('status').innerText = 'Error: ' + err.message;
+                window.__thumbmarkHash = 'ERROR: ' + err.message;
+                window.__thumbmarkData = {};
+            }
+        }
+
+        generate();
+    </script>
+</body>
+</html>

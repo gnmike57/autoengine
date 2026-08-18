@@ -1,0 +1,56 @@
+{
+  "runAt": "2026-08-04T18:39:23.887Z",
+  "totalTrials": 3,
+  "passed": 3,
+  "failed": 0,
+  "results": [
+    {
+      "label": "NO_ACCOUNT",
+      "outcome": "noaccount",
+      "expectedClass": "NO_ACCOUNT_CONFIRMED",
+      "actualClass": "NO_ACCOUNT_CONFIRMED",
+      "passed": true,
+      "invocationCount": 4,
+      "acceptedSubmitCount": 4,
+      "acceptedIncorrectCount": 4,
+      "reason": "four-invocation-envelope-with-three-accepted-incorrect-responses",
+      "videoPath": "/home/ubuntu/work/automation-engine/scripts/trial-output/no-account/trial.webm",
+      "evidencePath": "/home/ubuntu/work/automation-engine/scripts/trial-output/no-account/evidence.json",
+      "classificationPath": "/home/ubuntu/work/automation-engine/scripts/trial-output/no-account/classification.json",
+      "durationMs": 4221,
+      "loginFlowIssues": []
+    },
+    {
+      "label": "SUCCESS",
+      "outcome": "success",
+      "expectedClass": "SUCCESSFUL_LOGIN",
+      "actualClass": "SUCCESSFUL_LOGIN",
+      "passed": true,
+      "invocationCount": 1,
+      "acceptedSubmitCount": 1,
+      "acceptedIncorrectCount": 0,
+      "reason": "terminal-success",
+      "videoPath": "/home/ubuntu/work/automation-engine/scripts/trial-output/success/trial.webm",
+      "evidencePath": "/home/ubuntu/work/automation-engine/scripts/trial-output/success/evidence.json",
+      "classificationPath": "/home/ubuntu/work/automation-engine/scripts/trial-output/success/classification.json",
+      "durationMs": 1641,
+      "loginFlowIssues": []
+    },
+    {
+      "label": "TEMP_DISABLED",
+      "outcome": "tempdisabled",
+      "expectedClass": "TEMP_DISABLED_ACCOUNT_EXISTS",
+      "actualClass": "TEMP_DISABLED_ACCOUNT_EXISTS",
+      "passed": true,
+      "invocationCount": 1,
+      "acceptedSubmitCount": 1,
+      "acceptedIncorrectCount": 0,
+      "reason": "terminal-temp_disabled",
+      "videoPath": "/home/ubuntu/work/automation-engine/scripts/trial-output/temp-disabled/trial.webm",
+      "evidencePath": "/home/ubuntu/work/automation-engine/scripts/trial-output/temp-disabled/evidence.json",
+      "classificationPath": "/home/ubuntu/work/automation-engine/scripts/trial-output/temp-disabled/classification.json",
+      "durationMs": 1549,
+      "loginFlowIssues": []
+    }
+  ]
+}

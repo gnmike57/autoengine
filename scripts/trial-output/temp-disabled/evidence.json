@@ -1,0 +1,24 @@
+[
+  {
+    "runId": "trial-TEMP_DISABLED-1785868763667",
+    "attemptId": "inv-1",
+    "invocationIndex": 1,
+    "variation": "locator_click",
+    "invoked": true,
+    "actionCount": 1,
+    "actionKind": "locator",
+    "domMutation": true,
+    "networkActivity": false,
+    "formStateChanged": true,
+    "responseObserved": true,
+    "responseClass": "temp_disabled",
+    "evidence": "  Sign In\nYour account has been temporarily locked due to too many failed attempts. Please try again in 30 minutes.",
+    "accepted": true,
+    "acceptanceSignalCount": 3,
+    "acceptanceSignals": [
+      "dom_mutation",
+      "form_state_changed",
+      "response_observed"
+    ]
+  }
+]

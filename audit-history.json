@@ -1,0 +1,3820 @@
+[
+  {
+    "round": 1,
+    "timestamp": "2026-06-04T22:59:27.979Z",
+    "backends": [
+      {
+        "backend": "stealth",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 94416,
+        "internalScore": 11
+      },
+      {
+        "backend": "stealth-httpcloak",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 94346,
+        "internalScore": 11
+      },
+      {
+        "backend": "cloak-headless",
+        "fpjsHash": "e419e30effe498ad680bf7db302fc19f",
+        "thumbmarkHash": "e9821440cb5dd7e12854f0d79a9201cb",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 8,
+          "deviceMemory": 32,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "147"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "147"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1,
+          "timezone": "Australia/Sydney",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.5,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 16769,
+        "internalScore": 0
+      },
+      {
+        "backend": "cloak-headless-nocloak",
+        "fpjsHash": "e250b93817577c3308613a835a084b9b",
+        "thumbmarkHash": "a19b0faee43c3df2f5702ab144970840",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 16,
+          "deviceMemory": 8,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "147"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "147"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1.5,
+          "timezone": "Australia/Sydney",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.55,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 16794,
+        "internalScore": 0
+      },
+      {
+        "backend": "zendriver",
+        "fpjsHash": "701fa2b54b7aa0fae2a93de2c6506c00",
+        "thumbmarkHash": "3ec24084ee45760515c17f95a6908092",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "MacIntel",
+          "vendor": "Google Inc.",
+          "language": "en-US",
+          "languages": [
+            "en-US"
+          ],
+          "hardwareConcurrency": 12,
+          "deviceMemory": 32,
+          "maxTouchPoints": 0,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Brave",
+                "version": "143"
+              },
+              {
+                "brand": "Chromium",
+                "version": "143"
+              },
+              {
+                "brand": "Not A(Brand",
+                "version": "24"
+              }
+            ],
+            "mobile": false,
+            "platform": "macOS"
+          },
+          "screen": {
+            "width": 1512,
+            "height": 982,
+            "availWidth": 1512,
+            "availHeight": 891,
+            "colorDepth": 30,
+            "pixelDepth": 30,
+            "availTop": 33,
+            "availLeft": 0
+          },
+          "innerWidth": 500,
+          "innerHeight": 2,
+          "outerWidth": 1512,
+          "outerHeight": 872,
+          "devicePixelRatio": 2,
+          "timezone": "Australia/Melbourne",
+          "timezoneOffset": -600,
+          "webgl": {
+            "vendor": "Google Inc. (Apple)",
+            "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M2, Unspecified Version)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 0,
+          "voiceNames": [],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.7,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "outerWidth-innerWidth=1012 (suspicious)"
+          ],
+          "score": 1
+        },
+        "durationMs": 14163,
+        "internalScore": 8
+      }
+    ],
+    "bestScore": 0,
+    "worstScore": 11,
+    "avgScore": 6,
+    "uniqueFpjsHashes": 3,
+    "uniqueThumbmarkHashes": 3,
+    "allCoherent": false
+  },
+  {
+    "round": 2,
+    "timestamp": "2026-06-04T23:01:02.580Z",
+    "backends": [
+      {
+        "backend": "stealth",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 89592,
+        "internalScore": 11
+      },
+      {
+        "backend": "stealth-httpcloak",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 88911,
+        "internalScore": 11
+      },
+      {
+        "backend": "cloak-headless",
+        "fpjsHash": "585bf8d11fbd389610852d81100bfa88",
+        "thumbmarkHash": "c646062135ef18dbc78ef0a72a5abeab",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 6,
+          "deviceMemory": 16,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "145"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "145"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 2,
+          "timezone": "Australia/Sydney",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.75,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 12827,
+        "internalScore": 0
+      },
+      {
+        "backend": "cloak-headless-nocloak",
+        "fpjsHash": "f1ce0139dc5ec2898eeee4ababdabe00",
+        "thumbmarkHash": "1106033069470335c3f432562e066452",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 16,
+          "deviceMemory": 8,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "147"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "147"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1.25,
+          "timezone": "Australia/Melbourne",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.55,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 11995,
+        "internalScore": 0
+      },
+      {
+        "backend": "zendriver",
+        "fpjsHash": "b6b186f0ca1c7ab9c5bc330d1e67c14d",
+        "thumbmarkHash": "18747fca87635491bbccdcbaf5dae1ba",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+          "platform": "MacIntel",
+          "vendor": "Google Inc.",
+          "language": "en-US",
+          "languages": [
+            "en-US"
+          ],
+          "hardwareConcurrency": 12,
+          "deviceMemory": 32,
+          "maxTouchPoints": 0,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not(A:Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "144"
+              },
+              {
+                "brand": "Brave",
+                "version": "144"
+              }
+            ],
+            "mobile": false,
+            "platform": "macOS"
+          },
+          "screen": {
+            "width": 1440,
+            "height": 900,
+            "availWidth": 1440,
+            "availHeight": 900,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 500,
+          "innerHeight": 2,
+          "outerWidth": 1050,
+          "outerHeight": 880,
+          "devicePixelRatio": 1,
+          "timezone": "Australia/Brisbane",
+          "timezoneOffset": -600,
+          "webgl": {
+            "vendor": "Google Inc. (AMD)",
+            "renderer": "ANGLE (AMD, ANGLE Metal Renderer: AMD Radeon Pro 570, Unspecified Version)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 0,
+          "voiceNames": [],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.75,
+            "rtt": 150
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "outerWidth-innerWidth=550 (suspicious)"
+          ],
+          "score": 1
+        },
+        "durationMs": 14009,
+        "internalScore": 8
+      }
+    ],
+    "bestScore": 0,
+    "worstScore": 11,
+    "avgScore": 6,
+    "uniqueFpjsHashes": 3,
+    "uniqueThumbmarkHashes": 3,
+    "allCoherent": false
+  },
+  {
+    "round": 3,
+    "timestamp": "2026-06-04T23:02:38.869Z",
+    "backends": [
+      {
+        "backend": "stealth",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 91274,
+        "internalScore": 11
+      },
+      {
+        "backend": "stealth-httpcloak",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 86757,
+        "internalScore": 11
+      },
+      {
+        "backend": "cloak-headless",
+        "fpjsHash": "66e135e4b13344cbc7b4899b35a6acdb",
+        "thumbmarkHash": "c0616bac7125e174657e51c4e2b21d1a",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 4,
+          "deviceMemory": 8,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "146"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "146"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1,
+          "timezone": "Australia/Brisbane",
+          "timezoneOffset": -600,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.45,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 10827,
+        "internalScore": 0
+      },
+      {
+        "backend": "cloak-headless-nocloak",
+        "fpjsHash": "e2e407bb3127941f0a00ec0f7ef52abb",
+        "thumbmarkHash": "2711fd7192c5284bfc2fa1c0f56ec169",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 4,
+          "deviceMemory": 32,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "145"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "145"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1.5,
+          "timezone": "Australia/Melbourne",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.65,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 10532,
+        "internalScore": 0
+      },
+      {
+        "backend": "zendriver",
+        "fpjsHash": "b9abc2ea98c85d8dcbb36212d66116a7",
+        "thumbmarkHash": "c522f5efc0b7052c6426db381de409cd",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+          "platform": "MacIntel",
+          "vendor": "Google Inc.",
+          "language": "en-US",
+          "languages": [
+            "en-US"
+          ],
+          "hardwareConcurrency": 12,
+          "deviceMemory": 32,
+          "maxTouchPoints": 0,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Chromium",
+                "version": "140"
+              },
+              {
+                "brand": "Not=A?Brand",
+                "version": "24"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "140"
+              }
+            ],
+            "mobile": false,
+            "platform": "macOS"
+          },
+          "screen": {
+            "width": 1440,
+            "height": 900,
+            "availWidth": 1440,
+            "availHeight": 900,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 500,
+          "innerHeight": 2,
+          "outerWidth": 1050,
+          "outerHeight": 880,
+          "devicePixelRatio": 1,
+          "timezone": "Australia/Sydney",
+          "timezoneOffset": -600,
+          "webgl": {
+            "vendor": "Google Inc. (Google)",
+            "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 0,
+          "voiceNames": [],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.85,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "outerWidth-innerWidth=550 (suspicious)",
+            "SwiftShader GPU (headless indicator)"
+          ],
+          "score": 2
+        },
+        "durationMs": 12640,
+        "internalScore": 21
+      }
+    ],
+    "bestScore": 0,
+    "worstScore": 21,
+    "avgScore": 9,
+    "uniqueFpjsHashes": 3,
+    "uniqueThumbmarkHashes": 3,
+    "allCoherent": false
+  },
+  {
+    "round": 4,
+    "timestamp": "2026-06-04T23:04:32.795Z",
+    "backends": [
+      {
+        "backend": "stealth",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 108919,
+        "internalScore": 11
+      },
+      {
+        "backend": "stealth-httpcloak",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 92874,
+        "internalScore": 11
+      },
+      {
+        "backend": "cloak-headless",
+        "fpjsHash": "febf02820bf3e42c047923b529e0c1b6",
+        "thumbmarkHash": "abaa7b71c219925faa44128adc584d1b",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 16,
+          "deviceMemory": 8,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "147"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "147"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1.5,
+          "timezone": "Australia/Adelaide",
+          "timezoneOffset": -630,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.75,
+            "rtt": 150
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 15066,
+        "internalScore": 0
+      },
+      {
+        "backend": "cloak-headless-nocloak",
+        "fpjsHash": "1a996b55d9250843b0c8f4d296cab9d3",
+        "thumbmarkHash": "a90d045a1138bbe5082ad374a228eed1",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 8,
+          "deviceMemory": 32,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "147"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "147"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1,
+          "timezone": "Australia/Sydney",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.65,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 22840,
+        "internalScore": 0
+      },
+      {
+        "backend": "zendriver",
+        "fpjsHash": "0d69d6378ca37acab9eb7b97c32b2c67",
+        "thumbmarkHash": "4df2305577cccdeb220c7f9d5c6f06b5",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "MacIntel",
+          "vendor": "Google Inc.",
+          "language": "en-US",
+          "languages": [
+            "en-US"
+          ],
+          "hardwareConcurrency": 12,
+          "deviceMemory": 32,
+          "maxTouchPoints": 0,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not:A-Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "145"
+              },
+              {
+                "brand": "Chromium",
+                "version": "145"
+              }
+            ],
+            "mobile": false,
+            "platform": "macOS"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1004,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 25,
+            "availLeft": 0
+          },
+          "innerWidth": 500,
+          "innerHeight": 2,
+          "outerWidth": 1920,
+          "outerHeight": 1004,
+          "devicePixelRatio": 1,
+          "timezone": "Australia/Melbourne",
+          "timezoneOffset": -600,
+          "webgl": {
+            "vendor": "Google Inc. (Intel)",
+            "renderer": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) Iris(TM) Plus Graphics, Unspecified Version)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 0,
+          "voiceNames": [],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.45,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "outerWidth-innerWidth=1420 (suspicious)"
+          ],
+          "score": 1
+        },
+        "durationMs": 12700,
+        "internalScore": 8
+      }
+    ],
+    "bestScore": 0,
+    "worstScore": 11,
+    "avgScore": 6,
+    "uniqueFpjsHashes": 3,
+    "uniqueThumbmarkHashes": 3,
+    "allCoherent": false
+  },
+  {
+    "round": 5,
+    "timestamp": "2026-06-04T23:06:11.088Z",
+    "backends": [
+      {
+        "backend": "stealth",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 93276,
+        "internalScore": 11
+      },
+      {
+        "backend": "stealth-httpcloak",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 90870,
+        "internalScore": 11
+      },
+      {
+        "backend": "cloak-headless",
+        "fpjsHash": "52c04f18ff267f31c8890c729f9cfee0",
+        "thumbmarkHash": "edc4913a4efdb9466f7e514a6eb4519c",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 12,
+          "deviceMemory": 8,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "145"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "145"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1,
+          "timezone": "Australia/Sydney",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.65,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 31150,
+        "internalScore": 0
+      },
+      {
+        "backend": "cloak-headless-nocloak",
+        "fpjsHash": "0200a4d5d0f5db1fdaa5cdbeeb13c118",
+        "thumbmarkHash": "dca052a02205a085f34ddb8af9aa9a2f",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 6,
+          "deviceMemory": 8,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "147"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "147"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1.25,
+          "timezone": "Australia/Sydney",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.6,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 29122,
+        "internalScore": 0
+      },
+      {
+        "backend": "zendriver",
+        "fpjsHash": "1f50f5ac09a9445e91d46a84e67a67be",
+        "thumbmarkHash": "4df2305577cccdeb220c7f9d5c6f06b5",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "MacIntel",
+          "vendor": "Google Inc.",
+          "language": "en-US",
+          "languages": [
+            "en-US"
+          ],
+          "hardwareConcurrency": 12,
+          "deviceMemory": 32,
+          "maxTouchPoints": 0,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not:A-Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "145"
+              },
+              {
+                "brand": "Chromium",
+                "version": "145"
+              }
+            ],
+            "mobile": false,
+            "platform": "macOS"
+          },
+          "screen": {
+            "width": 1680,
+            "height": 1050,
+            "availWidth": 1680,
+            "availHeight": 1025,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 25,
+            "availLeft": 0
+          },
+          "innerWidth": 500,
+          "innerHeight": 2,
+          "outerWidth": 1680,
+          "outerHeight": 1025,
+          "devicePixelRatio": 2,
+          "timezone": "Australia/Melbourne",
+          "timezoneOffset": -600,
+          "webgl": {
+            "vendor": "Google Inc. (Apple)",
+            "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Max, Unspecified Version)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 0,
+          "voiceNames": [],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.9,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "outerWidth-innerWidth=1180 (suspicious)"
+          ],
+          "score": 1
+        },
+        "durationMs": 12802,
+        "internalScore": 8
+      }
+    ],
+    "bestScore": 0,
+    "worstScore": 11,
+    "avgScore": 6,
+    "uniqueFpjsHashes": 3,
+    "uniqueThumbmarkHashes": 3,
+    "allCoherent": false
+  },
+  {
+    "round": 6,
+    "timestamp": "2026-06-04T23:07:51.583Z",
+    "backends": [
+      {
+        "backend": "stealth",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 95478,
+        "internalScore": 11
+      },
+      {
+        "backend": "stealth-httpcloak",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 86581,
+        "internalScore": 11
+      },
+      {
+        "backend": "cloak-headless",
+        "fpjsHash": "95b1afe2368476bd163a62fb30445e45",
+        "thumbmarkHash": "e8b6e67b4aa9da17af1e7bb90b041a47",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 6,
+          "deviceMemory": 8,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "147"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "147"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1,
+          "timezone": "Australia/Sydney",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.55,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 12210,
+        "internalScore": 0
+      },
+      {
+        "backend": "cloak-headless-nocloak",
+        "fpjsHash": "8fc73e7806b1497dc16524b0a214fd21",
+        "thumbmarkHash": "4c0fc74bf2b42c554ce24440fbdfa3c1",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 4,
+          "deviceMemory": 8,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "147"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "147"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1.25,
+          "timezone": "Australia/Melbourne",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.55,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 12075,
+        "internalScore": 0
+      },
+      {
+        "backend": "zendriver",
+        "fpjsHash": "f02c4ef6c9fdf312b85b86e0b0e92dfe",
+        "thumbmarkHash": "80141b5eac45dfdcbc109f5348b9d6e3",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+          "platform": "MacIntel",
+          "vendor": "Google Inc.",
+          "language": "en-US",
+          "languages": [
+            "en-US"
+          ],
+          "hardwareConcurrency": 12,
+          "deviceMemory": 32,
+          "maxTouchPoints": 0,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not(A:Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "144"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "144"
+              }
+            ],
+            "mobile": false,
+            "platform": "macOS"
+          },
+          "screen": {
+            "width": 1440,
+            "height": 900,
+            "availWidth": 1440,
+            "availHeight": 900,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 500,
+          "innerHeight": 2,
+          "outerWidth": 1050,
+          "outerHeight": 880,
+          "devicePixelRatio": 1,
+          "timezone": "Australia/Melbourne",
+          "timezoneOffset": -600,
+          "webgl": {
+            "vendor": "Google Inc. (Apple)",
+            "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1, Unspecified Version)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 0,
+          "voiceNames": [],
+          "connection": {
+            "effectiveType": "3g",
+            "downlink": 1.35,
+            "rtt": 350
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "outerWidth-innerWidth=550 (suspicious)"
+          ],
+          "score": 1
+        },
+        "durationMs": 13460,
+        "internalScore": 8
+      }
+    ],
+    "bestScore": 0,
+    "worstScore": 11,
+    "avgScore": 6,
+    "uniqueFpjsHashes": 3,
+    "uniqueThumbmarkHashes": 3,
+    "allCoherent": false
+  },
+  {
+    "round": 7,
+    "timestamp": "2026-06-04T23:09:30.951Z",
+    "backends": [
+      {
+        "backend": "stealth",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 94352,
+        "internalScore": 11
+      },
+      {
+        "backend": "stealth-httpcloak",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 90612,
+        "internalScore": 11
+      },
+      {
+        "backend": "cloak-headless",
+        "fpjsHash": "f942bbc55ad4fef1ac97be423f4e5476",
+        "thumbmarkHash": "f44a8a43a6fedde5e4043ff0acb8e7a3",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 4,
+          "deviceMemory": 8,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "146"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "146"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1,
+          "timezone": "Australia/Sydney",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.5,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 15847,
+        "internalScore": 0
+      },
+      {
+        "backend": "cloak-headless-nocloak",
+        "fpjsHash": "89340661d125ef819e7d53dc5c00929b",
+        "thumbmarkHash": "4112db3484c6d5081f420b66c1dabe2c",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 6,
+          "deviceMemory": 8,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "147"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "147"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1,
+          "timezone": "Australia/Sydney",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.5,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 15994,
+        "internalScore": 0
+      },
+      {
+        "backend": "zendriver",
+        "fpjsHash": "25034e3ed2a15d6c99db5b023c7435ee",
+        "thumbmarkHash": "80141b5eac45dfdcbc109f5348b9d6e3",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+          "platform": "MacIntel",
+          "vendor": "Google Inc.",
+          "language": "en-US",
+          "languages": [
+            "en-US"
+          ],
+          "hardwareConcurrency": 12,
+          "deviceMemory": 32,
+          "maxTouchPoints": 0,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not(A:Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "144"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "144"
+              }
+            ],
+            "mobile": false,
+            "platform": "macOS"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1080,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 1512
+          },
+          "innerWidth": 500,
+          "innerHeight": 2,
+          "outerWidth": 1920,
+          "outerHeight": 993,
+          "devicePixelRatio": 2,
+          "timezone": "Australia/Melbourne",
+          "timezoneOffset": -600,
+          "webgl": {
+            "vendor": "Google Inc. (Apple)",
+            "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M5, Unspecified Version)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 0,
+          "voiceNames": [],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.5,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "outerWidth-innerWidth=1420 (suspicious)"
+          ],
+          "score": 1
+        },
+        "durationMs": 15539,
+        "internalScore": 8
+      }
+    ],
+    "bestScore": 0,
+    "worstScore": 11,
+    "avgScore": 6,
+    "uniqueFpjsHashes": 3,
+    "uniqueThumbmarkHashes": 3,
+    "allCoherent": false
+  },
+  {
+    "round": 8,
+    "timestamp": "2026-06-04T23:11:07.401Z",
+    "backends": [
+      {
+        "backend": "stealth",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 86481,
+        "internalScore": 11
+      },
+      {
+        "backend": "stealth-httpcloak",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 91433,
+        "internalScore": 11
+      },
+      {
+        "backend": "cloak-headless",
+        "fpjsHash": "512aa3afbde1b46265f2f124a924a94b",
+        "thumbmarkHash": "ae9a7ef87ae856b8cba32ad047978473",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 12,
+          "deviceMemory": 16,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "147"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "147"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1,
+          "timezone": "Australia/Melbourne",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.45,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 14508,
+        "internalScore": 0
+      },
+      {
+        "backend": "cloak-headless-nocloak",
+        "fpjsHash": "49459034d64e1b2eecd2df4a2267ce9c",
+        "thumbmarkHash": "59d86609f3f80260f8647a63e5927f44",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 6,
+          "deviceMemory": 16,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "147"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "147"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1,
+          "timezone": "Australia/Sydney",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.5,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 13546,
+        "internalScore": 0
+      },
+      {
+        "backend": "zendriver",
+        "fpjsHash": "ab3276e7f815b9fe7e6a8091915f268c",
+        "thumbmarkHash": "fcf96533af89ef73b0e08770bc563f44",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+          "platform": "MacIntel",
+          "vendor": "Google Inc.",
+          "language": "en-US",
+          "languages": [
+            "en-US"
+          ],
+          "hardwareConcurrency": 12,
+          "deviceMemory": 32,
+          "maxTouchPoints": 0,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not:A-Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Brave",
+                "version": "145"
+              },
+              {
+                "brand": "Chromium",
+                "version": "145"
+              }
+            ],
+            "mobile": false,
+            "platform": "macOS"
+          },
+          "screen": {
+            "width": 1680,
+            "height": 1050,
+            "availWidth": 1680,
+            "availHeight": 1050,
+            "colorDepth": 30,
+            "pixelDepth": 30,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 500,
+          "innerHeight": 2,
+          "outerWidth": 1518,
+          "outerHeight": 837,
+          "devicePixelRatio": 2,
+          "timezone": "Australia/Sydney",
+          "timezoneOffset": -600,
+          "webgl": {
+            "vendor": "Google Inc. (Intel)",
+            "renderer": "ANGLE (Intel, ANGLE Metal Renderer: Intel(R) UHD Graphics 630, Unspecified Version)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 0,
+          "voiceNames": [],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.5,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "outerWidth-innerWidth=1018 (suspicious)"
+          ],
+          "score": 1
+        },
+        "durationMs": 13004,
+        "internalScore": 8
+      }
+    ],
+    "bestScore": 0,
+    "worstScore": 11,
+    "avgScore": 6,
+    "uniqueFpjsHashes": 3,
+    "uniqueThumbmarkHashes": 3,
+    "allCoherent": false
+  },
+  {
+    "round": 9,
+    "timestamp": "2026-06-04T23:13:02.862Z",
+    "backends": [
+      {
+        "backend": "stealth",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 86738,
+        "internalScore": 11
+      },
+      {
+        "backend": "stealth-httpcloak",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 110443,
+        "internalScore": 11
+      },
+      {
+        "backend": "cloak-headless",
+        "fpjsHash": "8d14c73d6c1bdf968170bc22541712e0",
+        "thumbmarkHash": "ba7f347249262b27750aef447a2aac23",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 12,
+          "deviceMemory": 8,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "147"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "147"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1.25,
+          "timezone": "Australia/Melbourne",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.5,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 18354,
+        "internalScore": 0
+      },
+      {
+        "backend": "cloak-headless-nocloak",
+        "fpjsHash": "e8deabc2fb2a76ec75d2fcf77d908fe3",
+        "thumbmarkHash": "a09cdaa27da26fc03dd3e637d1c138b5",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 12,
+          "deviceMemory": 16,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "147"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "147"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1,
+          "timezone": "Australia/Sydney",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.5,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 13478,
+        "internalScore": 0
+      },
+      {
+        "backend": "zendriver",
+        "fpjsHash": "6814dc25f63fdd660f4be48148d9e492",
+        "thumbmarkHash": "dd4f4893eaaec415efc6415d36f413cf",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+          "platform": "MacIntel",
+          "vendor": "Google Inc.",
+          "language": "en-US",
+          "languages": [
+            "en-US"
+          ],
+          "hardwareConcurrency": 12,
+          "deviceMemory": 32,
+          "maxTouchPoints": 0,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not(A:Brand",
+                "version": "8"
+              },
+              {
+                "brand": "Chromium",
+                "version": "144"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "144"
+              }
+            ],
+            "mobile": false,
+            "platform": "macOS"
+          },
+          "screen": {
+            "width": 1728,
+            "height": 1117,
+            "availWidth": 1728,
+            "availHeight": 1014,
+            "colorDepth": 30,
+            "pixelDepth": 30,
+            "availTop": 33,
+            "availLeft": 0
+          },
+          "innerWidth": 500,
+          "innerHeight": 2,
+          "outerWidth": 1728,
+          "outerHeight": 1014,
+          "devicePixelRatio": 2,
+          "timezone": "Australia/Melbourne",
+          "timezoneOffset": -600,
+          "webgl": {
+            "vendor": "Google Inc. (Apple)",
+            "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 0,
+          "voiceNames": [],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.7,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "outerWidth-innerWidth=1228 (suspicious)"
+          ],
+          "score": 1
+        },
+        "durationMs": 16074,
+        "internalScore": 8
+      }
+    ],
+    "bestScore": 0,
+    "worstScore": 11,
+    "avgScore": 6,
+    "uniqueFpjsHashes": 3,
+    "uniqueThumbmarkHashes": 3,
+    "allCoherent": false
+  },
+  {
+    "round": 10,
+    "timestamp": "2026-06-04T23:14:42.673Z",
+    "backends": [
+      {
+        "backend": "stealth",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 89809,
+        "internalScore": 11
+      },
+      {
+        "backend": "stealth-httpcloak",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 94787,
+        "internalScore": 11
+      },
+      {
+        "backend": "cloak-headless",
+        "fpjsHash": "081b6d8939a59742192f84d96be00a76",
+        "thumbmarkHash": "18354a61bc021f5e0f06e72d18da9d94",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 12,
+          "deviceMemory": 8,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "147"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "147"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1,
+          "timezone": "Australia/Brisbane",
+          "timezoneOffset": -600,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.6,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 12202,
+        "internalScore": 0
+      },
+      {
+        "backend": "cloak-headless-nocloak",
+        "fpjsHash": "b5ad25408d72c09ecf5c1c84907e7142",
+        "thumbmarkHash": "1d8911f61e36cebabe0293f7fcba3db2",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 4,
+          "deviceMemory": 16,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "145"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "145"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1.5,
+          "timezone": "Australia/Sydney",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.45,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 11962,
+        "internalScore": 0
+      },
+      {
+        "backend": "zendriver",
+        "fpjsHash": "4c489eb343a5debd6a0e0a35c846a48e",
+        "thumbmarkHash": "f958e32c23ea94a5a7719f7b66bf6333",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "MacIntel",
+          "vendor": "Google Inc.",
+          "language": "en-US",
+          "languages": [
+            "en-US"
+          ],
+          "hardwareConcurrency": 12,
+          "deviceMemory": 32,
+          "maxTouchPoints": 0,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Google Chrome",
+                "version": "143"
+              },
+              {
+                "brand": "Chromium",
+                "version": "143"
+              },
+              {
+                "brand": "Not A(Brand",
+                "version": "24"
+              }
+            ],
+            "mobile": false,
+            "platform": "macOS"
+          },
+          "screen": {
+            "width": 1680,
+            "height": 1050,
+            "availWidth": 1680,
+            "availHeight": 964,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 25,
+            "availLeft": 0
+          },
+          "innerWidth": 500,
+          "innerHeight": 2,
+          "outerWidth": 814,
+          "outerHeight": 948,
+          "devicePixelRatio": 2,
+          "timezone": "Australia/Sydney",
+          "timezoneOffset": -600,
+          "webgl": {
+            "vendor": "Google Inc. (Apple)",
+            "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M2 Max, Unspecified Version)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 0,
+          "voiceNames": [],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.55,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "outerWidth-innerWidth=314 (suspicious)"
+          ],
+          "score": 1
+        },
+        "durationMs": 14944,
+        "internalScore": 8
+      }
+    ],
+    "bestScore": 0,
+    "worstScore": 11,
+    "avgScore": 6,
+    "uniqueFpjsHashes": 3,
+    "uniqueThumbmarkHashes": 3,
+    "allCoherent": false
+  },
+  {
+    "round": 11,
+    "timestamp": "2026-06-04T23:16:21.566Z",
+    "backends": [
+      {
+        "backend": "stealth",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 89802,
+        "internalScore": 11
+      },
+      {
+        "backend": "stealth-httpcloak",
+        "fpjsHash": null,
+        "thumbmarkHash": null,
+        "signals": {},
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "No coherence data"
+          ],
+          "score": 99
+        },
+        "durationMs": 93875,
+        "internalScore": 11
+      },
+      {
+        "backend": "cloak-headless",
+        "fpjsHash": "0999a55853595a3e3356fe8e98d36536",
+        "thumbmarkHash": "2845021d4631e0d68ef2eec33bba15b8",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 6,
+          "deviceMemory": 32,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "147"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "147"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1,
+          "timezone": "Australia/Sydney",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.6,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 12852,
+        "internalScore": 0
+      },
+      {
+        "backend": "cloak-headless-nocloak",
+        "fpjsHash": "1a7106230f4ea1ad4b4e1d7a8ab3cad2",
+        "thumbmarkHash": "4703cf2454fbeb3b2df3818b685700f3",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "Win32",
+          "vendor": "Google Inc.",
+          "language": "en-AU",
+          "languages": [
+            "en-AU"
+          ],
+          "hardwareConcurrency": 4,
+          "deviceMemory": 8,
+          "maxTouchPoints": 10,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not;A=Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Chromium",
+                "version": "146"
+              },
+              {
+                "brand": "Google Chrome",
+                "version": "146"
+              }
+            ],
+            "mobile": false,
+            "platform": "Windows"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1920,
+            "availHeight": 1032,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 0,
+            "availLeft": 0
+          },
+          "innerWidth": 800,
+          "innerHeight": 600,
+          "outerWidth": 816,
+          "outerHeight": 688,
+          "devicePixelRatio": 1,
+          "timezone": "Australia/Sydney",
+          "timezoneOffset": -660,
+          "webgl": {
+            "vendor": "Google Inc. (NVIDIA)",
+            "renderer": "ANGLE (NVIDIA, NVIDIA GeForce GTX 1080 Direct3D11 vs_5_0 ps_5_0, D3D11)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 6,
+          "voiceNames": [
+            "Microsoft David - English (United States)",
+            "Microsoft Zira - English (United States)",
+            "Microsoft Mark - English (United States)",
+            "Google US English",
+            "Google UK English Female"
+          ],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.55,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": true,
+          "issues": [],
+          "score": 0
+        },
+        "durationMs": 12894,
+        "internalScore": 0
+      },
+      {
+        "backend": "zendriver",
+        "fpjsHash": "d69a5cc69ee9ad559951ea2cb539b5e7",
+        "thumbmarkHash": "f958e32c23ea94a5a7719f7b66bf6333",
+        "signals": {
+          "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+          "platform": "MacIntel",
+          "vendor": "Google Inc.",
+          "language": "en-US",
+          "languages": [
+            "en-US"
+          ],
+          "hardwareConcurrency": 12,
+          "deviceMemory": 32,
+          "maxTouchPoints": 0,
+          "webdriver": false,
+          "pdfViewerEnabled": true,
+          "cookieEnabled": true,
+          "doNotTrack": null,
+          "uaData": {
+            "brands": [
+              {
+                "brand": "Not:A-Brand",
+                "version": "99"
+              },
+              {
+                "brand": "Brave",
+                "version": "145"
+              },
+              {
+                "brand": "Chromium",
+                "version": "145"
+              }
+            ],
+            "mobile": false,
+            "platform": "macOS"
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080,
+            "availWidth": 1875,
+            "availHeight": 1055,
+            "colorDepth": 24,
+            "pixelDepth": 24,
+            "availTop": 25,
+            "availLeft": 0
+          },
+          "innerWidth": 500,
+          "innerHeight": 2,
+          "outerWidth": 1875,
+          "outerHeight": 1055,
+          "devicePixelRatio": 2,
+          "timezone": "Australia/Sydney",
+          "timezoneOffset": -600,
+          "webgl": {
+            "vendor": "Google Inc. (Apple)",
+            "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+            "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+            "shadingLang": "WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)"
+          },
+          "canvasHash": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAyCAYAAAAZUZ",
+          "audioContextSupported": true,
+          "pluginCount": 5,
+          "pluginNames": [
+            "PDF Viewer",
+            "Chrome PDF Viewer",
+            "Chromium PDF Viewer",
+            "Microsoft Edge PDF Viewer",
+            "WebKit built-in PDF"
+          ],
+          "batteryApiExists": true,
+          "permissionsApiExists": true,
+          "webrtcSupported": true,
+          "chromeObj": true,
+          "chromeRuntime": false,
+          "playwrightTrace": false,
+          "seleniumTrace": false,
+          "cdcTrace": false,
+          "wdTrace": false,
+          "voiceCount": 0,
+          "voiceNames": [],
+          "connection": {
+            "effectiveType": "4g",
+            "downlink": 1.7,
+            "rtt": 100
+          },
+          "indexedDBAvailable": true,
+          "storageEstimateAvailable": true
+        },
+        "coherence": {
+          "coherent": false,
+          "issues": [
+            "outerWidth-innerWidth=1375 (suspicious)"
+          ],
+          "score": 1
+        },
+        "durationMs": 18638,
+        "internalScore": 8
+      }
+    ],
+    "bestScore": 0,
+    "worstScore": 11,
+    "avgScore": 6,
+    "uniqueFpjsHashes": 3,
+    "uniqueThumbmarkHashes": 3,
+    "allCoherent": false
+  }
+]

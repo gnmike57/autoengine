@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <!-- Gray gradient for inactive state -->
+    <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6B7280"/>
+      <stop offset="50%" stop-color="#9CA3AF"/>
+      <stop offset="100%" stop-color="#D1D5DB"/>
+    </linearGradient>
+
+    <!-- Darker gray for depth -->
+    <linearGradient id="shieldDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4B5563"/>
+      <stop offset="100%" stop-color="#6B7280"/>
+    </linearGradient>
+
+    <!-- Light gray for fingerprint -->
+    <linearGradient id="fingerprintGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E5E7EB"/>
+      <stop offset="100%" stop-color="#D1D5DB"/>
+    </linearGradient>
+
+    <!-- Glow effect -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#4B5563" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Shield shape -->
+  <path d="M64 8 L112 28 L112 60 C112 90 90 110 64 120 C38 110 16 90 16 60 L16 28 Z"
+        fill="url(#shieldGradient)"
+        filter="url(#glow)"/>
+
+  <!-- Shield inner border/depth -->
+  <path d="M64 16 L104 33 L104 60 C104 85 85 102 64 110 C43 102 24 85 24 60 L24 33 Z"
+        fill="url(#shieldDark)"
+        opacity="0.3"/>
+
+  <!-- Fingerprint pattern - concentric arcs -->
+  <g fill="none" stroke="url(#fingerprintGradient)" stroke-width="3" stroke-linecap="round" opacity="0.95">
+    <!-- Center dot -->
+    <circle cx="64" cy="68" r="4" fill="#E5E7EB"/>
+
+    <!-- Inner arc -->
+    <path d="M52 68 Q52 56 64 56 Q76 56 76 68"/>
+
+    <!-- Middle arc -->
+    <path d="M44 72 Q44 50 64 50 Q84 50 84 72"/>
+
+    <!-- Outer arc -->
+    <path d="M36 78 Q36 44 64 44 Q92 44 92 78"/>
+
+    <!-- Left fingerprint lines -->
+    <path d="M40 85 Q35 65 48 52"/>
+
+    <!-- Right fingerprint lines -->
+    <path d="M88 85 Q93 65 80 52"/>
+  </g>
+
+  <!-- X mark (inactive/off symbol) -->
+  <g transform="translate(75, 90)">
+    <circle cx="12" cy="12" r="14" fill="#6B7280"/>
+    <path d="M7 7 L17 17 M17 7 L7 17"
+          fill="none"
+          stroke="white"
+          stroke-width="3"
+          stroke-linecap="round"/>
+  </g>
+</svg>

@@ -1,0 +1,13 @@
+{
+  "outcome": "NO_ACCOUNT_CONFIRMED",
+  "invocationCount": 4,
+  "acceptedSubmitCount": 4,
+  "acceptedIncorrectCount": 4,
+  "reason": "four-invocation-envelope-with-three-accepted-incorrect-responses",
+  "label": "NO_ACCOUNT",
+  "expectedClass": "NO_ACCOUNT_CONFIRMED",
+  "passed": true,
+  "durationMs": 4221,
+  "loginFlowIssues": [],
+  "recordedAt": "2026-08-04T18:39:20.254Z"
+}

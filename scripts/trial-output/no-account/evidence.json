@@ -1,0 +1,87 @@
+[
+  {
+    "runId": "trial-NO_ACCOUNT-1785868757437",
+    "attemptId": "inv-1",
+    "invocationIndex": 1,
+    "variation": "locator_click",
+    "invoked": true,
+    "actionCount": 1,
+    "actionKind": "locator",
+    "domMutation": true,
+    "networkActivity": false,
+    "formStateChanged": true,
+    "responseObserved": true,
+    "responseClass": "incorrect",
+    "evidence": "  Sign In\nThere is no account associated with this email address.",
+    "accepted": true,
+    "acceptanceSignalCount": 3,
+    "acceptanceSignals": [
+      "dom_mutation",
+      "form_state_changed",
+      "response_observed"
+    ]
+  },
+  {
+    "runId": "trial-NO_ACCOUNT-1785868758299",
+    "attemptId": "inv-2",
+    "invocationIndex": 2,
+    "variation": "locator_click",
+    "invoked": true,
+    "actionCount": 1,
+    "actionKind": "locator",
+    "domMutation": true,
+    "networkActivity": false,
+    "formStateChanged": false,
+    "responseObserved": true,
+    "responseClass": "incorrect",
+    "evidence": "  Sign In\nThere is no account associated with this email address.",
+    "accepted": true,
+    "acceptanceSignalCount": 2,
+    "acceptanceSignals": [
+      "dom_mutation",
+      "response_observed"
+    ]
+  },
+  {
+    "runId": "trial-NO_ACCOUNT-1785868759166",
+    "attemptId": "inv-3",
+    "invocationIndex": 3,
+    "variation": "locator_click",
+    "invoked": true,
+    "actionCount": 1,
+    "actionKind": "locator",
+    "domMutation": true,
+    "networkActivity": false,
+    "formStateChanged": false,
+    "responseObserved": true,
+    "responseClass": "incorrect",
+    "evidence": "  Sign In\nThere is no account associated with this email address.",
+    "accepted": true,
+    "acceptanceSignalCount": 2,
+    "acceptanceSignals": [
+      "dom_mutation",
+      "response_observed"
+    ]
+  },
+  {
+    "runId": "trial-NO_ACCOUNT-1785868760033",
+    "attemptId": "inv-4",
+    "invocationIndex": 4,
+    "variation": "locator_click",
+    "invoked": true,
+    "actionCount": 1,
+    "actionKind": "locator",
+    "domMutation": true,
+    "networkActivity": false,
+    "formStateChanged": false,
+    "responseObserved": true,
+    "responseClass": "incorrect",
+    "evidence": "  Sign In\nThere is no account associated with this email address.",
+    "accepted": true,
+    "acceptanceSignalCount": 2,
+    "acceptanceSignals": [
+      "dom_mutation",
+      "response_observed"
+    ]
+  }
+]

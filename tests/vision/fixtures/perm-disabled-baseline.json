@@ -1,0 +1,8 @@
+{
+  "outcome": "permdisabled",
+  "domTrigger": "permdisabled",
+  "httpStatus": 200,
+  "recordedAt": "2026-08-12T17:19:54.356Z",
+  "engineVersion": "2.0.0",
+  "fixture": "perm-disabled-baseline.webm"
+}
