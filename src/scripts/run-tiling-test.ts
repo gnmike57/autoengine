@@ -1,3 +1,4 @@
+import path from "node:path";
 import { execSync } from 'child_process';
 
 import { createSession, type SessionOpts } from '../../backends/index.js';
@@ -55,8 +56,11 @@ async function run() {
     execSync('pkill -9 -f "firefox" || true');
     execSync('pkill -9 -f "Chromium" || true');
   } catch { /* ignore sweep errors */ }
-
-  process.exit(0);
 }
 
-run().catch(console.error);
+export { run as runTilingPhysicalTest };
+
+if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))) {
+  run().catch(console.error);
+}
+

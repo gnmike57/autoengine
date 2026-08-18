@@ -180,12 +180,13 @@ async function run() {
   for (let windows = 2; windows <= 8; windows++) {
     try {
       await runTestForWindowCount(windows, reportDir);
-    } catch (e: any) {
-      console.error(`Failed to run tiling test for ${windows} windows: ${e.message}`);
-    }
+    } catch { /* ignore */ }
   }
-
-  process.exit(0);
 }
 
-run().catch(console.error);
+export { runTestForWindowCount, run as runTilingOptimizer };
+
+if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))) {
+  run().catch(console.error);
+}
+

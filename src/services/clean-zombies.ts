@@ -8,6 +8,7 @@
  * inside the configured cloak-profile root, $TMPDIR/cloak-profiles, or the
  * repo root. The normal user Chrome is never targeted.
  */
+import path from "node:path";
 import { findOurOrphans, killOurOrphans, installGlobalCleanupHandlers } from "./process-cleaner.js";
 installGlobalCleanupHandlers();
 
@@ -32,8 +33,13 @@ async function main(): Promise<void> {
   if (r.survived > 0) process.exitCode = 1;
 }
 
-main().then(() => process.exit(process.exitCode ?? 0)).catch((err) => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  console.error("[clean-zombies] failed:", err?.message || err);
-  process.exit(1);
-});
+export { main as cleanZombiesMain };
+
+if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))) {
+  main().then(() => process.exit(process.exitCode ?? 0)).catch((err) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    console.error("[clean-zombies] failed:", err?.message || err);
+    process.exit(1);
+  });
+}
+

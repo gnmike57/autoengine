@@ -1,3 +1,4 @@
+import path from "node:path";
 import { createSession } from "../../backends/index.js";
 import { BrowserTiler, globalTiler } from "../../src/services/browser-tiler.js";
 import { execSync } from "child_process";
@@ -234,7 +235,11 @@ async function run() {
         }
     }
     await gracefulKill();
-    console.log(`Finished perfectly.`);
-    process.exit(0);
 }
-run().catch(console.error);
+
+export { getLayouts, run as runDynamicLayouts };
+
+if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))) {
+  run().catch(console.error);
+}
+

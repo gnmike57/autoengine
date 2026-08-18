@@ -134,4 +134,9 @@ async function main(): Promise<void> {
   log.info(DRY_RUN ? "dry run complete" : "hard reset complete");
 }
 
-main().catch((err: unknown) => { log.error(err instanceof Error ? err.message : String(err)); process.exit(1); });
+export { main as hardResetMain, resetProgressJson, profileRoots };
+
+if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))) {
+  main().catch((err: unknown) => { log.error(err instanceof Error ? err.message : String(err)); process.exit(1); });
+}
+

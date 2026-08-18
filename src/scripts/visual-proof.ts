@@ -1,3 +1,4 @@
+import path from "node:path";
 import { createSession } from "../../backends/index.js";
 import { execSync } from "child_process";
 
@@ -89,11 +90,18 @@ async function runVisualProof(numWindows: number) {
     await gracefulKill();
 }
 
-async function main() {
+async function main(): Promise<void> {
     const variations = [2, 4, 6, 8];
     for (const v of variations) {
         await runVisualProof(v);
         await new Promise(r => setTimeout(r, 3000));
     }
 }
-main().catch(console.error);
+
+export { runVisualProof, gracefulKill, main };
+
+if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))) {
+  main().catch(console.error);
+}
+
+

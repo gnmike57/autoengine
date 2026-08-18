@@ -1,3 +1,4 @@
+import path from "node:path";
 import { chromium, type Page } from "playwright-core";
 import { saveCoordinateMap, type SiteCoordinateMap } from "../intelligence/coordinate-mapper.js";
 import "dotenv/config";
@@ -78,4 +79,9 @@ async function main() {
   console.log("All calibrations complete.");
 }
 
-main().catch(console.error);
+export { runCalibration, getCenterPercentage };
+
+if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))) {
+  main().catch(console.error);
+}
+

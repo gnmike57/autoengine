@@ -132,5 +132,8 @@ async function runCalibration(url: string, siteName: string) {
   }
 }
 
-// Run for Joe Fortune immediately
-void runCalibration("https://www.joefortune.zone/login", "joefortune");
+export { runCalibration };
+
+if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))) {
+  void runCalibration("https://www.joefortune.zone/login", "joefortune");
+}

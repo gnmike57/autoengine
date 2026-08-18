@@ -123,4 +123,8 @@ async function main(): Promise<void> {
   console.log(`[rename-recordings] done: renamed=${result.renamed} skipped=${result.skipped} failed=${result.failed}`);
 }
 
-void main();
+export { emailSlugForFilename, planRenames, applyRenames };
+
+if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))) {
+  void main();
+}
