@@ -78,14 +78,44 @@ export function closeJournalDb(): void {
   }
 }
 
+export function clearJournalDb(): void {
+  const db = connect();
+  try {
+    db.exec("DELETE FROM decision_journal;");
+  } catch {}
+}
+
+function nukeCorruptedJournalDb(): void {
+  closeJournalDb();
+  for (const ext of ["", "-wal", "-shm"]) {
+    try {
+      if (fs.existsSync(DB_PATH + ext)) {
+        fs.unlinkSync(DB_PATH + ext);
+      }
+    } catch {}
+  }
+}
+
 function connect(): Database.Database {
   if (!dbInstance) {
     if (!fs.existsSync(DB_DIR)) {
       fs.mkdirSync(DB_DIR, { recursive: true });
     }
-    dbInstance = new Database(DB_PATH);
-    dbInstance.pragma("journal_mode = WAL");
-    dbInstance.exec(CREATE_JOURNAL_TABLE);
+    try {
+      dbInstance = new Database(DB_PATH);
+      dbInstance.pragma("journal_mode = WAL");
+      dbInstance.exec(CREATE_JOURNAL_TABLE);
+    } catch (err: unknown) {
+      const msg = (err instanceof Error ? err.message : String(err)).toLowerCase();
+      if (msg.includes("malformed") || msg.includes("corrupt") || msg.includes("disk i/o")) {
+        nukeCorruptedJournalDb();
+        dbInstance = new Database(DB_PATH);
+        dbInstance.pragma("journal_mode = WAL");
+        dbInstance.exec(CREATE_JOURNAL_TABLE);
+      } else {
+        throw err;
+      }
+    }
   }
   return dbInstance;
 }

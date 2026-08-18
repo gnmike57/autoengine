@@ -1,35 +1,21 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import fs from "node:fs";
-import path from "node:path";
 import {
   logDecision,
   getRecentDecisions,
   getDecisionsByType,
   getDecisionsInRange,
   getJournalStats,
-  closeJournalDb,
+  clearJournalDb,
   type LogDecisionOpts
 } from "../../src/hermes/decision-journal.js";
 
 describe("Hermes Decision Journal", () => {
-  const testDir = path.join(process.cwd(), "hermes");
-  const testDb = path.join(testDir, "hermes-learning.db");
-
-  function cleanDb() {
-    closeJournalDb();
-    if (fs.existsSync(testDb)) {
-      try {
-        fs.unlinkSync(testDb);
-      } catch {}
-    }
-  }
-
   beforeEach(() => {
-    cleanDb();
+    clearJournalDb();
   });
 
   afterEach(() => {
-    cleanDb();
+    clearJournalDb();
   });
 
   it("should record and retrieve decisions", () => {

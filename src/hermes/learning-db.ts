@@ -74,9 +74,9 @@ function connect(): Database.Database {
     sharedDb.pragma("journal_mode = WAL");
     sharedDb.exec(CREATE_TABLE);
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    if (msg.includes("malformed") || msg.includes("corrupt")) {
-      // WAL sidecars without parent DB — nuke and recreate
+    const msg = (err instanceof Error ? err.message : String(err)).toLowerCase();
+    if (msg.includes("malformed") || msg.includes("corrupt") || msg.includes("disk i/o")) {
+      // WAL sidecars or stale handle — nuke and recreate
       nukeCorruptedDb();
       sharedDb = new Database(DB_PATH);
       sharedDb.pragma("journal_mode = WAL");

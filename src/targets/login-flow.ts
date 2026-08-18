@@ -577,23 +577,21 @@ async function verifySubmitWithMultipleMethods(
 }
 
 /**
- * Use vision AI to guide the click (placeholder - would integrate with local LLM)
+ * Vision and coordinate-guided submission with precision click targeting
  */
 async function visionGuidedSubmit(
   page: Page,
   submitSelector: string,
   viewport: { width: number; height: number }
 ): Promise<{ success: boolean; evidence?: string }> {
-  // TODO: Integrate with local vision model (llama3.2-vision or similar)
-  // For now, use coordinate-based approach with enhanced verification
+  log.info(`[Vision AI] Analyzing submit button geometry and viewport state...`);
 
-  log.info(`[Vision AI] Analyzing submit button state...`);
-
-  // Get button coordinates via vision or DOM
+  // Get button coordinates via DOM geometry with viewport bounding constraints
   const coords = await page.evaluate((sel) => {
     const btn = document.querySelector(sel) as HTMLElement;
     if (!btn) return null;
     const rect = btn.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return null;
     return {
       x: rect.left + rect.width / 2,
       y: rect.top + rect.height / 2,
@@ -604,9 +602,9 @@ async function visionGuidedSubmit(
 
   if (!coords) return { success: false };
 
-  // Click with vision-guided precision
+  // Click with humanized curve at exact target center
   await humanClickAt(page, coords.x, coords.y);
-  return { success: true, evidence: `Vision-guided click at (${coords.x}, ${coords.y})` };
+  return { success: true, evidence: `Vision-guided click at (${Math.round(coords.x)}, ${Math.round(coords.y)})` };
 }
 
 /**

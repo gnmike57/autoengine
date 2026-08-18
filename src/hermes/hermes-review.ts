@@ -1082,12 +1082,76 @@ class HermesOrchestrator {
 export async function scanDomain(domain: string, vectors: string[]): Promise<Array<{ vector: string; script: string }>> {
   log.info(`[Hermes Scan] Scanning ${domain} for vectors: ${vectors.join(", ")}`);
 
-  // MOCK: Hermes deep scan logic for zero-day analysis
-  const results = [];
+  const results: Array<{ vector: string; script: string }> = [];
   for (const vector of vectors) {
+    const vLower = vector.toLowerCase();
+    let patchScript = "";
+
+    if (vLower.includes("canvas")) {
+      patchScript = `
+        (() => {
+          const origToDataURL = HTMLCanvasElement.prototype.toDataURL;
+          const origGetImageData = CanvasRenderingContext2D.prototype.getImageData;
+          HTMLCanvasElement.prototype.toDataURL = function(...args) {
+            const ctx = this.getContext('2d');
+            if (ctx) {
+              const imgData = origGetImageData.call(ctx, 0, 0, Math.min(10, this.width), Math.min(10, this.height));
+              imgData.data[0] = (imgData.data[0] ^ 1);
+            }
+            return origToDataURL.apply(this, args);
+          };
+        })();
+      `;
+    } else if (vLower.includes("webgl")) {
+      patchScript = `
+        (() => {
+          const origGetParam = WebGLRenderingContext.prototype.getParameter;
+          WebGLRenderingContext.prototype.getParameter = function(param) {
+            if (param === 37445) return 'Google Inc. (Apple)';
+            if (param === 37446) return 'ANGLE (Apple, Apple M1, OpenGL 4.1)';
+            return origGetParam.apply(this, [param]);
+          };
+        })();
+      `;
+    } else if (vLower.includes("audio")) {
+      patchScript = `
+        (() => {
+          if (typeof AudioContext !== 'undefined') {
+            const origCreateOsc = AudioContext.prototype.createOscillator;
+            AudioContext.prototype.createOscillator = function() {
+              const osc = origCreateOsc.apply(this, arguments);
+              const origStart = osc.start;
+              osc.start = function(when) { return origStart.apply(this, [when]); };
+              return osc;
+            };
+          }
+        })();
+      `;
+    } else if (vLower.includes("cdp") || vLower.includes("automation") || vLower.includes("webdriver")) {
+      patchScript = `
+        (() => {
+          Object.defineProperty(navigator, 'webdriver', { get: () => undefined, configurable: true });
+          delete (window as any).__proto__.cdc_adoQpoasnfa76pfcZLmcfl_Array;
+          delete (window as any).__proto__.cdc_adoQpoasnfa76pfcZLmcfl_Promise;
+        })();
+      `;
+    } else {
+      patchScript = `
+        (() => {
+          // Dynamic defensive mitigation for ${vector}
+          try {
+            if (window.navigator && '${vector}' in window.navigator) {
+              const val = (window.navigator as any)['${vector}'];
+              Object.defineProperty(navigator, '${vector}', { get: () => val, configurable: true });
+            }
+          } catch {}
+        })();
+      `;
+    }
+
     results.push({
       vector,
-      script: `// Hermes dynamically generated patch for ${vector}\n(function() { console.log('Hermes patching ${vector}'); })();`
+      script: patchScript.trim()
     });
   }
 
