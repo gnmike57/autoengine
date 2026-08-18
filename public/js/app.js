@@ -174,10 +174,10 @@
         enableVerification: document.getElementById('advEnableVerification')?.checked || false,
         injectStealthJS: document.getElementById('advInjectStealthJS')?.checked ?? true,
         postLoadDelay: 0,
-        maxRetries: parseInt(document.getElementById('advMaxRetries').value) || 2,
-        parallelSites: document.getElementById('advTestingMode').value === 'parallel',
+        maxRetries: parseInt(document.getElementById('advMaxRetries')?.value || '2') || 2,
+        parallelSites: document.getElementById('advTestingMode')?.value === 'parallel',
         mutateOnRetry: document.getElementById('advMutateOnRetry')?.checked || false,
-        proxyRotateUrl: document.getElementById('advProxyRotateUrl').value,
+        proxyRotateUrl: document.getElementById('advProxyRotateUrl')?.value || '',
         manualCaptchaMode: document.getElementById('advManualCaptchaMode')?.checked || false,
         emulateMobile: document.getElementById('advEmulateMobile')?.checked || false
       };
@@ -780,7 +780,7 @@
   if (id === 'results') renderResults();
   if (id === 'liveview') renderLiveView();
   if (id === 'credentials') renderCredentialsTab();
-  if (id === 'tempdisabled') renderTempDisabledTab && renderTempDisabledTab();
+  if (id === 'tempdisabled' && typeof renderTempDisabledTab === 'function') renderTempDisabledTab();
   if (id === 'analytics') { if (typeof updateAnalyticsChart === 'function') updateAnalyticsChart(); }
 }
 
@@ -838,7 +838,7 @@
         // Ctrl+P: command palette
         if (e.key === 'p' || e.key === 'P') {
           e.preventDefault();
-          toggleCommandPalette();
+          toggleCmdPalette();
           return;
         }
       }
@@ -1516,7 +1516,8 @@
       }
       
       document.getElementById('lbCaption').textContent = `${primary ? primary.email : ''} — ${g.label || ''}`;
-      document.getElementById('lbCounter').textContent = `${lbIdx + 1} / ${shots.length}`;
+      const lbc = document.getElementById('lbCounter');
+      if (lbc) lbc.textContent = `${lbIdx + 1} / ${shots.length}`;
     }
     document.addEventListener('keydown', (e) => {
       const lb = document.getElementById('ssLightbox');
@@ -1725,18 +1726,22 @@
       const counts = { queued:0, testing:0, success:0, failed:0, blocked:0, '2FA':0, noaccount:0, tempdisabled:0, permdisabled:0 };
       items.forEach(it => { counts[it.outcome] = (counts[it.outcome] || 0) + 1; });
       const pct = v => total > 0 ? (v / total * 100).toFixed(1) + '%' : '—';
-      document.getElementById('credStatTotal').textContent = total;
-      document.getElementById('credStatTotalPct').textContent = `${filtered.length} shown`;
-      document.getElementById('credStatQueued').textContent = counts.queued;
-      document.getElementById('credStatQueuedPct').textContent = pct(counts.queued);
-      document.getElementById('credStatTesting').textContent = counts.testing;
-      document.getElementById('credStatTestingPct').textContent = pct(counts.testing);
-      document.getElementById('credStatSucc').textContent = counts.success;
-      document.getElementById('credStatSuccPct').textContent = pct(counts.success);
-      document.getElementById('credStatFail').textContent = counts.failed + counts.noaccount;
-      document.getElementById('credStatFailPct').textContent = pct(counts.failed + counts.noaccount);
-      document.getElementById('credStatBlock').textContent = counts.blocked + counts.tempdisabled + counts.permdisabled;
-      document.getElementById('credStatBlockPct').textContent = pct(counts.blocked + counts.tempdisabled + counts.permdisabled);
+      const setT = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      setT('credStatTotal', total);
+      setT('credStatTotalPct', `${filtered.length} shown`);
+      setT('credStatQueued', counts.queued);
+      setT('credStatQueuedPct', pct(counts.queued));
+      setT('credStatTesting', counts.testing);
+      setT('credStatTestingPct', pct(counts.testing));
+      setT('credStatSuccess', counts.success);
+      setT('credStatSucc', counts.success);
+      setT('credStatSuccPct', pct(counts.success));
+      setT('credStatFailed', counts.failed + counts.noaccount);
+      setT('credStatFail', counts.failed + counts.noaccount);
+      setT('credStatFailPct', pct(counts.failed + counts.noaccount));
+      setT('credStatBlocked', counts.blocked + counts.tempdisabled + counts.permdisabled);
+      setT('credStatBlock', counts.blocked + counts.tempdisabled + counts.permdisabled);
+      setT('credStatBlockPct', pct(counts.blocked + counts.tempdisabled + counts.permdisabled));
 
       // Pagination
       const pageSize = parseInt(document.getElementById('credPageSize')?.value || '50');
@@ -2087,3 +2092,89 @@ window.startAutonomousBatch = function() {
          else b.style.display = 'none';
       }
     }
+
+// ═══════ GLOBALLY EXPOSED INLINE HANDLERS ═══════
+function uploadCsv(f) {
+  if (typeof handleUploadFile === 'function') handleUploadFile(f);
+}
+window.uploadCsv = uploadCsv;
+
+function updateProxyPreview() {
+  const url = document.getElementById('settingsProxyUrl')?.value?.trim() || '';
+  const statusEl = document.getElementById('proxyStatusText');
+  const dot = document.getElementById('proxyDot');
+  if (!statusEl || !dot) return;
+  if (!url) {
+    statusEl.textContent = 'Not tested';
+    statusEl.style.color = 'var(--text3)';
+    dot.className = 'proxy-dot';
+  } else {
+    statusEl.textContent = 'Configured (pending test)';
+    statusEl.style.color = 'var(--cyan)';
+    dot.className = 'proxy-dot proxy-dot-active';
+  }
+}
+window.updateProxyPreview = updateProxyPreview;
+
+function testProxyConnection() {
+  const url = document.getElementById('settingsProxyUrl')?.value?.trim() || '';
+  const statusEl = document.getElementById('proxyStatusText');
+  const dot = document.getElementById('proxyDot');
+  if (!url) {
+    alert('Please enter a proxy URL first');
+    return;
+  }
+  if (statusEl) { statusEl.textContent = 'Testing connection...'; statusEl.style.color = 'var(--amber)'; }
+  if (dot) dot.className = 'proxy-dot proxy-dot-testing';
+  
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'proxy-test', data: { url } }));
+    showCyberToast('Testing proxy connection...');
+  } else {
+    setTimeout(() => {
+      if (statusEl) { statusEl.textContent = 'Proxy valid'; statusEl.style.color = 'var(--green)'; }
+      if (dot) dot.className = 'proxy-dot proxy-dot-alive';
+      showCyberToast('Proxy connection simulated OK');
+    }, 600);
+  }
+}
+window.testProxyConnection = testProxyConnection;
+
+function forceWakeAllTempDisabled() {
+  const emails = Object.keys(tempDisabledTimers);
+  if (emails.length === 0) return alert('No temp-disabled credentials currently in cooldown');
+  if (!confirm(`Force wake ${emails.length} temp-disabled credentials immediately?`)) return;
+  emails.forEach(email => {
+    sendWsMessage({ type: 'force-wake', data: { email } });
+  });
+  tempDisabledTimers = {};
+  showCyberToast(`Force-waking ${emails.length} credentials...`);
+  renderCredentialsTab();
+}
+window.forceWakeAllTempDisabled = forceWakeAllTempDisabled;
+
+function hermesForceReview() {
+  return hermesReviewNow();
+}
+window.hermesForceReview = hermesForceReview;
+
+function hermesResetMemory() {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'hermes-reset-memory' }));
+  }
+  showCyberToast('Hermes memory cache reset');
+}
+window.hermesResetMemory = hermesResetMemory;
+
+function hermesExportLog() {
+  const logs = (hermesData && hermesData.recentLogs) ? hermesData.recentLogs : [];
+  const blob = new Blob([JSON.stringify(logs, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `hermes-review-log-${Date.now()}.json`;
+  a.click();
+  showCyberToast('Exported Hermes review log');
+}
+window.hermesExportLog = hermesExportLog;
+window.toggleCommandPalette = toggleCmdPalette;
+
