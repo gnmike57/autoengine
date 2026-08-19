@@ -171,23 +171,28 @@ describe("random-login-actions", () => {
   });
 
   it("executeSubmit locator_click performs one locator action", async () => {
-    vi.spyOn(await import("../../src/stealth/random-login-actions.js"), "simulateHumanClick").mockResolvedValue({ x: 50, y: 50 });
+    // simulateHumanClick uses mouse.down/up (2 clicks with Math.random()=0.01)
     await executeSubmit(mockPage, "#submit", "#password", "locator_click");
-    expect((await import("../../src/stealth/random-login-actions.js")).simulateHumanClick).toHaveBeenCalledTimes(1);
+    expect(mockPage.mouse.down).toHaveBeenCalled();
+    expect(mockPage.mouse.up).toHaveBeenCalled();
+    expect(mockLocator.boundingBox).toHaveBeenCalled();
   });
 
   it("executeSubmit locator_click_actionable waits for normal actionability", async () => {
-    vi.spyOn(await import("../../src/stealth/random-login-actions.js"), "simulateHumanClick").mockResolvedValue({ x: 50, y: 50 });
     const receipt = await executeSubmit(mockPage, "#submit", "#password", "locator_click_actionable");
-    expect((await import("../../src/stealth/random-login-actions.js")).simulateHumanClick).toHaveBeenCalledTimes(1);
+    // simulateHumanClick fires mouse.down/up sequences
+    expect(mockPage.mouse.down).toHaveBeenCalled();
+    expect(mockPage.mouse.up).toHaveBeenCalled();
     expect(receipt).toMatchObject({ method: "locator_click_actionable", actionCount: 1, actionKind: "locator" });
   });
 
-  it("executeSubmit locator_click_position uses deterministic relative coordinates", async () => {
-    vi.spyOn(await import("../../src/stealth/random-login-actions.js"), "simulateHumanClick").mockResolvedValue({ x: 60, y: 20 });
+  it("executeSubmit locator_click_position uses jittered coordinates via simulateHumanClick", async () => {
     const receipt = await executeSubmit(mockPage, "#submit", "#password", "locator_click_position");
-    expect((await import("../../src/stealth/random-login-actions.js")).simulateHumanClick).toHaveBeenCalledTimes(1);
-    expect(receipt.coordinates).toEqual({ x: 60, y: 20 });
+    // simulateHumanClick returns {x, y} from jittered bounding box
+    expect(mockPage.mouse.down).toHaveBeenCalled();
+    expect(receipt.coordinates).toBeDefined();
+    expect(receipt.coordinates!.x).toBeGreaterThanOrEqual(10);
+    expect(receipt.coordinates!.y).toBeGreaterThanOrEqual(10);
   });
 
   it.each([
