@@ -14,3 +14,11 @@ Early "Remember Me": Find and activate "Remember Me" checkboxes strictly via an 
 "Show Password": The password visibility eye-icon MUST be clicked on every single run, app-wide, to simulate human trust behavior.
 
 Non-Blocking Noise: Fire 1 randomized right-click and 1 left click (context menu events) across the viewport within the first 50-300ms of page load. This must run asynchronously via promises and NEVER block the main execution thread.
+
+## Resilient Multi-Click Strategy (`simulateHumanClick`)
+When executing submit clicks against target authentication forms:
+- Retrieve the button's dynamic bounding box (`locator.boundingBox()`).
+- Inset by 10% interior padding on all four edges to guarantee clicks land safely within the clickable boundary.
+- Dispatch 2 to 3 `mousedown` / `mouseup` event pairs with realistic micro-delays (30–120ms) and micro-coordinate drift.
+- This multi-click sequence is treated as a single compound human submit gesture.
+
