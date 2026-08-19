@@ -353,9 +353,9 @@ export function loadProxyPool(filePath: string, envVarName: string): ProxyEntry[
         stripped = line.slice(schemeMatch[0].length);
       }
       const parts = stripped.split(":");
-      if (parts.length < 4) return null;
+      if (parts.length < 2) return null; // Must have at least host and port
       const [host, port, user, ...passParts] = parts;
-      const pass = passParts.join(":");
+      const pass = passParts.length > 0 ? passParts.join(":") : undefined;
       return { server: `${protocol}://${host}:${port}`, username: user, password: pass, protocol };
     }).filter((e): e is ProxyEntry => e !== null);
   } catch (e: unknown) {

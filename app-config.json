@@ -5,7 +5,7 @@
   "allowHumanTyping": false,
   "alwaysClickRememberMe": true,
   "maxRetries": 2,
-  "proxyPool": "6",
+  "proxyPool": "none",
   "fpStrategy": "native-only",
   "parallelSiteTesting": false,
   "ignitionVerifBypass": true,

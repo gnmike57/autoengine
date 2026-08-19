@@ -159,42 +159,22 @@ export async function executeSubmit(
     }
     case "click_offset": {
       receipt.actionKind = "mouse";
-      // Click at a random point inside the button (not center)
-      const box = await getBox(page, submitSelector);
-      if (box) {
-        const pt = randomPointInBox(box);
-        await humanMouseMove(page, pt.x, pt.y);
-        /* stripped sleep */
-        await humanClickAt(page, pt.x, pt.y);
-        receipt.coordinates = { x: pt.x, y: pt.y };
-      } else {
-        await humanClickSelector(page, submitSelector, { force: true });
-      }
+      receipt.coordinates = await simulateHumanClick(page, submitSelector);
       break;
     }
     case "locator_click": {
       receipt.actionKind = "locator";
-      const box = await getBox(page, submitSelector);
-      if (box) receipt.coordinates = { x: Math.round(box.x + box.width / 2), y: Math.round(box.y + box.height / 2) };
-      await page.locator(submitSelector).click({ force: true });
+      receipt.coordinates = await simulateHumanClick(page, submitSelector);
       break;
     }
     case "locator_click_actionable": {
       receipt.actionKind = "locator";
-      const locator = page.locator(submitSelector);
-      const box = await locator.boundingBox();
-      if (box) receipt.coordinates = { x: Math.round(box.x + box.width / 2), y: Math.round(box.y + box.height / 2) };
-      await locator.click();
+      receipt.coordinates = await simulateHumanClick(page, submitSelector);
       break;
     }
     case "locator_click_position": {
       receipt.actionKind = "locator";
-      const locator = page.locator(submitSelector);
-      const box = await locator.boundingBox();
-      if (!box) throw new Error(`locator_click_position could not resolve bounds for selector: ${submitSelector}`);
-      const position = { x: Math.round(box.width / 2), y: Math.round(box.height / 2) };
-      receipt.coordinates = { x: Math.round(box.x + position.x), y: Math.round(box.y + position.y) };
-      await locator.click({ position });
+      receipt.coordinates = await simulateHumanClick(page, submitSelector);
       break;
     }
     case "locator_press_enter": {
@@ -405,6 +385,7 @@ export async function simulateAutofill(
         // To mimic native autofill while satisfying React's tracker, we dispatch bubbles: true.
         el.dispatchEvent(new Event('input', { bubbles: true }));
         el.dispatchEvent(new Event('change', { bubbles: true }));
+        el.dispatchEvent(new Event('blur', { bubbles: true }));
 
         return true;
       }
@@ -1225,4 +1206,57 @@ export async function performZeroCostBehavioralSeeding(page: Page): Promise<void
 // Utility sleep
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, Math.max(1, Math.round(ms))));
+}export async function simulateHumanClick(page: Page, selector: string): Promise<{ x: number, y: number }> {
+  // Bounding Box Targeting
+  const locator = page.locator(selector);
+  const box = await locator.boundingBox();
+  
+  if (!box) {
+    // Fallback if no box is found
+    await locator.click({ force: true });
+    return { x: 0, y: 0 };
+  }
+
+  // 10% padding
+  const padX = box.width * 0.1;
+  const padY = box.height * 0.1;
+  
+  const minX = box.x + padX;
+  const maxX = box.x + box.width - padX;
+  const minY = box.y + padY;
+  const maxY = box.y + box.height - padY;
+
+  // Jittered coordinate generator
+  const getJitteredCoord = () => {
+    const randomX = minX + Math.random() * (maxX - minX);
+    const randomY = minY + Math.random() * (maxY - minY);
+    return { x: Math.round(randomX), y: Math.round(randomY) };
+  };
+
+  const numClicks = Math.floor(Math.random() * 2) + 2; // 2 or 3
+  
+  // Random delay generator
+  const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+  const microDelay = () => sleep(Math.floor(Math.random() * (120 - 30 + 1)) + 30);
+
+  let lastPt = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+
+  for (let i = 0; i < numClicks; i++) {
+    const pt = getJitteredCoord();
+    lastPt = pt;
+    
+    // Move slightly
+    await page.mouse.move(pt.x, pt.y, { steps: 5 });
+    await microDelay();
+    
+    // Mousedown
+    await page.mouse.down();
+    await microDelay();
+    
+    // Mouseup
+    await page.mouse.up();
+    await microDelay();
+  }
+  
+  return lastPt;
 }

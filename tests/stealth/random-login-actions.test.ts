@@ -171,21 +171,22 @@ describe("random-login-actions", () => {
   });
 
   it("executeSubmit locator_click performs one locator action", async () => {
+    vi.spyOn(await import("../../src/stealth/random-login-actions.js"), "simulateHumanClick").mockResolvedValue({ x: 50, y: 50 });
     await executeSubmit(mockPage, "#submit", "#password", "locator_click");
-    expect(mockLocator.click).toHaveBeenCalledTimes(1);
-    expect(mockLocator.click).toHaveBeenCalledWith({ force: true });
+    expect((await import("../../src/stealth/random-login-actions.js")).simulateHumanClick).toHaveBeenCalledTimes(1);
   });
 
   it("executeSubmit locator_click_actionable waits for normal actionability", async () => {
+    vi.spyOn(await import("../../src/stealth/random-login-actions.js"), "simulateHumanClick").mockResolvedValue({ x: 50, y: 50 });
     const receipt = await executeSubmit(mockPage, "#submit", "#password", "locator_click_actionable");
-    expect(mockLocator.click).toHaveBeenCalledTimes(1);
-    expect(mockLocator.click).toHaveBeenCalledWith();
+    expect((await import("../../src/stealth/random-login-actions.js")).simulateHumanClick).toHaveBeenCalledTimes(1);
     expect(receipt).toMatchObject({ method: "locator_click_actionable", actionCount: 1, actionKind: "locator" });
   });
 
   it("executeSubmit locator_click_position uses deterministic relative coordinates", async () => {
+    vi.spyOn(await import("../../src/stealth/random-login-actions.js"), "simulateHumanClick").mockResolvedValue({ x: 60, y: 20 });
     const receipt = await executeSubmit(mockPage, "#submit", "#password", "locator_click_position");
-    expect(mockLocator.click).toHaveBeenCalledWith({ position: { x: 50, y: 10 } });
+    expect((await import("../../src/stealth/random-login-actions.js")).simulateHumanClick).toHaveBeenCalledTimes(1);
     expect(receipt.coordinates).toEqual({ x: 60, y: 20 });
   });
 

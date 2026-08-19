@@ -130,15 +130,15 @@ describe("AutomationEngine", async () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/require-await
-    it("pads a 1-password batch with ! and !! variants (Path B)", async () => {
+    it("pads a 1-password batch with duplicates of that password to length 4", async () => {
       const seq = build(["solo"], 0);
-      expect(seq).toEqual(["solo", "solo!", "solo!!", "solo!!"]);
+      expect(seq).toEqual(["solo", "solo", "solo", "solo"]);
     });
 
     // eslint-disable-next-line @typescript-eslint/require-await
-    it("pads a 2-password batch with a single ! variant of password1", async () => {
+    it("pads a 2-password batch with duplicates of the last valid password to length 4", async () => {
       const seq = build(["pw1", "pw2"], 0);
-      expect(seq).toEqual(["pw1", "pw2", "pw1!", "pw1!"]);
+      expect(seq).toEqual(["pw1", "pw2", "pw2", "pw2"]);
     });
 
     // eslint-disable-next-line @typescript-eslint/require-await
@@ -154,10 +154,10 @@ describe("AutomationEngine", async () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/require-await
-    it("applies ! padding per-batch using the batch's first password", async () => {
-      // Batch 1 has only 1 password left — pad with that password's variants.
+    it("applies duplicate padding per-batch using the batch's last valid password", async () => {
+      // Batch 1 has only 1 password left — pad with duplicates of that password.
       const seq = build(["a", "b", "c", "lone"], 1);
-      expect(seq).toEqual(["lone", "lone!", "lone!!", "lone!!"]);
+      expect(seq).toEqual(["lone", "lone", "lone", "lone"]);
     });
   });
 

@@ -957,6 +957,7 @@ export async function executeUnifiedLoginChoreography(input: UnifiedChoreography
     await page.getByRole("textbox", { name: /E-mail/i }).click({ force: true, timeout: 3000 }).catch(() => { });
 
     // ── FILL CREDENTIALS (autofill-first, fallback to individual) ──────────
+    log.info(`[Choreography] 1. Starting field population (Attempt 1)...`);
     if (useVisionCoordinates) {
       log.info(`[AIVision] Requesting Viewport Coordinate Markdown matrix...`);
       const coords = await getViewportCoordinateMarkdown(page);
@@ -1045,13 +1046,13 @@ export async function executeUnifiedLoginChoreography(input: UnifiedChoreography
     }
 
     if (wicketkeeperPromise) {
-      log.debug(`Pre-submit gate: waiting for Wicketkeeper token (max 35s)...`);
+      log.debug(`Pre-submit gate: waiting for Wicketkeeper token (max 5s)...`);
       const token = await Promise.race([
         wicketkeeperPromise,
-        new Promise<null>(r => setTimeout(() => r(null), 35000))
+        new Promise<null>(r => setTimeout(() => r(null), 5000))
       ]);
       if (token) log.debug(`Wicketkeeper token ready: ${token.substring(0, 10)}...`);
-      else log.warn(`Wicketkeeper gate timed out after 35s — submitting without PoW token`);
+      else log.warn(`Wicketkeeper gate timed out after 5s — submitting without PoW token`);
     }
 
     await page.evaluate(() => {
@@ -1061,6 +1062,7 @@ export async function executeUnifiedLoginChoreography(input: UnifiedChoreography
     }).catch(() => { });
 
     // ── VERIFY CREDENTIALS BEFORE SUBMIT ────────────────────────────────────
+    log.info(`[Choreography] 2. Field population complete. Verifying credentials...`);
     AgentObserver.emitState(observerSessionId, "VERIFYING_CREDENTIALS");
     await AgentObserver.updateOverlay(page, { state: "VERIFYING_CREDENTIALS", attemptNumber: attemptIdx + 1, totalAttempts: 4, email: targetEmail, password, siteName });
 
@@ -1082,6 +1084,28 @@ export async function executeUnifiedLoginChoreography(input: UnifiedChoreography
         log.error(`[Verification] Credentials still not filled correctly after re-fill attempt`);
         throw new Error("Credentials failed to fill correctly");
       }
+    }
+
+    // ── SUBMIT READY GATE ───────────────────────────────────────────────────
+    log.info(`[Choreography] 3. Awaiting submit ready gate...`);
+    if (submitTracker && submitTracker.getState() !== "IDLE") {
+      try { await submitTracker.waitUntilReady(5000); } catch {}
+    } else {
+      try {
+        await page.waitForFunction((args: { sel: string }) => {
+          let el: HTMLElement | null = null;
+          try { el = document.querySelector(args.sel); } catch { return true; }
+          if (!el) return true;
+          if ((el as HTMLButtonElement).disabled) return false;
+          if (el.getAttribute("aria-disabled") === "true") return false;
+          if (el.getAttribute("aria-busy") === "true") return false;
+          const style = window.getComputedStyle(el);
+          if (style.pointerEvents === "none" || style.visibility === "hidden" || style.display === "none") return false;
+          const op = parseFloat(style.opacity || "1");
+          if (!isNaN(op) && op < 0.5) return false;
+          return true;
+        }, { sel: selectors.submit }, { timeout: 5000, polling: 200 });
+      } catch {}
     }
 
     // ── ONE REGISTERED SUBMIT INVOCATION + SYNCHRONIZED EVIDENCE ───────────
@@ -1148,6 +1172,7 @@ export async function executeUnifiedLoginChoreography(input: UnifiedChoreography
     let invoked = true;
     let actionReceipt: SubmitActionReceipt | undefined;
     try {
+      log.info(`[Choreography] 4. Executing submit action (${submitMethod})...`);
       actionReceipt = await executeSubmit(page, selectors.submit, selectors.password, submitMethod);
     } catch (error) {
       invoked = false;
@@ -1224,43 +1249,51 @@ export async function executeUnifiedLoginChoreography(input: UnifiedChoreography
     // ==========================================
     let passwordOk = false;
 
-    // Blueprint Fast-Loop Rule: Email persists in DOM across retries — skip re-fill
-    // Only clear and re-inject the new password
-    await page.locator(selectors.password).fill("").catch(() => {});
+    if (attemptIdx < 3) {
+      log.info(`[Fast-Loop] 1. Clearing password field and populating payload (Attempt ${attemptIdx + 1})...`);
+      // Blueprint Fast-Loop Rule: Email persists in DOM across retries — skip re-fill
+      // Only clear and re-inject the new password
+      await page.locator(selectors.password).fill("").catch(() => {});
 
-    AgentObserver.emitState(observerSessionId, "FILLING_CREDENTIALS");
-    await AgentObserver.updateOverlay(page, { state: "FILLING_CREDENTIALS", attemptNumber: attemptIdx + 1, totalAttempts: 4, email: targetEmail, password, siteName });
+      AgentObserver.emitState(observerSessionId, "FILLING_CREDENTIALS");
+      await AgentObserver.updateOverlay(page, { state: "FILLING_CREDENTIALS", attemptNumber: attemptIdx + 1, totalAttempts: 4, email: targetEmail, password, siteName });
 
-    if (useVisionCoordinates) {
-      const coords = await getViewportCoordinateMarkdown(page);
-      if (coords && coords.password) {
-        const px = Math.round(coords.password.x * vp.width);
-        const py = Math.round(coords.password.y * vp.height);
-        await humanClickAt(page, px, py).catch(() => {});
-        await page.keyboard.type(password, { delay: Math.floor(Math.random() * 30) });
-        passwordOk = true;
+      if (useVisionCoordinates) {
+        const coords = await getViewportCoordinateMarkdown(page);
+        if (coords && coords.password) {
+          const px = Math.round(coords.password.x * vp.width);
+          const py = Math.round(coords.password.y * vp.height);
+          await humanClickAt(page, px, py).catch(() => {});
+          await page.keyboard.type(password, { delay: Math.floor(Math.random() * 30) });
+          passwordOk = true;
+        }
       }
-    }
 
-    if (!passwordOk) {
-      passwordOk = await enterText(page, selectors.password, password);
       if (!passwordOk) {
-        const healed = await healAndFill(page, "Password input field", password, siteName, selectors, "password", enterText, persistHealedSelector);
-        if (healed) passwordOk = true;
+        passwordOk = await enterText(page, selectors.password, password);
+        if (!passwordOk) {
+          const healed = await healAndFill(page, "Password input field", password, siteName, selectors, "password", enterText, persistHealedSelector);
+          if (healed) passwordOk = true;
+        }
       }
+    } else {
+      // Attempt 4: Do not clear the field, leave Password #3 in the field
+      log.info(`[Fast-Loop] 1. Attempt 4: Retaining existing payload in password field (bypassing clearing)...`);
+      passwordOk = true;
     }
 
     if (!passwordOk) {
       log.error(`[AIVision] Fast-loop Zero-Trust Fallback failed. Form cannot be interacted with.`);
       return { success: false };
     }
+    log.info(`[Fast-Loop] 2. Field preparation complete.`);
 
     // Wicketkeeper token (check in case it's still running, though usually done by now)
     const wicketkeeperPromise = handleWicketkeeper(page, siteName).catch((e: any) => null);
     if (wicketkeeperPromise) {
       await Promise.race([
         wicketkeeperPromise,
-        new Promise<null>(r => setTimeout(() => r(null), 35000))
+        new Promise<null>(r => setTimeout(() => r(null), 5000))
       ]);
     }
 
@@ -1272,11 +1305,35 @@ export async function executeUnifiedLoginChoreography(input: UnifiedChoreography
     AgentObserver.emitState(observerSessionId, "SUBMITTING_FORM");
     await AgentObserver.updateOverlay(page, { state: "SUBMITTING_FORM", attemptNumber: invocationIndex, totalAttempts: 4, email: targetEmail, password, siteName });
 
-    const fastLoopVerification = await verifyCredentialsFilled(page, selectors.username, selectors.password, targetEmail, password);
-    if (!fastLoopVerification.passwordOk) {
-      log.warn(`[Fast-Loop] Password not filled correctly before re-submit, re-filling...`);
-      await page.locator(selectors.password).fill("").catch(() => {});
-      await enterText(page, selectors.password, password);
+    if (attemptIdx < 3) {
+      const fastLoopVerification = await verifyCredentialsFilled(page, selectors.username, selectors.password, targetEmail, password);
+      if (!fastLoopVerification.passwordOk) {
+        log.warn(`[Fast-Loop] Password not filled correctly before re-submit, re-filling...`);
+        await page.locator(selectors.password).fill("").catch(() => {});
+        await enterText(page, selectors.password, password);
+      }
+    }
+
+    // ── SUBMIT READY GATE ───────────────────────────────────────────────────
+    log.info(`[Fast-Loop] 3. Awaiting submit ready gate...`);
+    if (submitTracker && submitTracker.getState() !== "IDLE") {
+      try { await submitTracker.waitUntilReady(5000); } catch {}
+    } else {
+      try {
+        await page.waitForFunction((args: { sel: string }) => {
+          let el: HTMLElement | null = null;
+          try { el = document.querySelector(args.sel); } catch { return true; }
+          if (!el) return true;
+          if ((el as HTMLButtonElement).disabled) return false;
+          if (el.getAttribute("aria-disabled") === "true") return false;
+          if (el.getAttribute("aria-busy") === "true") return false;
+          const style = window.getComputedStyle(el);
+          if (style.pointerEvents === "none" || style.visibility === "hidden" || style.display === "none") return false;
+          const op = parseFloat(style.opacity || "1");
+          if (!isNaN(op) && op < 0.5) return false;
+          return true;
+        }, { sel: selectors.submit }, { timeout: 5000, polling: 200 });
+      } catch {}
     }
 
     const preSubmitUrl = page.url();
@@ -1322,6 +1379,7 @@ export async function executeUnifiedLoginChoreography(input: UnifiedChoreography
     let invoked = true;
     let actionReceipt: SubmitActionReceipt | undefined;
     try {
+      log.info(`[Fast-Loop] 4. Executing submit action (${submitMethod})...`);
       actionReceipt = await executeSubmit(page, selectors.submit, selectors.password, submitMethod);
     } catch (error) {
       invoked = false;
