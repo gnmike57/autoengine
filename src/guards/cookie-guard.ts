@@ -202,7 +202,7 @@ export class CookieGuard {
       let clickSuccess = false;
       for (const sel of COOKIE_ACCEPT_SELECTORS) {
         try {
-          const btn = this.page.locator(sel).first();
+          const btn = this.page.locator(`pierce/${sel}`).first();
           if (await btn.isVisible({ timeout: 300 }).catch(() => false)) {
             await btn.click({ timeout: 1500 });
             clickSuccess = true;
@@ -216,7 +216,7 @@ export class CookieGuard {
       if (!clickSuccess) {
         for (const text of COOKIE_ACCEPT_TEXT_PATTERNS) {
           try {
-            const btn = this.page.locator(`button:has-text("${text}")`).first();
+            const btn = this.page.locator(`pierce/button:has-text("${text}")`).first();
             if (await btn.isVisible({ timeout: 200 }).catch(() => false)) {
               await btn.click({ timeout: 1500 });
               clickSuccess = true;

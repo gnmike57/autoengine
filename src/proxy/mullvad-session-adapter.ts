@@ -3,11 +3,15 @@ import fs from "node:fs";
 import net from "node:net";
 import os from "node:os";
 import path from "node:path";
-import { spawn, type ChildProcess } from "node:child_process";
+import { spawn, exec, type ChildProcess } from "node:child_process";
+import { promisify } from "node:util";
 import fetch from "node-fetch";
 import { SocksProxyAgent } from "socks-proxy-agent";
+import { MullvadApiClient, type MullvadRelay } from "./mullvad-api.js";
 
-export type MullvadSessionMode = "disabled" | "os-socks" | "wireproxy";
+const execAsync = promisify(exec);
+
+export type MullvadSessionMode = "disabled" | "os-socks" | "wireproxy" | "wireproxy-api" | "mullvad-cli";
 
 export interface SessionProxyEntry {
   server: string;
@@ -52,6 +56,8 @@ export interface MullvadSessionAdapterOptions {
   stateDir?: string;
   startupTimeoutMs?: number;
   allowSharedOsTunnel?: boolean;
+  accountId?: string;
+  proxyCountry?: string;
   dependencies?: Partial<MullvadAdapterDependencies>;
 }
 
@@ -178,6 +184,8 @@ function parseMode(value: string | undefined): MullvadSessionMode {
   if (["", "disabled", "off", "none"].includes(normalized)) return "disabled";
   if (["os-socks", "os_socks", "socks"].includes(normalized)) return "os-socks";
   if (["wireproxy", "wg-config", "wg_config"].includes(normalized)) return "wireproxy";
+  if (["wireproxy-api", "api"].includes(normalized)) return "wireproxy-api";
+  if (["mullvad-cli", "cli"].includes(normalized)) return "mullvad-cli";
   throw new Error(`unsupported-mullvad-session-mode:${normalized}`);
 }
 
@@ -185,6 +193,7 @@ export class MullvadSessionAdapter {
   readonly mode: MullvadSessionMode;
   private readonly options: Required<Pick<MullvadSessionAdapterOptions, "bindHost" | "stateDir" | "startupTimeoutMs" | "wireproxyBinary">> & MullvadSessionAdapterOptions;
   private readonly dependencies: MullvadAdapterDependencies;
+  private readonly apiClient?: MullvadApiClient;
 
   constructor(options: MullvadSessionAdapterOptions) {
     this.mode = options.mode;
@@ -200,6 +209,9 @@ export class MullvadSessionAdapter {
       reservePort: options.dependencies?.reservePort ?? defaultReservePort,
       launchWireproxy: options.dependencies?.launchWireproxy ?? defaultLaunchWireproxy,
     };
+    if (this.options.accountId) {
+      this.apiClient = new MullvadApiClient(this.options.accountId);
+    }
   }
 
   static fromEnvironment(modeOverride?: string): MullvadSessionAdapter {
@@ -214,14 +226,20 @@ export class MullvadSessionAdapter {
       relaySocksHosts,
       stateDir: process.env.MULLVAD_LEASE_STATE_DIR,
       allowSharedOsTunnel: process.env.MULLVAD_ALLOW_SHARED_OS_TUNNEL === "1",
+      accountId: process.env.MULLVAD_ACCOUNT_ID,
+      proxyCountry: process.env.MULLVAD_PROXY_COUNTRY,
     });
   }
 
   async acquire(sessionKey: string): Promise<MullvadSessionLease> {
     if (this.mode === "disabled") throw new Error("mullvad-session-adapter-disabled");
-    return this.mode === "os-socks"
-      ? this.acquireOsSocks(sessionKey)
-      : this.acquireWireproxy(sessionKey);
+    switch (this.mode) {
+      case "os-socks": return this.acquireOsSocks(sessionKey);
+      case "wireproxy": return this.acquireWireproxy(sessionKey);
+      case "wireproxy-api": return this.acquireWireproxyApi(sessionKey);
+      case "mullvad-cli": return this.acquireMullvadCli(sessionKey);
+      default: throw new Error(`unsupported-mullvad-session-mode:${this.mode}`);
+    }
   }
 
   private async acquireOsSocks(sessionKey: string): Promise<MullvadSessionLease> {
@@ -341,5 +359,154 @@ export class MullvadSessionAdapter {
       fs.rmSync(lockPath, { force: true });
       throw error;
     }
+  }
+
+  private async acquireWireproxyApi(sessionKey: string): Promise<MullvadSessionLease> {
+    if (!this.apiClient) throw new Error("mullvad-account-id-required-for-api");
+    const country = this.options.proxyCountry;
+    
+    // 1. Manage Device Keys (generate up to 4, then pick deterministically)
+    // Using a robust file lock to prevent concurrent sessions from generating duplicate keys simultaneously
+    fs.mkdirSync(this.options.stateDir, { recursive: true, mode: 0o700 });
+    const keysCacheFile = path.join(this.options.stateDir, "api-device-keys.json");
+    const keysLockFile = path.join(this.options.stateDir, "api-device-keys.lock");
+    
+    let locked = false;
+    for (let attempt = 0; attempt < 50; attempt++) {
+      try {
+        const fd = fs.openSync(keysLockFile, "wx", 0o600);
+        fs.closeSync(fd);
+        locked = true;
+        break;
+      } catch (err: any) {
+        if (err.code !== "EEXIST") throw err;
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+    }
+    
+    if (!locked) throw new Error("timeout-acquiring-api-keys-lock");
+
+    let deviceKeys: any[] = [];
+    try {
+      if (fs.existsSync(keysCacheFile)) {
+        deviceKeys = JSON.parse(fs.readFileSync(keysCacheFile, "utf8"));
+      }
+      
+      if (deviceKeys.length < 4) {
+        try {
+          const newDevice = await this.apiClient.generateAndRegisterDevice();
+          deviceKeys.push(newDevice);
+          fs.writeFileSync(keysCacheFile, JSON.stringify(deviceKeys, null, 2), "utf8");
+        } catch (err: any) {
+          // If we hit a limit or network error, fallback to existing keys if available
+          if (deviceKeys.length === 0) throw err;
+        }
+      }
+    } finally {
+      fs.rmSync(keysLockFile, { force: true });
+    }
+    
+    // Pick device deterministically based on sessionKey hash
+    const sessionInt = Number.parseInt(sanitizedId(sessionKey).slice(0, 8), 16);
+    const device = deviceKeys[sessionInt % deviceKeys.length];
+
+    // 2. Fetch and select relay
+    const allRelays = await this.apiClient.fetchRelays();
+    const candidateRelays = country 
+      ? allRelays.filter(r => r.country_code.toLowerCase() === country.toLowerCase())
+      : allRelays;
+      
+    if (candidateRelays.length === 0) throw new Error(`no-mullvad-relays-found-for-country:${country}`);
+    
+    // Sort relays consistently so modulo math works deterministically
+    candidateRelays.sort((a, b) => a.hostname.localeCompare(b.hostname));
+    const relay = candidateRelays[sessionInt % candidateRelays.length]!;
+    
+    // 3. Generate wireproxy config and launch
+    const configContent = this.apiClient.generateWireproxyConfig(relay, device);
+    const configId = sanitizedId(`${device.pubkey}-${relay.hostname}`);
+    const runtimeDir = path.join(this.options.stateDir, `api-session-${sanitizedId(sessionKey)}-${configId}`);
+    
+    fs.mkdirSync(runtimeDir, { recursive: true, mode: 0o700 });
+    const sourceConfigPath = path.join(runtimeDir, "base.conf");
+    fs.writeFileSync(sourceConfigPath, configContent, { encoding: "utf8", mode: 0o600 });
+    
+    let managed: ManagedWireproxy | undefined;
+    try {
+      const bindPort = await this.dependencies.reservePort(this.options.bindHost);
+      managed = await this.dependencies.launchWireproxy({
+        binary: this.options.wireproxyBinary,
+        sourceConfig: sourceConfigPath,
+        bindHost: this.options.bindHost,
+        bindPort,
+        runtimeDir,
+        startupTimeoutMs: this.options.startupTimeoutMs,
+      });
+      const proxy: SessionProxyEntry = { server: `socks5://${this.options.bindHost}:${bindPort}`, protocol: "socks5" };
+      const exitProof = await this.dependencies.probeProxy(proxy);
+      managed.assertAlive();
+      let closed = false;
+      return {
+        id: `mullvad-wireproxy-api-${sanitizedId(`${sessionKey}:${configId}`)}`,
+        mode: "wireproxy-api",
+        isolation: "dedicated-wireguard-config",
+        proxy,
+        configId,
+        exitProof,
+        assertHealthy: () => {
+          if (closed) throw new Error("mullvad-lease-closed");
+          managed?.assertAlive();
+        },
+        close: async () => {
+          if (closed) return;
+          closed = true;
+          await managed?.close();
+          fs.rmSync(runtimeDir, { recursive: true, force: true });
+        },
+      };
+    } catch (error) {
+      await managed?.close().catch(() => {});
+      fs.rmSync(runtimeDir, { recursive: true, force: true });
+      throw error;
+    }
+  }
+
+  private async acquireMullvadCli(sessionKey: string): Promise<MullvadSessionLease> {
+    const country = this.options.proxyCountry ?? "us";
+    
+    // Set location using mullvad CLI
+    try {
+      await execAsync(`mullvad relay set location ${country}`);
+      await execAsync("mullvad connect");
+      // Wait for it to connect
+      let connected = false;
+      for (let i = 0; i < 20; i++) {
+        const { stdout } = await execAsync("mullvad status");
+        if (stdout.toLowerCase().includes("connected")) {
+          connected = true;
+          break;
+        }
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      if (!connected) throw new Error("mullvad-cli-failed-to-connect");
+    } catch (err: any) {
+      throw new Error(`mullvad-cli-error: ${err.message}`);
+    }
+
+    // Rely on OS-socks (Mullvad's local SOCKS5 relay running at 10.64.0.1:1080)
+    const host = DEFAULT_RELAY_SOCKS_HOSTS[0]!;
+    const proxy: SessionProxyEntry = { server: `socks5://${host}:1080`, protocol: "socks5" };
+    const exitProof = await this.dependencies.probeProxy(proxy);
+    
+    let closed = false;
+    return {
+      id: `mullvad-cli-${sanitizedId(`${sessionKey}:${country}`)}`,
+      mode: "mullvad-cli",
+      isolation: "shared-os-tunnel",
+      proxy,
+      exitProof,
+      assertHealthy: () => { if (closed) throw new Error("mullvad-lease-closed"); },
+      close: async () => { closed = true; }, // Does not disconnect the OS tunnel, intentionally shared
+    };
   }
 }

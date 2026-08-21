@@ -57,7 +57,27 @@ export async function injectDualClassifier(page: Page, _siteName: string) {
           return;
         }
 
-        const bodyText = document.body?.innerText?.toLowerCase() || "";
+        const getDeepText = (root: Node): string => {
+          let text = "";
+          if (root.nodeType === Node.TEXT_NODE) return (root.textContent || "").trim();
+          if (root.nodeType === Node.ELEMENT_NODE) {
+            const tag = (root as Element).tagName.toLowerCase();
+            if (tag === "script" || tag === "style" || tag === "noscript") return "";
+            if ((root as Element).shadowRoot) text += " " + getDeepText((root as Element).shadowRoot as unknown as Node);
+          }
+          const childNodes = root.childNodes || [];
+          for (let i = 0; i < childNodes.length; i++) {
+            text += " " + getDeepText(childNodes[i]!);
+          }
+          return text;
+        };
+        
+        let bodyText = "";
+        try {
+          bodyText = getDeepText(document.body).replace(/\s+/g, " ").trim().toLowerCase();
+        } catch {
+          bodyText = document.body?.innerText?.toLowerCase() || "";
+        }
 
         // Success Detection (Rule 17)
         if (/welcome!/i.test(bodyText)) {

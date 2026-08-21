@@ -161,16 +161,36 @@ export class SubmitButtonStateTracker {
           initialHtml: string;
         }
 
+        const getDeepText = (root: Node): string => {
+          let text = "";
+          if (root.nodeType === Node.TEXT_NODE) return (root.textContent || "").trim();
+          if (root.nodeType === Node.ELEMENT_NODE) {
+            const tag = (root as Element).tagName.toLowerCase();
+            if (tag === "script" || tag === "style" || tag === "noscript") return "";
+            if ((root as Element).shadowRoot) text += " " + getDeepText((root as Element).shadowRoot as unknown as Node);
+          }
+          const childNodes = root.childNodes || [];
+          for (let i = 0; i < childNodes.length; i++) {
+            text += " " + getDeepText(childNodes[i]!);
+          }
+          return text;
+        };
+
         const getFormErrorText = (): string => {
           const emailEl = document.querySelector(emailSel);
-          if (!emailEl) return (document.body.textContent || "").substring(0, 2000).toLowerCase();
-          let parent = emailEl.parentElement;
-          for (let i = 0; i < 4; i++) {
-            if (parent?.parentElement) parent = parent.parentElement;
+          let target: Node = document.body;
+          if (emailEl) {
+            let parent = emailEl.parentElement;
+            for (let i = 0; i < 4; i++) {
+              if (parent?.parentElement) parent = parent.parentElement;
+            }
+            if (parent) target = parent;
           }
-          return parent
-            ? (parent.textContent || "").toLowerCase()
-            : (document.body.textContent || "").substring(0, 2000).toLowerCase();
+          try {
+            return getDeepText(target).replace(/\s+/g, " ").trim().substring(0, 2000).toLowerCase();
+          } catch {
+            return (document.body.textContent || "").substring(0, 2000).toLowerCase();
+          }
         };
 
         const btn = document.querySelector(submitSel);
@@ -377,14 +397,37 @@ export class SubmitButtonStateTracker {
       const state = (window as any)[SYM];
       if (!state) return;
 
+      const getDeepText = (root: Node): string => {
+        let text = "";
+        if (root.nodeType === Node.TEXT_NODE) return (root.textContent || "").trim();
+        if (root.nodeType === Node.ELEMENT_NODE) {
+          const tag = (root as Element).tagName.toLowerCase();
+          if (tag === "script" || tag === "style" || tag === "noscript") return "";
+          if ((root as Element).shadowRoot) text += " " + getDeepText((root as Element).shadowRoot as unknown as Node);
+        }
+        const childNodes = root.childNodes || [];
+        for (let i = 0; i < childNodes.length; i++) {
+          text += " " + getDeepText(childNodes[i]!);
+        }
+        return text;
+      };
+
+      let target: Node = document.body;
       const emailEl = document.querySelector(emailSel);
-      let parent = emailEl?.parentElement;
-      for (let i = 0; i < 4; i++) {
-        if (parent?.parentElement) parent = parent.parentElement;
+      if (emailEl) {
+        let parent = emailEl.parentElement;
+        for (let i = 0; i < 4; i++) {
+          if (parent?.parentElement) parent = parent.parentElement;
+        }
+        if (parent) target = parent;
       }
-      const text = parent
-        ? (parent.textContent || "").toLowerCase()
-        : (document.body.textContent || "").substring(0, 2000).toLowerCase();
+      
+      let text = "";
+      try {
+        text = getDeepText(target).replace(/\s+/g, " ").trim().substring(0, 2000).toLowerCase();
+      } catch {
+        text = target.textContent ? target.textContent.substring(0, 2000).toLowerCase() : "";
+      }
       state.baselineErrorText = text;
       state.currentErrorText = text;
       state.errorTextChanged = false;

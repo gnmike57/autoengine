@@ -1595,14 +1595,36 @@ export async function setupSubmitMutationObserver(page: Page, submitSel: string,
   await page.evaluate(({ sSel, eSel }) => {
     (window as unknown as AutomatiWindow).__automatiSubmitObserverResult = null;
 
+    const getDeepText = (root: Node): string => {
+      let text = "";
+      if (root.nodeType === Node.TEXT_NODE) return (root.textContent || "").trim();
+      if (root.nodeType === Node.ELEMENT_NODE) {
+        const tag = (root as Element).tagName.toLowerCase();
+        if (tag === "script" || tag === "style" || tag === "noscript") return "";
+        if ((root as Element).shadowRoot) text += " " + getDeepText((root as Element).shadowRoot as unknown as Node);
+      }
+      const childNodes = root.childNodes || [];
+      for (let i = 0; i < childNodes.length; i++) {
+        text += " " + getDeepText(childNodes[i]!);
+      }
+      return text;
+    };
+
     const getErrorText = () => {
       const emailEl = document.querySelector(eSel);
-      if (!emailEl) return (document.body.textContent || "").toLowerCase();
-      let parent = emailEl.parentElement;
-      for (let i = 0; i < 4; i++) {
-        if (parent && parent.parentElement) parent = parent.parentElement;
+      let target: Node = document.body;
+      if (emailEl) {
+        let parent = emailEl.parentElement;
+        for (let i = 0; i < 4; i++) {
+          if (parent && parent.parentElement) parent = parent.parentElement;
+        }
+        if (parent) target = parent;
       }
-      return parent ? (parent.textContent || "").toLowerCase() : (document.body.textContent || "").toLowerCase();
+      try {
+        return getDeepText(target).replace(/\s+/g, " ").trim().toLowerCase();
+      } catch {
+        return target.textContent ? target.textContent.toLowerCase() : "";
+      }
     };
 
     const initialErrorText = getErrorText();
@@ -1714,14 +1736,36 @@ export async function waitForSubmitMutationResult(page: Page, timeoutMs = 2000):
       const finalState = await page.evaluate((eSel) => {
          if ((window as unknown as AutomatiWindow).__automatiCleanupObservers) (window as unknown as AutomatiWindow).__automatiCleanupObservers?.();
 
+         const getDeepText = (root: Node): string => {
+           let text = "";
+           if (root.nodeType === Node.TEXT_NODE) return (root.textContent || "").trim();
+           if (root.nodeType === Node.ELEMENT_NODE) {
+             const tag = (root as Element).tagName.toLowerCase();
+             if (tag === "script" || tag === "style" || tag === "noscript") return "";
+             if ((root as Element).shadowRoot) text += " " + getDeepText((root as Element).shadowRoot as unknown as Node);
+           }
+           const childNodes = root.childNodes || [];
+           for (let i = 0; i < childNodes.length; i++) {
+             text += " " + getDeepText(childNodes[i]!);
+           }
+           return text;
+         };
+
          const getErrorText = () => {
            const emailEl = document.querySelector(eSel);
-           if (!emailEl) return (document.body.textContent || "").toLowerCase();
-           let parent = emailEl.parentElement;
-           for (let i = 0; i < 4; i++) {
-             if (parent && parent.parentElement) parent = parent.parentElement;
+           let target: Node = document.body;
+           if (emailEl) {
+             let parent = emailEl.parentElement;
+             for (let i = 0; i < 4; i++) {
+               if (parent && parent.parentElement) parent = parent.parentElement;
+             }
+             if (parent) target = parent;
            }
-           return parent ? (parent.textContent || "").toLowerCase() : (document.body.textContent || "").toLowerCase();
+           try {
+             return getDeepText(target).replace(/\s+/g, " ").trim().toLowerCase();
+           } catch {
+             return target.textContent ? target.textContent.toLowerCase() : "";
+           }
          };
          const finalErrorText = getErrorText();
          const initialErrorText = (window as unknown as AutomatiWindow).__automatiErrorBaseline || "";
