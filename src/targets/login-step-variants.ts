@@ -46,18 +46,23 @@ async function materializeLocator(
   return `[data-automati-discovery="${marker}"]`;
 }
 
+function getPiercingSelector(sel: string): string {
+  if (sel.startsWith('pierce/') || sel.startsWith('xpath=') || sel.startsWith('text=')) return sel;
+  return `pierce/${sel}`;
+}
+
 async function configuredSelectorsVisible(page: Page, selectors: LoginSelectors): Promise<boolean> {
   const [username, password, submit] = await Promise.all([
-    visible(page.locator(selectors.username), 2500),
-    visible(page.locator(selectors.password), 2500),
-    visible(page.locator(selectors.submit), 2500),
+    visible(page.locator(getPiercingSelector(selectors.username)), 2500),
+    visible(page.locator(getPiercingSelector(selectors.password)), 2500),
+    visible(page.locator(getPiercingSelector(selectors.submit)), 2500),
   ]);
   return username && password && submit;
 }
 
 async function findFirstVisible(page: Page, candidates: readonly string[]): Promise<string | null> {
   for (const selector of candidates) {
-    if (await visible(page.locator(selector))) return selector;
+    if (await visible(page.locator(getPiercingSelector(selector)))) return selector;
   }
   return null;
 }
