@@ -369,6 +369,7 @@ const loadedConfig = ConfigStore.load();
 // runs so the dashboard's last value is reused when the user clicks Start again.
 let currentConcurrency = loadedConfig.concurrency || 5;
 let currentProxyPool: string = loadedConfig.proxyPool || "none";
+let currentMullvadMode: "mullvad-cli" | "wireproxy-api" | "disabled" = (loadedConfig.mullvadSessionMode as any) || "disabled";
 let currentFpStrategy: FpStrategy = loadedConfig.fpStrategy as FpStrategy;
 let currentEmulateMobile: boolean = loadedConfig.advEmulateMobile || false;
 const currentSpiderApiKey: string = loadedConfig.spiderApiKey || "";
@@ -1547,6 +1548,7 @@ wss.on("connection", (ws: any, req: import("http").IncomingMessage) => {
           config: {
             concurrency: currentConcurrency,
             proxyPool: currentProxyPool,
+            mullvadSessionMode: currentMullvadMode,
             fpStrategy: currentFpStrategy,
             emulateMobile: currentEmulateMobile,
             spiderApiKey: currentSpiderApiKey,
@@ -2002,6 +2004,16 @@ wss.on("connection", (ws: any, req: import("http").IncomingMessage) => {
             currentConcurrency = applied;
             globalTiler.reconfigure(applied);
             broadcast({ type: "concurrency", data: { value: applied } });
+            break;
+          }
+
+          case "set-mullvad-mode": {
+            const v = String(msg.data?.value || "disabled");
+            if (v === "disabled" || v === "mullvad-cli" || v === "wireproxy-api") {
+              currentMullvadMode = v as "mullvad-cli" | "wireproxy-api" | "disabled";
+              if (currentEngineConfig) currentEngineConfig.mullvadSessionMode = currentMullvadMode;
+              broadcast({ type: "config-sync", data: { config: { mullvadSessionMode: v } } });
+            }
             break;
           }
 

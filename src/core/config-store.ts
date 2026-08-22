@@ -38,6 +38,7 @@ export interface AppConfig {
   enableAgentObservation: boolean;
   goldenCredentials: { joe?: string; ignition?: string };
   spiderApiKey?: string;
+  mullvadSessionMode?: "mullvad-cli" | "wireproxy-api" | "disabled";
 }
 
 const CONFIG_PATH = process.env.AUTOMATI_CONFIG_PATH

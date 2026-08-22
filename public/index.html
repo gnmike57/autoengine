@@ -466,6 +466,13 @@
               <label class="toggle-row" title="Inject fingerprint script for Zendriver/Spider/Cloak"><span>Inject Stealth JS</span><label class="cyber-switch"><input type="checkbox" id="advInjectStealthJS"><span class="cyber-slider"></span></label></label>
               <label class="toggle-row" title="Bypass Ignition login popup with random code"><span>Ignition Bypass</span><label class="cyber-switch"><input type="checkbox" id="advIgnitionVerifBypass"><span class="cyber-slider"></span></label></label>
               <label class="toggle-row" title="Emulate mobile device profile for fingerprint evasion"><span>Mobile Emulation</span><label class="cyber-switch"><input type="checkbox" id="advEmulateMobile"><span class="cyber-slider"></span></label></label>
+              <label class="toggle-row" title="Mullvad API Integration Mode"><span>Mullvad Mode</span>
+                <select id="advMullvadMode" style="background: var(--bg3); color: var(--text1); border: 1px solid var(--border); border-radius: 4px; padding: 2px 4px; font-size: 11px;">
+                  <option value="disabled">Off</option>
+                  <option value="mullvad-cli">CLI Wrapper</option>
+                  <option value="wireproxy-api">Wireproxy API</option>
+                </select>
+              </label>
             </div>
           </div>
         </div>
