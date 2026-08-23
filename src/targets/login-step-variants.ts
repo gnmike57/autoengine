@@ -46,23 +46,26 @@ async function materializeLocator(
   return `[data-automati-discovery="${marker}"]`;
 }
 
-function getPiercingSelector(sel: string): string {
-  if (sel.startsWith('pierce/') || sel.startsWith('xpath=') || sel.startsWith('text=')) return sel;
-  return `pierce/${sel}`;
+async function isSelectorVisible(page: Page, sel: string, timeout = 2500): Promise<boolean> {
+  if (await visible(page.locator(sel), timeout)) return true;
+  if (!sel.startsWith('pierce/') && !sel.startsWith('xpath=') && !sel.startsWith('text=')) {
+    return visible(page.locator(`pierce/${sel}`), timeout);
+  }
+  return false;
 }
 
 async function configuredSelectorsVisible(page: Page, selectors: LoginSelectors): Promise<boolean> {
   const [username, password, submit] = await Promise.all([
-    visible(page.locator(getPiercingSelector(selectors.username)), 2500),
-    visible(page.locator(getPiercingSelector(selectors.password)), 2500),
-    visible(page.locator(getPiercingSelector(selectors.submit)), 2500),
+    isSelectorVisible(page, selectors.username, 2500),
+    isSelectorVisible(page, selectors.password, 2500),
+    isSelectorVisible(page, selectors.submit, 2500),
   ]);
   return username && password && submit;
 }
 
 async function findFirstVisible(page: Page, candidates: readonly string[]): Promise<string | null> {
   for (const selector of candidates) {
-    if (await visible(page.locator(getPiercingSelector(selector)))) return selector;
+    if (await isSelectorVisible(page, selector, 1000)) return selector;
   }
   return null;
 }

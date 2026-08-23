@@ -2,7 +2,7 @@ import WebSocket from 'ws';
 
 async function startBatch() {
   const args = process.argv.slice(2);
-  const port = args.find(a => a.startsWith('--port='))?.split('=')[1] || '9223';
+  const port = args.find(a => a.startsWith('--port='))?.split('=')[1] || process.env.PORT || '3000';
   const ws = new WebSocket(`ws://127.0.0.1:${port}`);
 
   ws.on('open', () => {

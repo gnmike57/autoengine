@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { TimelineManifest } from "../services/timeline-recorder.js";
 import { ollamaClient } from "../core/ollama-client.js";
+import { generateContentWithFallback, isAiAvailable } from "../intelligence/llm-provider.js";
 import { createLogger } from "../core/logger.js";
 import { EventEmitter } from "node:events";
 
@@ -45,81 +46,92 @@ Your task:
 Provide a structured, chronological breakdown of the execution timeline and your final diagnostic conclusion.
     `;
     const base64Images: string[] = [];
+    const imageBuffers: Buffer[] = [];
 
     for (const frame of selectedFrames) {
       const imgPath = path.join(sessionDir, frame.imagePath);
       if (fs.existsSync(imgPath)) {
-        const rawBase64 = fs.readFileSync(imgPath).toString("base64");
-        // Clean base64 string if it has a data URI prefix
+        const buf = fs.readFileSync(imgPath);
+        imageBuffers.push(buf);
+        const rawBase64 = buf.toString("base64");
         const cleanBase64 = rawBase64.replace(/^data:image\/\w+;base64,/, '');
         base64Images.push(cleanBase64);
         promptText += `\nFrame at +${frame.offsetMs}ms`;
       }
     }
 
-      try {
-        log.thought("Hermes", `Dispatching ${selectedFrames.length} frames to local models for MULTI-AGENT CONSENSUS timeline analysis of session ${sessionId}...`);
+    try {
+      log.thought("Hermes", `Analyzing timeline for session ${sessionId} with ${selectedFrames.length} frames...`);
 
-        // Multi-Agent Consensus: Query multiple models in parallel
-        const queryModel = async (modelName: string) => {
-          try {
-            const response = await ollamaClient.chat({
-              model: modelName,
-              messages: [{
-                role: 'user',
-                content: promptText + "\nEND YOUR RESPONSE WITH EITHER [SUCCESS], [FAILED], OR [UNKNOWN].",
-                images: base64Images
-              }]
-            });
-            return response.message?.content?.trim() || "";
-          } catch (err) {
-            log.warn(`Model ${modelName} failed: ${String(err)}`);
-            return "";
-          }
-        };
+      // 1. Try local Ollama models first
+      let response1 = "";
+      let response2 = "";
 
-        const [response1, response2] = await Promise.all([
-          queryModel('llava'),
-          queryModel('llava:latest') // Use second available vision model or same model to verify consistency
-        ]);
-
-        const extractVerdict = (text: string) => {
-          if (text.includes("[SUCCESS]")) return "success";
-          if (text.includes("[FAILED]")) return "failed";
-          return "unknown";
-        };
-
-        const verdict1 = extractVerdict(response1);
-        const verdict2 = extractVerdict(response2);
-
-        let finalResponse = "";
-
-        if (verdict1 === verdict2 && verdict1 !== "unknown") {
-          log.thought("Hermes", `Consensus Reached! Both models concluded: ${verdict1.toUpperCase()}`);
-          finalResponse = `=== CONSENSUS REACHED ===\n\nModel 1:\n${response1}\n\nModel 2:\n${response2}`;
-        } else {
-          log.thought("Hermes", `CONSENSUS FAILED for session ${sessionId}. Model 1: ${verdict1}, Model 2: ${verdict2}. Requesting HUMAN OVERRIDE.`);
-          finalResponse = `=== CONSENSUS FAILED - HUMAN REVIEW REQUIRED ===\n\nModel 1:\n${response1}\n\nModel 2:\n${response2}`;
-
-          // Emit event for server.ts to pick up and push a Human Query to the dashboard
-          timelineEvents.emit("human-query-required", {
-            sessionId,
-            reason: "Multi-Agent Consensus failed. The AI agents disagree on whether the login succeeded or failed.",
-            evidence: base64Images[base64Images.length - 1], // Provide last screenshot for context
-            model1: response1,
-            model2: response2
+      const queryModel = async (modelName: string) => {
+        try {
+          const response = await ollamaClient.chat({
+            model: modelName,
+            messages: [{
+              role: 'user',
+              content: promptText + "\nEND YOUR RESPONSE WITH EITHER [SUCCESS], [FAILED], OR [UNKNOWN].",
+              images: base64Images
+            }]
           });
+          return response.message?.content?.trim() || "";
+        } catch (err) {
+          return "";
         }
+      };
 
-        const analysisPath = path.join(sessionDir, "hermes-analysis.md");
-        fs.writeFileSync(analysisPath, finalResponse);
+      [response1, response2] = await Promise.all([
+        queryModel('llava'),
+        queryModel('llava:latest')
+      ]);
 
-        return finalResponse;
-
-      } catch (localErr) {
-        log.warn(`Multi-agent consensus failed (${String(localErr)}).`);
+      // 2. If Ollama is unavailable, fallback to OpenRouter / Gemini
+      if (!response1 && isAiAvailable()) {
+        try {
+          log.info(`[TimelineAnalyzer] Local Ollama unavailable — routing timeline analysis to cloud vision model...`);
+          const cloudRes = await generateContentWithFallback({
+            prompt: promptText + "\nEND YOUR RESPONSE WITH EITHER [SUCCESS], [FAILED], OR [UNKNOWN].",
+            images: imageBuffers,
+            timeoutMs: 30000,
+          });
+          response1 = cloudRes.text.trim();
+        } catch (cloudErr) {
+          log.warn(`Cloud vision fallback failed: ${String(cloudErr)}`);
+        }
       }
 
-      return null;
+      const extractVerdict = (text: string) => {
+        if (text.includes("[SUCCESS]")) return "success";
+        if (text.includes("[FAILED]")) return "failed";
+        return "unknown";
+      };
+
+      const verdict1 = extractVerdict(response1);
+      const verdict2 = response2 ? extractVerdict(response2) : verdict1;
+
+      let finalResponse = "";
+
+      if (verdict1 !== "unknown" && (verdict1 === verdict2 || !response2)) {
+        log.thought("Hermes", `Timeline Diagnosis: ${verdict1.toUpperCase()}`);
+        finalResponse = `=== TIMELINE ANALYSIS ===\n\nVerdict: [${verdict1.toUpperCase()}]\n\n${response1}`;
+      } else if (response1 || response2) {
+        finalResponse = `=== TIMELINE ANALYSIS ===\n\nModel 1:\n${response1}\n\nModel 2:\n${response2}`;
+      } else {
+        finalResponse = `=== TIMELINE ANALYSIS ===\n\nNo vision models available to analyze timeline.`;
+      }
+
+      const analysisPath = path.join(sessionDir, "hermes-analysis.md");
+      fs.writeFileSync(analysisPath, finalResponse);
+
+      return finalResponse;
+
+    } catch (localErr) {
+      log.warn(`Timeline analysis error (${String(localErr)}).`);
+    }
+
+    return null;
   }
 }

@@ -2,7 +2,7 @@ import WebSocket from 'ws';
 
 async function setConcurrency() {
   const args = process.argv.slice(2);
-  const port = args.find(a => a.startsWith('--port='))?.split('=')[1] || '9223';
+  const port = args.find(a => a.startsWith('--port='))?.split('=')[1] || process.env.PORT || '3000';
   const concurrencyStr = args.find(a => a.startsWith('--concurrency='))?.split('=')[1];
   
   if (!concurrencyStr) {
