@@ -138,10 +138,11 @@ async function defaultLaunchWireproxy(input: {
   fs.appendFileSync(runtimeConfig, `\n\n[Socks5]\nBindAddress = ${input.bindHost}:${input.bindPort}\n`, { encoding: "utf8" });
 
   const child = spawn(input.binary, ["-c", runtimeConfig], {
-    stdio: ["ignore", "ignore", "ignore"],
+    stdio: ["ignore", "ignore", "pipe"],
     env: { PATH: process.env.PATH ?? "" },
     detached: false,
   });
+  child.stderr?.on("data", (data) => console.error(`[wireproxy stderr] ${data.toString()}`));
   let closing = false;
   let unexpectedExit: string | undefined;
   child.once("exit", (code, signal) => {

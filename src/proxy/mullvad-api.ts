@@ -43,6 +43,17 @@ export class MullvadApiClient {
     return data.filter(r => r.active && r.type === "wireguard");
   }
 
+  private async getAuthToken(): Promise<string> {
+    const res = await fetch("https://api.mullvad.net/auth/v1/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ account_number: this.accountId })
+    });
+    if (!res.ok) throw new Error(`Failed to get auth token: ${res.status} ${res.statusText}`);
+    const data = await res.json() as { access_token: string };
+    return data.access_token;
+  }
+
   /**
    * Generates a new WireGuard keypair and registers it with the Mullvad API.
    */
@@ -53,11 +64,13 @@ export class MullvadApiClient {
     const wgPrivateBase64 = Buffer.from(jwkPrivate.d as string, "base64url").toString("base64");
     const wgPublicBase64 = Buffer.from(jwkPublic.x as string, "base64url").toString("base64");
 
+    const token = await this.getAuthToken();
+
     const res = await fetch("https://api.mullvad.net/app/v1/wireguard-keys", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Token ${this.accountId}`
+        "Authorization": `Bearer ${token}`
       },
       body: JSON.stringify({ pubkey: wgPublicBase64 })
     });
@@ -82,8 +95,8 @@ export class MullvadApiClient {
   generateWireproxyConfig(relay: MullvadRelay, device: MullvadDeviceKey): string {
     return `[Interface]
 PrivateKey = ${device.privkey}
-Address = ${device.ipv4_address}/32
-${device.ipv6_address ? `Address = ${device.ipv6_address}/128` : ""}
+Address = ${device.ipv4_address}
+${device.ipv6_address ? `Address = ${device.ipv6_address}` : ""}
 DNS = 10.64.0.1
 
 [Peer]
