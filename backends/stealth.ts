@@ -215,6 +215,11 @@ export async function createStealthSession(opts: SessionOpts): Promise<SessionHa
                "manifest_version": 2,
                "name": "Automati Dynamic Resizer",
                "version": "1.0",
+               "browser_specific_settings": {
+                   "gecko": {
+                       "id": "resizer@automati.local"
+                   }
+               },
                "background": {
                    "scripts": ["background.js"]
                },

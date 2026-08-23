@@ -202,8 +202,8 @@ export class CookieGuard {
       let clickSuccess = false;
       for (const sel of COOKIE_ACCEPT_SELECTORS) {
         try {
-          const btn = this.page.locator(`pierce/${sel}`).first();
-          if (await btn.isVisible({ timeout: 300 }).catch(() => false)) {
+          const btn = this.page.locator(sel).first();
+          if (await btn.isVisible({ timeout: 400 }).catch(() => false)) {
             await btn.click({ timeout: 1500 });
             clickSuccess = true;
             log.info(`✅ Dismissed via selector: ${sel}`);
@@ -216,8 +216,8 @@ export class CookieGuard {
       if (!clickSuccess) {
         for (const text of COOKIE_ACCEPT_TEXT_PATTERNS) {
           try {
-            const btn = this.page.locator(`pierce/button:has-text("${text}")`).first();
-            if (await btn.isVisible({ timeout: 200 }).catch(() => false)) {
+            const btn = this.page.locator(`button:has-text("${text}"), span:has-text("${text}"), a:has-text("${text}")`).first();
+            if (await btn.isVisible({ timeout: 300 }).catch(() => false)) {
               await btn.click({ timeout: 1500 });
               clickSuccess = true;
               log.info(`✅ Dismissed via text match: "${text}"`);
@@ -228,18 +228,18 @@ export class CookieGuard {
       }
 
       // Tier 3: CSS Force Hide (always runs as final safety net)
-      await this.page.evaluate((selectors: string[]) => {
+      await this.page.evaluate(`((selectors) => {
         for (const sel of selectors) {
           try {
             document.querySelectorAll(sel).forEach((el) => {
-              (el as HTMLElement).style.setProperty("display", "none", "important");
+              el.style.setProperty("display", "none", "important");
             });
           } catch { /* intentional */ }
         }
-      }, [...COOKIE_OVERLAY_SELECTORS] as string[]).catch(() => {});
+      })(${JSON.stringify(COOKIE_OVERLAY_SELECTORS)})`).catch(() => {});
 
       // Brief settle for CSS fade-outs
-      await new Promise((r) => setTimeout(r, 100));
+      await new Promise((r) => setTimeout(r, 120));
 
       // Verify dismissal
       const verified = await this.verifyDismissed();
@@ -274,7 +274,7 @@ export class CookieGuard {
                 const htmlEl = el as HTMLElement;
                 if (htmlEl.offsetParent !== null) {
                   const style = window.getComputedStyle(htmlEl);
-                  if (style.display !== "none" && style.visibility !== "hidden" && parseFloat(style.opacity) > 0.1) {
+                  if (style.display !== "none" && style.visibility !== "hidden" && parseFloat(style.opacity || "1") > 0.1) {
                     // This overlay is still visually present
                     return false;
                   }
@@ -315,11 +315,12 @@ export class CookieGuard {
   }
 
   /**
-   * Detect if a cookie overlay is currently present in the DOM.
+   * Detect if a cookie overlay or API is currently present in the DOM.
    */
   async isCookiePresent(): Promise<boolean> {
     try {
       return await this.page.evaluate((selectors: string[]) => {
+        if ((window as any).CookieInformation?.submitAllCategories) return true;
         for (const sel of selectors) {
           try {
             const els = document.querySelectorAll(sel);
@@ -327,7 +328,7 @@ export class CookieGuard {
               const htmlEl = el as HTMLElement;
               if (htmlEl.offsetParent !== null) {
                 const style = window.getComputedStyle(htmlEl);
-                if (style.display !== "none" && style.visibility !== "hidden") {
+                if (style.display !== "none" && style.visibility !== "hidden" && parseFloat(style.opacity || "1") > 0.1) {
                   return true;
                 }
               }
@@ -345,11 +346,11 @@ export class CookieGuard {
    * HARD GATE: Block until the cookie notice is confirmed dismissed.
    *
    * Flow:
-   *   1. Fire viewport click at T+500ms to encourage appearance
-   *   2. Poll every 200ms for cookie overlay presence
+   *   1. Fire viewport clicks at T+300ms, T+1500ms, T+3500ms to provoke cookie appearance
+   *   2. Actively poll for cookie presence / CookieInformation API
    *   3. When detected: run 3-tier dismiss cascade + verify
-   *   4. Fire another viewport click at T+2s if still waiting
-   *   5. If not dismissed after maxWaitMs: force CSS-hide + warn + proceed
+   *   4. Perform scheduled re-attempts every 1.5-2s to catch delayed async injections
+   *   5. If not dismissed after maxWaitMs: force CSS-hide + verify
    *
    * @returns true if dismissed (or force-cleared), false only if page closed
    */
@@ -358,56 +359,63 @@ export class CookieGuard {
 
     const { maxWaitMs, pollIntervalMs, siteName } = this.options;
     const startTime = Date.now();
-    let appearanceTriggered500 = false;
-    let appearanceTriggered2000 = false;
+    let appearanceTriggered300 = false;
+    let appearanceTriggered1500 = false;
+    let appearanceTriggered3500 = false;
     let dismissAttempts = 0;
+    let lastDismissAttempt = 0;
 
-    log.info(`${siteName}: Waiting for cookie notice (max ${maxWaitMs / 1000}s)...`);
+    log.info(`${siteName}: Waiting for cookie notice (max ${maxWaitMs / 1000}s on fresh launch)...`);
 
     while (Date.now() - startTime < maxWaitMs) {
       if (this.page.isClosed()) return false;
 
       const elapsed = Date.now() - startTime;
 
-      // Fire viewport click at T+500ms to speed up cookie appearance
-      if (!appearanceTriggered500 && elapsed >= 500) {
-        appearanceTriggered500 = true;
+      // Fire viewport click at T+300ms to speed up cookie appearance
+      if (!appearanceTriggered300 && elapsed >= 300) {
+        appearanceTriggered300 = true;
         await this.triggerAppearance();
       }
 
-      // Fire another viewport click at T+2s
-      if (!appearanceTriggered2000 && elapsed >= 2000) {
-        appearanceTriggered2000 = true;
+      // Fire another viewport click at T+1.5s
+      if (!appearanceTriggered1500 && elapsed >= 1500) {
+        appearanceTriggered1500 = true;
         await this.triggerAppearance();
       }
 
-      // Check if cookie is present
+      // Fire another viewport click at T+3.5s
+      if (!appearanceTriggered3500 && elapsed >= 3500) {
+        appearanceTriggered3500 = true;
+        await this.triggerAppearance();
+      }
+
+      // Check if cookie banner or API is present
       const present = await this.isCookiePresent();
 
       if (present) {
-        dismissAttempts++;
-        log.info(`${siteName}: Cookie notice detected at T+${elapsed}ms (attempt ${dismissAttempts})`);
+        if (Date.now() - lastDismissAttempt > 500) {
+          dismissAttempts++;
+          lastDismissAttempt = Date.now();
+          log.info(`${siteName}: Cookie notice detected at T+${elapsed}ms (attempt ${dismissAttempts})`);
 
-        const success = await this.dismiss();
-        if (success) {
-          log.info(`${siteName}: ✅ Cookie dismissed and verified at T+${Date.now() - startTime}ms`);
-          return true;
+          const success = await this.dismiss();
+          if (success) {
+            log.info(`${siteName}: ✅ Cookie dismissed and verified at T+${Date.now() - startTime}ms`);
+            // Brief extra pause to ensure any banner re-animation is caught
+            await new Promise((r) => setTimeout(r, 150));
+            return true;
+          }
         }
-
-        // If dismiss failed, wait a bit and retry
-        await new Promise((r) => setTimeout(r, 100));
-        continue;
       }
 
-      // Check if already dismissed (by initScript speed layer)
+      // Check if verified accessible
       const verified = await this.verifyDismissed();
       if (verified) {
-        // No overlay visible and form inputs are accessible — either dismissed or never appeared yet
-        // But we know it ALWAYS appears, so keep waiting unless we're past the typical window
-        if (elapsed > 8000) {
-          // Past the typical 3-10s window — likely already dismissed by initScript
+        // Only consider settled after at least 1500ms to guarantee async banners had time to mount
+        if (elapsed > 2000) {
           this._dismissed = true;
-          log.info(`${siteName}: ✅ No overlay detected after ${elapsed}ms — likely dismissed by speed layer`);
+          log.info(`${siteName}: ✅ Form inputs verified accessible at T+${elapsed}ms`);
           return true;
         }
       }
@@ -415,34 +423,29 @@ export class CookieGuard {
       await new Promise((r) => setTimeout(r, pollIntervalMs));
     }
 
-    // Timeout: force CSS-hide and proceed
-    log.warn(`${siteName}: ⚠ Cookie wait timed out after ${maxWaitMs}ms — forcing CSS-hide and proceeding`);
-    await this.page.evaluate((selectors: string[]) => {
-      for (const sel of selectors) {
-        try {
-          document.querySelectorAll(sel).forEach((el) => {
-            (el as HTMLElement).style.setProperty("display", "none", "important");
-          });
-        } catch { /* intentional */ }
-      }
-    }, [...COOKIE_OVERLAY_SELECTORS] as string[]).catch(() => {});
-
+    // Timeout: force CSS-hide, dismiss, and proceed
+    log.warn(`${siteName}: ⚠ Cookie wait timed out after ${maxWaitMs}ms — running final 3-tier cascade and proceeding`);
+    await this.dismiss();
     this._dismissed = true;
     return true;
   }
 
   /**
-   * Re-check and re-dismiss if needed (for use during no-response restart flows).
+   * Re-check and re-dismiss if needed (for use during fast-loop iterations or pre-submit checks).
    */
   async recheckAndDismiss(): Promise<boolean> {
     this._dismissed = false;
     const present = await this.isCookiePresent();
     if (present) {
-      log.info(`${this.options.siteName}: Cookie reappeared — re-dismissing`);
+      log.info(`${this.options.siteName}: Cookie reappeared or still present — executing re-dismissal cascade`);
       return this.dismiss();
     }
     const verified = await this.verifyDismissed();
-    this._dismissed = verified;
-    return verified;
+    if (!verified) {
+      log.info(`${this.options.siteName}: Form inputs obscured — executing re-dismissal cascade`);
+      return this.dismiss();
+    }
+    this._dismissed = true;
+    return true;
   }
 }
