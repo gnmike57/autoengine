@@ -1,11 +1,12 @@
 import fs from 'fs';
 import path from 'path';
-import { exec } from 'child_process';
+import vm from 'node:vm';
 import { createLogger } from '../core/logger.js';
 import { readRecentRecords, computePhaseStats, type PhaseTimings } from './timing-telemetry.js';
 import { addProposal, calculateConfidence, type ProposalEvidence } from './hermes-proposals.js';
 import { HermesLLM, getHermesLLM } from './hermes-llm.js';
 import { DynamicTimings } from '../core/timings.js';
+import { insertRevision, getLastActiveRevision, markRevisionRolledBack } from '../core/database.js';
 
 const log = createLogger('OpsOrchestrator');
 
@@ -91,21 +92,54 @@ export class OpsOrchestrator {
   public async executeSkill(skill: OpsSkill) {
     log.info(`[Ops] Executing OpsSkill: ${skill.id}...`);
     return new Promise<void>((resolve) => {
-      const proc = exec(skill.script, { timeout: 30000, cwd: process.cwd() }, (err, stdout, stderr) => {
-        if (err) {
-          log.warn(`[Ops] OpsSkill ${skill.id} FAILED: ${stderr || err.message}`);
-          this.onSkillComplete?.(skill, false, stderr || err.message);
-        } else {
-          log.info(`[Ops] OpsSkill ${skill.id} OK: ${stdout.substring(0, 200)}`);
-          this.onSkillComplete?.(skill, true, stdout);
-        }
-        resolve();
-      });
-      proc.unref();
+      try {
+        const sandboxContext = vm.createContext({
+          console: {
+            log: (...args: any[]) => log.info(`[OpsSkill ${skill.id}]`, ...args),
+            error: (...args: any[]) => log.warn(`[OpsSkill ${skill.id}] ERROR:`, ...args),
+            warn: (...args: any[]) => log.warn(`[OpsSkill ${skill.id}] WARN:`, ...args)
+          },
+          fetch: fetch,
+          setTimeout: setTimeout,
+          clearTimeout: clearTimeout
+        });
+
+        // Run the script in the isolated context with a strict timeout
+        vm.runInNewContext(skill.script, sandboxContext, { timeout: 5000 });
+        
+        log.info(`[Ops] OpsSkill ${skill.id} executed successfully in sandbox.`);
+        this.onSkillComplete?.(skill, true, "Sandbox execution OK");
+      } catch (err) {
+        log.warn(`[Ops] OpsSkill ${skill.id} FAILED in sandbox: ${err instanceof Error ? err.message : String(err)}`);
+        this.onSkillComplete?.(skill, false, err instanceof Error ? err.message : String(err));
+      }
+      resolve();
     });
   }
 
-  public async evaluateTriggers(context: { recentOutcomes: string[]; stats: Record<string, number> }) {
+  public async evaluateTriggers(context: { recentOutcomes: string[]; stats: Record<string, number>; successRate?: number }) {
+    // 1. Rollback mechanism
+    if (context.successRate !== undefined && context.successRate < 0.4) {
+      // Success rate is below 40% (a severe drop), let's check for recent revisions to rollback
+      const lastRevision = getLastActiveRevision() as any;
+      if (lastRevision) {
+        log.warn(`🚨 [Ops] Success rate dropped to ${Math.round(context.successRate * 100)}%. Triggering rollback of revision ${lastRevision.id} (${lastRevision.revision_type}).`);
+        
+        if (lastRevision.revision_type === 'timing') {
+          const prevState = JSON.parse(lastRevision.previous_state) as Record<string, number>;
+          Object.assign(DynamicTimings, prevState);
+          log.info(`[Ops] Restored DynamicTimings to pre-revision state.`);
+        } else if (lastRevision.revision_type === 'skill') {
+          // Disable the skill by removing it from active
+          this.activeSkills = this.activeSkills.filter(s => s.id !== lastRevision.target_id);
+          log.info(`[Ops] Disabled anomalous OpsSkill ${lastRevision.target_id}.`);
+        }
+        
+        markRevisionRolledBack(lastRevision.id, "Success rate dropped below threshold");
+      }
+    }
+
+    // 2. Normal anomaly execution
     for (const skill of this.activeSkills) {
       if (skill.triggerCondition === 'manual') continue;
       if (skill.triggerCondition.includes('anomaly') && context.recentOutcomes.includes('blocked')) {
@@ -159,6 +193,14 @@ export class OpsOrchestrator {
         };
 
         const confidence = calculateConfidence(evidence);
+
+        // Record a snapshot of the state before creating the proposal, so if applied it can be rolled back
+        insertRevision(
+          "timing",
+          constant,
+          JSON.stringify(DynamicTimings),
+          JSON.stringify({ ...DynamicTimings, [constant]: safeProposed })
+        );
 
         addProposal({
           type: "timing_reduction",

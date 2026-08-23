@@ -144,6 +144,10 @@ export class HermesObserver {
   private sessions: Map<string, ObserverSession> = new Map();
   private llm: HermesLLM;
   private staleCleanupTimer: ReturnType<typeof setInterval> | null = null;
+  
+  // Self-repair loop prevention
+  private globalRepairCooldownUntil: number = 0;
+  private anomalyRepairHistory: Map<string, { attempts: number, lastAttemptAt: number, failedSuggestions: string[] }> = new Map();
 
   constructor() {
     this.llm = getHermesLLM();
@@ -482,11 +486,50 @@ Look at this screenshot and tell me: Is the verdict correct? What should happen 
     const session = this.sessions.get(sessionId);
     if (!session) return null;
 
+    // 1. Check Global Cooldown
+    if (Date.now() < this.globalRepairCooldownUntil) {
+      log.warn(`[HermesObserver] 🛑 Skipping self-repair for [${sessionId}] due to active global cooldown.`);
+      return null;
+    }
+
+    // 2. Track Anomaly Repair History
+    let history = this.anomalyRepairHistory.get(issue);
+    if (!history) {
+      history = { attempts: 0, lastAttemptAt: 0, failedSuggestions: [] };
+      this.anomalyRepairHistory.set(issue, history);
+    }
+    
+    // Reset history if it's been more than 24 hours
+    if (Date.now() - history.lastAttemptAt > 24 * 60 * 60 * 1000) {
+      history.attempts = 0;
+      history.failedSuggestions = [];
+    }
+
+    // 3. Max Attempts Threshold
+    if (history.attempts >= 2) {
+      log.error(`[HermesObserver] 🛑 Halt! Anomaly "${issue}" has failed repair >2 times in 24h. Escalating to human review.`);
+      persistIntelligence({
+        timestamp: new Date().toISOString(),
+        sessionId,
+        type: "external_anomaly",
+        anomalyType: "INFINITE_REPAIR_LOOP_PREVENTED",
+        details: { issue, history }
+      });
+      return null;
+    }
+
+    history.attempts++;
+    history.lastAttemptAt = Date.now();
+
     try {
+      const historyContext = history.failedSuggestions.length > 0 
+        ? `\nPREVIOUS FAILED ATTEMPTS for this anomaly (DO NOT REPEAT THESE):\n${history.failedSuggestions.join('\n')}\nYou must explicitly attempt a RADICALLY DIFFERENT APPROACH.`
+        : "";
+
       const userContent = `Issue detected: ${issue}
 Current automation state: ${currentState}
 Session: ${session.email} @ ${session.site}
-Attempt results so far: ${session.attemptResults.map(a => `A${(a.attemptIdx ?? 0) + 1}=${a.verdict ?? a.outcome ?? "?"}`).join(", ") || "none"}
+Attempt results so far: ${session.attemptResults.map(a => `A${(a.attemptIdx ?? 0) + 1}=${a.verdict ?? a.outcome ?? "?"}`).join(", ") || "none"}${historyContext}
 
 What is the most likely cause and what correction should be applied immediately?`;
 
@@ -494,6 +537,13 @@ What is the most likely cause and what correction should be applied immediately?
 
       if (result.content) {
         log.info(`[HermesObserver] 💡 Correction [${sessionId}]: ${result.content.substring(0, 200)}`);
+        
+        // Track the suggestion so we don't repeat it
+        history.failedSuggestions.push(result.content);
+        
+        // Apply 1-hour global cooldown
+        this.globalRepairCooldownUntil = Date.now() + 60 * 60 * 1000;
+        log.info(`[HermesObserver] ⏱️ Global repair cooldown activated for 1 hour.`);
 
         persistIntelligence({
           timestamp: new Date().toISOString(),

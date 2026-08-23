@@ -245,6 +245,17 @@ export function initDB() {
     CREATE INDEX IF NOT EXISTS idx_telemetry_session ON session_telemetry(session_id);
     CREATE INDEX IF NOT EXISTS idx_telemetry_outcome ON session_telemetry(outcome);
     CREATE INDEX IF NOT EXISTS idx_telemetry_backend ON session_telemetry(backend);
+
+    -- Ops Revisions (Rollback Tracker)
+    CREATE TABLE IF NOT EXISTS ops_revisions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      revision_type TEXT NOT NULL, -- 'timing' or 'skill'
+      target_id TEXT NOT NULL,
+      previous_state TEXT NOT NULL,
+      new_state TEXT NOT NULL,
+      applied_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      status TEXT DEFAULT 'active' -- 'active' or 'rolled_back'
+    );
   `);
 
     // Schema Migration for new columns
@@ -412,6 +423,38 @@ export function countCredentials(): number {
 
 export function countTestRuns(): number {
   return (getStmt('SELECT COUNT(*) as cnt FROM test_runs').get() as { cnt: number }).cnt;
+}
+
+// ── Ops Revisions (Rollback Mechanism) ──────────────────────────────────────
+
+export function insertRevision(type: string, targetId: string, previousState: string, newState: string): number {
+  let id = -1;
+  pushToWriteQueue(() => {
+    const info = getStmt(
+      `INSERT INTO ops_revisions (revision_type, target_id, previous_state, new_state, status) 
+       VALUES (?, ?, ?, ?, 'active')`
+    ).run(type, targetId, previousState, newState);
+    id = info.lastInsertRowid as number;
+  });
+  return id;
+}
+
+export function getLastActiveRevision(): any {
+  return getStmt(
+    `SELECT * FROM ops_revisions 
+     WHERE status = 'active' 
+     ORDER BY id DESC LIMIT 1`
+  ).get();
+}
+
+export function markRevisionRolledBack(id: number, reason: string): void {
+  pushToWriteQueue(() => {
+    getStmt(
+      `UPDATE ops_revisions 
+       SET status = 'rolled_back'
+       WHERE id = ?`
+    ).run(id);
+  });
 }
 
 // ── CSV Import ──────────────────────────────────────────────────────────────
