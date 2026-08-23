@@ -227,10 +227,12 @@ export async function createSession(opts: SessionOpts): Promise<SessionHandle> {
   if (opts.backend?.startsWith("cloak-")) {
     if (opts.backend?.includes("nocloak")) opts = { ...opts, useHttpCloak: false };
     if (opts.backend?.includes("headed")) opts = { ...opts, headless: false, liveTest: true };
+    else opts = { ...opts, headless: true, liveTest: false };
     return launchSessionWithContract(() => createCloakSession(opts), opts, proxyRequirement);
   }
   if (opts.backend?.startsWith("stealth")) {
     if (opts.backend?.includes("headed")) opts = { ...opts, headless: false, liveTest: true };
+    else opts = { ...opts, headless: true, liveTest: false };
     if (opts.backend?.includes("httpcloak")) opts = { ...opts, useHttpCloak: true };
     // Apex Enhancement #3: Drop Redundant JS Injections for Native Engines
     opts = { ...opts, injectStealthJS: false };
@@ -238,6 +240,7 @@ export async function createSession(opts: SessionOpts): Promise<SessionHandle> {
   }
   if (opts.backend?.startsWith("zendriver")) {
     if (opts.backend?.includes("headed")) opts = { ...opts, headless: false, liveTest: true };
+    else opts = { ...opts, headless: true, liveTest: false };
     return launchSessionWithContract(() => createZendriverSession(opts), opts, proxyRequirement);
   }
   // Default fallback — cloak-headless (was spider-cloud before spider was disabled)

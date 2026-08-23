@@ -134,6 +134,14 @@ export async function createStealthSession(opts: SessionOpts): Promise<SessionHa
     firefoxUserPrefs: {
       'dom.disable_window_move_resize': false,
       'privacy.resistFingerprinting.letterboxing': false,
+      'browser.sessionstore.resume_from_crash': false,
+      'browser.sessionstore.max_resumed_crashes': 0,
+      'toolkit.startup.max_resumed_crashes': -1,
+      'browser.sessionstore.enabled': false,
+      'browser.sessionstore.restore_on_demand': false,
+      'browser.sessionstore.max_tabs_undo': 0,
+      'browser.sessionstore.privacy_level': 2,
+      'browser.startup.page': 0,
     },
   };
 
@@ -258,15 +266,10 @@ export async function createStealthSession(opts: SessionOpts): Promise<SessionHa
        }
     }
   } else {
-    // Pseudo-headless: force headful but hidden off-screen.
-    // IMPORTANT: Use realistic viewport dimensions (1280x720) instead of 1x1.
-    // A 1x1 window creates window.innerWidth=1 which is instantly flagged as
-    // non-human by any anti-bot viewport check. The official docs explicitly
-    // warn against fixed window sizes, but 1x1 is catastrophically detectable.
-    browserConfig.headless = false;
+    // True native headless mode: no OS window created, zero dialog interference
+    browserConfig.headless = true;
     browserConfig.window = [1280, 720];
     browserConfig.args = ["-width", "1280", "-height", "720"];
-    (browserConfig)._initialBounds = { x: -2000, y: -2000, width: 1280, height: 720 };
   }
 
   let browser: any;
