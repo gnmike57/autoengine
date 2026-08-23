@@ -44,6 +44,9 @@ interface CredentialRow {
   email: string;
   passwords: string;
   outcome: string | null;
+  status?: string | null;
+  processing_started_at?: number | null;
+  crash_count?: number;
   last_tested_at: string | null;
   retry_count: number;
 }
@@ -100,26 +103,63 @@ export function scanForRequeue(config: RequeuerConfig = {}): RequeueResult {
     };
   }
 
-  const db = new Database(dbPath, { readonly: true });
+  // Use writable connection to mark state and recover limbo
+  const db = new Database(dbPath);
   try {
     db.pragma("journal_mode = WAL");
+    
+    // Create new status columns if they don't exist
+    try {
+      db.exec(`
+        ALTER TABLE credentials ADD COLUMN status TEXT DEFAULT 'untested';
+      `);
+      db.exec(`
+        ALTER TABLE credentials ADD COLUMN processing_started_at INTEGER;
+      `);
+      db.exec(`
+        ALTER TABLE credentials ADD COLUMN crash_count INTEGER DEFAULT 0;
+      `);
+    } catch {
+      // Columns likely already exist
+    }
   } catch {
-    // Ignore error if readonly connection cannot set pragma
+    // Ignore error if connection cannot set pragma
   }
 
   try {
     let rows: CredentialRow[] = [];
 
     try {
+      // Recover Limbo Credentials (processing > 15 mins)
+      const limboThreshold = Date.now() - (15 * 60 * 1000);
+      db.prepare(`
+        UPDATE credentials 
+        SET status = 'untested',
+            crash_count = COALESCE(crash_count, 0) + 1,
+            processing_started_at = NULL
+        WHERE status = 'processing' AND processing_started_at < ?
+      `).run(limboThreshold);
+      
+      // Move crash loopers to DLQ
+      db.prepare(`
+        UPDATE credentials 
+        SET status = 'DLQ', outcome = 'DLQ_CRASH_LOOP'
+        WHERE crash_count >= 3 AND status = 'untested'
+      `).run();
+
       rows = db
         .prepare(
           `SELECT
             email,
             passwords,
             outcome,
+            status,
+            processing_started_at,
+            crash_count,
             last_tested_at,
             COALESCE(retry_count, 0) as retry_count
           FROM credentials
+          WHERE status != 'DLQ' AND status != 'processing'
           ORDER BY last_tested_at ASC NULLS FIRST`
         )
         .all() as CredentialRow[];
@@ -132,6 +172,9 @@ export function scanForRequeue(config: RequeuerConfig = {}): RequeueResult {
               email,
               passwords,
               outcome,
+              NULL as status,
+              NULL as processing_started_at,
+              0 as crash_count,
               NULL as last_tested_at,
               0 as retry_count
             FROM credentials`
@@ -210,6 +253,25 @@ export function scanForRequeue(config: RequeuerConfig = {}): RequeueResult {
 
     const recommendedBatchSize = Math.min(eligible.length, maxBatchSize);
     const batch = eligible.slice(0, recommendedBatchSize);
+
+    // Claim the batch in the DB
+    if (batch.length > 0) {
+      try {
+        const updateStmt = db.prepare(`
+          UPDATE credentials 
+          SET status = 'processing', processing_started_at = ?
+          WHERE email = ?
+        `);
+        const claimTx = db.transaction((emails: string[], timestamp: number) => {
+          for (const email of emails) {
+            updateStmt.run(timestamp, email);
+          }
+        });
+        claimTx(batch.map(b => b.email), Date.now());
+      } catch (e) {
+        log.error(`[Requeue] Failed to claim batch: ${e}`);
+      }
+    }
 
     log.info(
       `[Requeue Scan] Total: ${rows.length} | Terminal: ${terminalCount} | ` +
