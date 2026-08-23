@@ -11,6 +11,18 @@ import { MullvadApiClient, type MullvadRelay } from "./mullvad-api.js";
 
 const execAsync = promisify(exec);
 
+const activeWireguardSessions = new Set<string>();
+const activeWireguardProcesses = new Set<ChildProcess>();
+
+process.on("exit", () => {
+  for (const child of activeWireguardProcesses) {
+    try { child.kill("SIGKILL"); } catch { /* ignore */ }
+  }
+  for (const dir of activeWireguardSessions) {
+    try { fs.rmSync(dir, { recursive: true, force: true }); } catch { /* ignore */ }
+  }
+});
+
 export type MullvadSessionMode = "disabled" | "os-socks" | "wireproxy" | "wireproxy-api" | "mullvad-cli";
 
 export interface SessionProxyEntry {
@@ -143,9 +155,12 @@ async function defaultLaunchWireproxy(input: {
     detached: false,
   });
   child.stderr?.on("data", (data) => console.error(`[wireproxy stderr] ${data.toString()}`));
+  activeWireguardProcesses.add(child);
+  
   let closing = false;
   let unexpectedExit: string | undefined;
   child.once("exit", (code, signal) => {
+    activeWireguardProcesses.delete(child);
     if (!closing) unexpectedExit = `wireproxy-exited-after-ready:${code ?? "null"}:${signal ?? "none"}`;
   });
   try {
@@ -154,6 +169,7 @@ async function defaultLaunchWireproxy(input: {
     closing = true;
     child.kill("SIGKILL");
     fs.rmSync(runtimeConfig, { force: true });
+    activeWireguardProcesses.delete(child);
     throw error;
   }
 
@@ -167,6 +183,7 @@ async function defaultLaunchWireproxy(input: {
       if (closed) return;
       closed = true;
       closing = true;
+      activeWireguardProcesses.delete(child);
       if (child.exitCode === null) {
         child.kill("SIGTERM");
         await Promise.race([
@@ -428,12 +445,15 @@ export class MullvadSessionAdapter {
     const configId = sanitizedId(`${device.pubkey}-${relay.hostname}`);
     const runtimeDir = path.join(this.options.stateDir, `api-session-${sanitizedId(sessionKey)}-${configId}`);
     
-    fs.mkdirSync(runtimeDir, { recursive: true, mode: 0o700 });
-    const sourceConfigPath = path.join(runtimeDir, "base.conf");
-    fs.writeFileSync(sourceConfigPath, configContent, { encoding: "utf8", mode: 0o600 });
-    
     let managed: ManagedWireproxy | undefined;
+    
     try {
+      fs.mkdirSync(runtimeDir, { recursive: true, mode: 0o700 });
+      activeWireguardSessions.add(runtimeDir);
+      
+      const sourceConfigPath = path.join(runtimeDir, "base.conf");
+      fs.writeFileSync(sourceConfigPath, configContent, { encoding: "utf8", mode: 0o600 });
+      
       const bindPort = await this.dependencies.reservePort(this.options.bindHost);
       managed = await this.dependencies.launchWireproxy({
         binary: this.options.wireproxyBinary,
@@ -461,11 +481,13 @@ export class MullvadSessionAdapter {
         close: async () => {
           if (closed) return;
           closed = true;
+          activeWireguardSessions.delete(runtimeDir);
           await managed?.close();
           fs.rmSync(runtimeDir, { recursive: true, force: true });
         },
       };
     } catch (error) {
+      activeWireguardSessions.delete(runtimeDir);
       await managed?.close().catch(() => {});
       fs.rmSync(runtimeDir, { recursive: true, force: true });
       throw error;

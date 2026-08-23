@@ -13,6 +13,7 @@
 
 import fs from "node:fs";
 import { createLogger } from "../core/logger.js";
+import { withResilience } from "../core/network-resilience.js";
 
 const log = createLogger("HermesLLM");
 
@@ -86,26 +87,35 @@ export class HermesLLM {
 
     const start = performance.now();
     try {
-      const response = await fetch(OPENROUTER_URL, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${this.config.openRouterApiKey}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": "https://automati.dev",
-          "X-Title": "Hermes Observer",
-        },
-        body: JSON.stringify({
-          model: this.config.textModel,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userContent },
-          ],
-          max_tokens: this.config.maxTokens,
-          temperature: this.config.temperature,
-        }),
-      });
+      const response = await withResilience(async () => {
+        const res = await fetch(OPENROUTER_URL, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${this.config.openRouterApiKey}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://automati.dev",
+            "X-Title": "Hermes Observer",
+          },
+          body: JSON.stringify({
+            model: this.config.textModel,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userContent }
+            ],
+            max_tokens: this.config.maxTokens,
+            temperature: this.config.temperature,
+          })
+        });
+        
+        if (!res.ok) {
+          const err = new Error(`OpenRouter API error: ${res.statusText}`) as any;
+          err.status = res.status;
+          throw err;
+        }
+        return res;
+      }, { contextName: "HermesLLM.analyzeText" });
 
-      const data = await response.json();
+      const data = await response.json() as any;
       const latencyMs = Math.round(performance.now() - start);
       this.requestCount++;
       this.totalLatencyMs += latencyMs;
@@ -141,37 +151,43 @@ export class HermesLLM {
     }
 
     const start = performance.now();
-    const base64 = screenshotBuffer.toString("base64");
+    const base64Image = screenshotBuffer.toString("base64");
 
     try {
-      const response = await fetch(OPENROUTER_URL, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${this.config.openRouterApiKey}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": "https://automati.dev",
-          "X-Title": "Hermes Vision",
-        },
-        body: JSON.stringify({
-          model: this.config.visionModel,
-          messages: [
-            {
-              role: "user",
-              content: [
-                { type: "text", text: prompt },
-                {
-                  type: "image_url",
-                  image_url: { url: `data:image/png;base64,${base64}` },
-                },
-              ],
-            },
-          ],
-          max_tokens: this.config.maxTokens,
-          temperature: this.config.temperature,
-        }),
-      });
+      const response = await withResilience(async () => {
+        const res = await fetch(OPENROUTER_URL, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${this.config.openRouterApiKey}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://automati.dev",
+            "X-Title": "Hermes Vision",
+          },
+          body: JSON.stringify({
+            model: this.config.visionModel,
+            messages: [
+              {
+                role: "user",
+                content: [
+                  { type: "text", text: prompt },
+                  { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64Image}` } }
+                ]
+              }
+            ],
+            max_tokens: this.config.maxTokens,
+            temperature: this.config.temperature,
+          })
+        });
 
-      const data = await response.json();
+        if (!res.ok) {
+          const err = new Error(`OpenRouter API error: ${res.statusText}`) as any;
+          err.status = res.status;
+          throw err;
+        }
+        return res;
+      }, { contextName: "HermesLLM.analyzeScreenshot" });
+
+      const data = await response.json() as any;
       const latencyMs = Math.round(performance.now() - start);
       this.requestCount++;
       this.totalLatencyMs += latencyMs;

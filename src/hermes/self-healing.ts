@@ -1,10 +1,36 @@
 import { execFile } from "child_process";
 import fs from "fs";
 import path from "path";
+import { killOurOrphans } from "../services/process-cleaner.js";
 
 // Hermes Auto-Revert & Commit System
 
 export class SelfHealingAgent {
+    private healingLoopInterval: ReturnType<typeof setInterval> | null = null;
+
+    /**
+     * Starts the active zombie sweeper loop that runs every 5 minutes.
+     */
+    public startHealingLoop(): void {
+        if (this.healingLoopInterval) return;
+
+        console.log("[Hermes Healing] Starting active zombie sweeper loop (5 min interval)");
+        
+        this.healingLoopInterval = setInterval(async () => {
+            try {
+                console.log("[Hermes Healing] Sweeping for orphaned browser processes...");
+                const result = await killOurOrphans({ timeoutMs: 5000, minEtimeSec: 300 });
+                if (result.killed > 0) {
+                    console.log(`[Hermes Healing] Successfully reaped ${result.killed} zombie processes.`);
+                }
+            } catch (err) {
+                console.error("[Hermes Healing] Zombie sweeper loop encountered an error:", err);
+            }
+        }, 5 * 60 * 1000);
+        
+        // Don't prevent process exit
+        this.healingLoopInterval.unref();
+    }
 
     /**
      * Attempts to commit a live patch. If a patch fails later, Hermes will trigger a revert.

@@ -55,6 +55,7 @@ import { globalTiler } from "../services/browser-tiler.js";
 import { getHermesObserver } from "../hermes/hermes-observer.js";
 import { getPendingProposals } from "../hermes/hermes-proposals.js";
 import { OpsOrchestrator } from "../hermes/ops-orchestrator.js";
+import { hermesHealer } from "../hermes/self-healing.js";
 
 import { db, initDB, startCredentialsWatcher, importCsv, getUntestedCredentials, getCredentialsByEmails, getAllCredentialsHistory, getCategorizedTempDisabled, countCredentials, getAllCredentialsWithLatestStatus, getResultSummary, saveTargetWinner, getTargetWinners, type RestoredRow, closeDB, getStmt } from "../core/database.js";
 
@@ -3024,6 +3025,9 @@ httpServer.on('error', (err: NodeJS.ErrnoException) => {
   }
   process.exit(1);
 });
+
+// Start Hermes self-healing active zombie sweeper loop
+hermesHealer.startHealingLoop();
 
 process.env.VITEST ? null : httpServer.listen(PORT, "0.0.0.0", () => {
   const watchdog = new Watchdog({

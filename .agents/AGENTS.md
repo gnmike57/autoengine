@@ -33,6 +33,7 @@ Instead of a single monolithic file, you MUST load the rules from the `.agents/r
 - `<RULE[.agents/rules/6-pipeline.md]>`
 - `<RULE[.agents/rules/7-security.md]>`
 - `<RULE[.agents/rules/8-hermes-ipc.md]>`
+- `<RULE[.agents/rules/9-infrastructure.md]>`
 
 ## QA Subagent (qa-bot)
 When making deep architectural changes, you are explicitly encouraged to use the `define_subagent` tool to spawn a `qa-bot` in the background. Tell the qa-bot to continually run `npm run typecheck` and test the code against the proxy targets while you continue writing code.

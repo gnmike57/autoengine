@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import fetch from "node-fetch";
+import { withResilience } from "../core/network-resilience.js";
 
 export interface MullvadRelay {
   hostname: string;
@@ -35,23 +36,33 @@ export class MullvadApiClient {
    * Fetches the complete list of active Mullvad relays.
    */
   async fetchRelays(): Promise<MullvadRelay[]> {
-    const res = await fetch("https://api.mullvad.net/www/relays/all/");
-    if (!res.ok) {
-      throw new Error(`Failed to fetch mullvad relays: ${res.status} ${res.statusText}`);
-    }
-    const data = await res.json() as MullvadRelay[];
-    return data.filter(r => r.active && r.type === "wireguard");
+    return withResilience(async () => {
+      const res = await fetch("https://api.mullvad.net/www/relays/all/");
+      if (!res.ok) {
+        const error = new Error(`Failed to fetch mullvad relays: ${res.status} ${res.statusText}`) as any;
+        error.status = res.status;
+        throw error;
+      }
+      const data = await res.json() as MullvadRelay[];
+      return data.filter(r => r.active && r.type === "wireguard");
+    }, { contextName: "MullvadAPI.fetchRelays" });
   }
 
   private async getAuthToken(): Promise<string> {
-    const res = await fetch("https://api.mullvad.net/auth/v1/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ account_number: this.accountId })
-    });
-    if (!res.ok) throw new Error(`Failed to get auth token: ${res.status} ${res.statusText}`);
-    const data = await res.json() as { access_token: string };
-    return data.access_token;
+    return withResilience(async () => {
+      const res = await fetch("https://api.mullvad.net/auth/v1/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ account_number: this.accountId })
+      });
+      if (!res.ok) {
+        const error = new Error(`Failed to get auth token: ${res.status} ${res.statusText}`) as any;
+        error.status = res.status;
+        throw error;
+      }
+      const data = await res.json() as { access_token: string };
+      return data.access_token;
+    }, { contextName: "MullvadAPI.getAuthToken" });
   }
 
   /**
@@ -66,27 +77,31 @@ export class MullvadApiClient {
 
     const token = await this.getAuthToken();
 
-    const res = await fetch("https://api.mullvad.net/app/v1/wireguard-keys", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify({ pubkey: wgPublicBase64 })
-    });
+    return withResilience(async () => {
+      const res = await fetch("https://api.mullvad.net/app/v1/wireguard-keys", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ pubkey: wgPublicBase64 })
+      });
 
-    if (!res.ok) {
-      throw new Error(`Failed to register wireguard key with Mullvad: ${res.status} ${res.statusText}`);
-    }
+      if (!res.ok) {
+        const error = new Error(`Failed to register wireguard key with Mullvad: ${res.status} ${res.statusText}`) as any;
+        error.status = res.status;
+        throw error;
+      }
 
-    const data = await res.json() as { ipv4_address: string; ipv6_address?: string };
-    
-    return {
-      pubkey: wgPublicBase64,
-      privkey: wgPrivateBase64,
-      ipv4_address: data.ipv4_address,
-      ipv6_address: data.ipv6_address
-    };
+      const data = await res.json() as { ipv4_address: string; ipv6_address?: string };
+      
+      return {
+        pubkey: wgPublicBase64,
+        privkey: wgPrivateBase64,
+        ipv4_address: data.ipv4_address,
+        ipv6_address: data.ipv6_address
+      };
+    }, { contextName: "MullvadAPI.generateDevice" });
   }
 
   /**
