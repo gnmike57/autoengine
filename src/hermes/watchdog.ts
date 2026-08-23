@@ -80,8 +80,32 @@ export class Watchdog {
       memoryRestartMB: config.memoryRestartMB ?? 2000,
       stallTimeoutMs: config.stallTimeoutMs ?? 300000,
       onRestart: config.onRestart ?? ((reason) => {
-        log.error(`[Watchdog] Restart requested: ${reason} — exiting process to force restart`);
-        setImmediate(() => process.exit(1));
+        log.error(`[Watchdog] Graceful drain requested: ${reason} — triggering DRAIN state and waiting up to 60s`);
+        
+        let timeWaited = 0;
+        const drainTimeoutMs = 60000;
+        
+        const drainInterval = setInterval(() => {
+          timeWaited += 5000;
+          const active = this.getActiveSessions ? this.getActiveSessions() : 0;
+          
+          if (active === 0 || timeWaited >= drainTimeoutMs) {
+            clearInterval(drainInterval);
+            log.warn(`[Watchdog] Drain complete (Active: ${active}, Time: ${timeWaited}ms). Sweeping zombies...`);
+            
+            try {
+              const { killOurOrphans } = require("../services/process-cleaner.js");
+              killOurOrphans();
+            } catch (e) {
+              log.error(`[Watchdog] Failed to clean zombies during drain: ${e}`);
+            }
+            
+            log.error(`[Watchdog] Exiting cleanly for PM2 restart.`);
+            setImmediate(() => process.exit(0));
+          } else {
+            log.info(`[Watchdog] Draining... ${active} sessions remain. Waited ${timeWaited/1000}s`);
+          }
+        }, 5000);
       }),
       onWarn: config.onWarn ?? ((msg) => log.warn(msg)),
       isEngineRunning: config.isEngineRunning ?? (() => false),
