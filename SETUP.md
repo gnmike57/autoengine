@@ -1,164 +1,94 @@
-# Automation Engine — First-Run Setup Guide
+# Setup & Operations Guide
 
-This guide covers everything needed to get the engine running from a fresh clone.
-
----
-
-## 1. Prerequisites
-
-| Dependency | Version | Required For |
-|---|---|---|
-| **Node.js** | ≥ 22 | All backends |
-| **npm** | ≥ 10 | Package install |
-| **Python** | ≥ 3.11 | zendriver backend |
-| **uv** | latest | zendriver Python env |
-| **ffmpeg** | any | Video recording |
-| **git** | any | Version control |
-
-Install system dependencies (Ubuntu/Debian):
-```bash
-sudo apt-get install -y python3 python3-pip ffmpeg
-pip3 install uv
-```
-
-Install system dependencies (macOS):
-```bash
-brew install python3 ffmpeg
-pip3 install uv
-```
+This guide provides end-to-end setup, environment configuration, proxy pool connectivity, and operational instructions for running the Automation Engine.
 
 ---
 
-## 2. Clone and Install
+## 📋 System Prerequisites
 
-```bash
-git clone git@github.com:gnmike57/automation-engine.git
-cd automation-engine
-npm install
-```
-
-> **Note:** `npm install` will automatically rebuild native bindings (`better-sqlite3`)
-> for your Node version. If you upgrade Node later, run `npm rebuild` again.
+- **Node.js**: `v20.x` or higher
+- **Package Manager**: `npm`
+- **Operating Systems**: macOS (Apple Silicon / Intel), Windows 10/11, Ubuntu/Debian Linux
+- **WireGuard / Wireproxy** (Optional for Mullvad residential proxy forwarders)
 
 ---
 
-## 3. Environment Variables
+## 🔧 Environment Configuration (`.env`)
 
-```bash
-cp .env.example .env
-```
-
-Edit `.env` and fill in any values you need. The only required change for a basic run:
+Create a `.env` file in the root workspace directory based on `.env.example`:
 
 ```env
-BACKEND=camoufox        # or: cloakbrowser | zendriver | stealth | curl
-PROXY_POOL=off          # or: 6 (Flame Sticky AU)
-CONCURRENCY=4
-RECORD_VIDEO=true
+# Server Configuration
+PORT=3011
+ENGINE_CONCURRENCY=3
+DEFAULT_BACKEND=stealth
+HEADLESS_MODE=true
+
+# Database Configuration
+DATABASE_URL=data/credentials.sqlite
+
+# Proxy Configuration
+PROXY_POOL_1=http://user:pass@proxy-node-1.net:8080
+PROXY_POOL_2=http://user:pass@proxy-node-2.net:8080
+PROXY_POOL_3=http://user:pass@proxy-node-3.net:8080
+MULLVAD_ACCOUNT_ID=5901587210529138
+
+# AI & Verification Keys (Optional for Video Verification Fallback)
+ANTHROPIC_API_KEY=
+OPENAI_API_KEY=
+GEMINI_API_KEY=
 ```
 
 ---
 
-## 4. Backend-Specific Setup
+## 🚀 Running the Engine
 
-### camoufox (default — recommended)
-No extra setup. Camoufox is bundled via `camoufox-js` npm package.
-
+### 1. Start GUI & Engine Server
 ```bash
-# Verify it works:
-node -e "require('camoufox-js'); console.log('camoufox OK')"
+npm start
 ```
+The server will initialize the SQLite database in WAL mode, start background zombie cleanup monitors, and expose:
+- **Web UI / Dashboard**: `http://localhost:3011`
+- **WebSocket Feeds**: Real-time log streams, screenshot streams, and telemetry updates.
 
-### cloakbrowser
-Requires a CloakBrowser API key. Add to `.env`:
-```env
-CLOAKBROWSER_API_KEY=your_api_key_here
-```
+### 2. Autonomous Batch Execution via CLI
 
-### zendriver
-Requires Python + uv. The engine launches zendriver via `uv run` automatically.
-
+Run a batch with headless stealth mode:
 ```bash
-# Verify uv is installed:
-uv --version
-
-# Verify zendriver can be fetched:
-uv run --with zendriver python -c "import zendriver; print('zendriver OK')"
+npx tsx src/scripts/cli-start-batch.ts --backend=stealth --concurrency=3
 ```
 
-### curl (no browser)
-No extra setup. Uses the system `curl` binary via Node child_process.
-
----
-
-## 5. Credentials
-
-Place your credentials CSV in `credentials/credentials.csv`:
-
-```csv
-email,password1,password2,password3
-user@example.com,pass1,pass2,pass3
-```
-
-Or upload via the dashboard at `http://localhost:3000` after starting the server.
-
----
-
-## 6. Start the Engine
-
-### Dashboard (recommended)
+Run Darwin Natural Selection Mode to auto-evaluate and discover the optimal backend:
 ```bash
-npm run dev
-# Opens dashboard at http://localhost:3000
+npx tsx src/scripts/cli-start-batch.ts --backend=darwin --concurrency=3
 ```
 
-### CLI (headless)
+Live-adjust concurrency while a batch is executing:
 ```bash
-npm run start:batch
+npx tsx src/scripts/cli-set-concurrency.ts --concurrency=4
 ```
 
-### With PM2 (production — persistent across reboots)
+### 3. Verify Codebase Integrity
+Run the comprehensive 5-layer system audit and TypeScript strict checks:
 ```bash
-npm install -g pm2
-pm2 start npm --name "automation-engine" -- run dev
-pm2 save
-pm2 startup
+npm run audit:all
+npm run typecheck
 ```
 
 ---
 
-## 7. Verify the Installation
+## 🦎 Darwin Mode Operational Flow
 
-```bash
-# Run the full test suite (should pass 1343+ tests):
-npm test
-
-# Run TypeScript type check:
-npx tsc --noEmit
-
-# Run lint:
-npx eslint src/ backends/ tests/ --max-warnings=9999
-```
+1. **Candidate Rotation**: Evaluates `stealth`, `stealth-headed`, `cloak-headless`, `cloak-headed`, `cloak-headless-nocloak`, `cloak-headed-nocloak`, `zendriver`, and `zendriver-headed`.
+2. **Outcome Tracking**: Each attempt records response times, outcome decisiveness, and WAF blocks.
+3. **Auto-Elimination**: Any engine with $\ge 3$ blocks or failures is automatically eliminated.
+4. **Optimal Auto-Pivoting**: When statistical confidence is reached, the highest-scoring backend is crowned, logged into `learning/hermes-memory.json`, and the batch is automatically transitioned to run on that winner.
+5. **Hard Review & Auto-Mitigation**: If all candidate backends are blocked, Hermes triggers proxy rotation and concurrency reduction before initiating post-mortem analysis.
 
 ---
 
-## 8. Troubleshooting
+## 🛡️ Cookie Banner Dismissal Rules
 
-### `better-sqlite3` binding error on startup
-```bash
-npm rebuild better-sqlite3
-```
-
-### camoufox crashes with SIGABRT on macOS
-This is a known macOS sandbox issue. Use `zendriver` or `cloakbrowser` as the backend instead, or run on Linux/Docker.
-
-### `uv: command not found` when using zendriver
-```bash
-pip3 install uv
-# or: curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-### Port 3000 already in use
-```bash
-PORT=3001 npm run dev
-```
+On fresh launches for both **Joe Fortune** (`https://www.joefortune.zone/login`) and **Ignition Casino** (`https://www.ignitioncasino.ooo/login`):
+- The engine executes a 3-tier cascade (`Native CookieInformation API` → `UI Selector Click` → `CSS Force-Hide`).
+- Multi-stage interaction triggers ensure the cookie notice is dismissed at $T+300\text{ms}$, $T+1.5\text{s}$, and $T+3.5\text{s}$ before filling credentials.

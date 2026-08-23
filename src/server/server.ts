@@ -56,6 +56,8 @@ import { getHermesObserver } from "../hermes/hermes-observer.js";
 import { getPendingProposals } from "../hermes/hermes-proposals.js";
 import { OpsOrchestrator } from "../hermes/ops-orchestrator.js";
 import { hermesHealer } from "../hermes/self-healing.js";
+import { DARWIN_BACKENDS, DarwinEngine } from "../core/darwin-engine.js";
+import { hermesDarwinAnalyzer } from "../hermes/darwin-analyzer.js";
 
 import { db, initDB, startCredentialsWatcher, importCsv, getUntestedCredentials, getCredentialsByEmails, getAllCredentialsHistory, getCategorizedTempDisabled, countCredentials, getAllCredentialsWithLatestStatus, getResultSummary, saveTargetWinner, getTargetWinners, type RestoredRow, closeDB, getStmt } from "../core/database.js";
 
@@ -1342,6 +1344,52 @@ engine.on("pass-complete", (data: any) => {
   broadcast({ type: "pass-complete", data });
 });
 
+// 🦎 Darwin Mode: Real-time Status, Winner Election & Continuous Auto-Pivoting
+engine.on("darwin-status", (scorecard: any) => {
+  broadcast({ type: "darwin-status", data: scorecard });
+});
+
+engine.on("darwin-elimination", (data: any) => {
+  broadcast({ type: "darwin-elimination", data });
+  broadcast({
+    type: "log",
+    data: {
+      level: "WARN",
+      message: `🦎 [Natural Selection] Backend [${data.backend}] ELIMINATED: ${data.reason}`,
+    },
+  });
+});
+
+engine.on("darwin-winner-selected", (data: any) => {
+  log.info(`[Darwin] Optimal winner elected: ${data.backend} (Score: ${data.score})`);
+  broadcast({ type: "darwin-winner", data });
+  broadcast({
+    type: "log",
+    data: {
+      level: "INFO",
+      message: `🦎🏆 DARWIN OPTIMAL WINNER: ${data.backend} (Score: ${data.score}, Decisive: ${data.decisiveRate}%, Confidence: ${data.confidence}%). Auto-pivoting active engine!`,
+    },
+  });
+
+  // Continuous Auto-Pivoting: Hot swap active engine backend to the winning optimal backend
+  if (currentBackend !== data.backend) {
+    currentBackend = data.backend;
+    if (currentEngineConfig) {
+      currentEngineConfig.backend = data.backend;
+      currentEngineConfig.isExperimental = false;
+      currentEngineConfig.experimentalModeType = undefined;
+    }
+    broadcast({ type: "config-sync", data: { config: { backend: data.backend, isExperimental: false } } });
+    broadcast({
+      type: "log",
+      data: {
+        level: "INFO",
+        message: `🔄 [Auto-Pivot] Batch locked to proven optimal backend: ${data.backend}`,
+      },
+    });
+  }
+});
+
 // 🦎 Darwin Mode: Hard review when all backends are eliminated
 engine.on("darwin-all-eliminated", (diagnostic: any) => {
   log.info(`[Darwin] ALL backends eliminated — triggering hard review`);
@@ -1416,7 +1464,7 @@ engine.on("darwin-all-eliminated", (diagnostic: any) => {
   // 4. Trigger Hermes AI review for deeper analysis
   runHermesReview();
 
-  broadcast({ type: "log", data: { level: "INFO", message: `🦎 Hermes AI review triggered for post-mortem analysis. Check darwin-reports/ for full diagnostic.` } });
+  broadcast({ type: "log", data: { level: "INFO", message: `🦎 Hermes AI review triggered for post-mortem analysis. Check reports/darwin/ for full diagnostic.` } });
 });
 engine.on("screenshot", (data) => {
   // Enrich screenshot with current engine settings for the dashboard feed
@@ -2116,16 +2164,7 @@ wss.on("connection", (ws: any, req: import("http").IncomingMessage) => {
                 currentEngineConfig.experimentalModeType = "darwin";
                 currentEngineConfig.splitBackends = undefined;
                 currentEngineConfig.backend = undefined;
-                const darwinBackends = [
-                  "stealth",
-                  "stealth-headed",
-                  "cloak-headless",
-                  "cloak-headed",
-                  "cloak-headless-nocloak",
-                  "cloak-headed-nocloak",
-                  "zendriver",
-                  "zendriver-headed"
-                ].filter(b => !currentDisabledBackends.includes(b));
+                const darwinBackends = DARWIN_BACKENDS.filter(b => !currentDisabledBackends.includes(b));
 
                 currentEngineConfig.experimentalConfigs = darwinBackends.map(b => ({
                   backend: b as any,

@@ -1,81 +1,107 @@
-# Automation Scripts
+# Automation Engine
 
-A fully autonomous, 24/7 self-learning multi-backend web automation engine designed for credential validation and behavioral testing.
+A fully autonomous, 24/7 self-learning multi-backend web automation engine designed for high-resilience credential validation, behavioral testing, and target site classification.
 
-This engine utilizes five distinct browser backends, a 9-vector fingerprinting system, and a robust outcome classification gate to simulate deep, deterministic human interactions against sophisticated targets.
+This engine utilizes high-performance browser backends, dynamic fingerprinting, AI DOM self-healing, deterministic telemetry, and the **Darwin Natural Selection Engine** to evaluate and auto-pivot to optimal execution configurations in real time.
+
+---
+
+## 🚀 Key Architectural Capabilities
+
+- **🦎 Darwin Natural Selection Mode**: Evaluates multiple candidate backends concurrently, scores resilience using a weighted multi-variable formula ($500 \times \text{decisiveRate} + 300 \times \text{successRate} - 400 \times \text{blockRate} - 200 \times \text{failRate} - 100 \times \text{latencyPenalty}$), auto-eliminates underperforming engines, elects the winning optimal backend, and hot-swaps active batches with zero manual intervention.
+- **🛡️ 3-Tier Universal Cookie Notice Cascade**: Mandatory Cookie Information / OneTrust banner handling (`Native API` → `UI Selector Click` → `CSS Force-Hide`) with multi-stage verification at $T+300\text{ms}$, $T+1.5\text{s}$, and $T+3.5\text{s}$ on fresh launches before credential entry.
+- **⚡ Dual Headless / Headed Execution**: Native headless stealth mode via Camoufox C++ biometric binary, Cloak browser, and Zendriver CDP with strict isolation, zero memory leaks, and high-concurrency capability.
+- **🤖 Hermes AI Autonomous Ops**: Autonomous supervisor with telemetry watchers, vision model screenshot verification, DOM self-healing, automatic concurrency scaling, and long-term memory persistence (`learning/hermes-memory.json` & SQLite WAL).
+- **🔒 Project Rule 1 Governing Invariant**: Precise classification truth gate:
+  - `TEMP_DISABLED` → `TEMP_DISABLED_ACCOUNT_EXISTS` (stop immediately and track in 1-hour retry queue).
+  - `PERM_DISABLED` → `PERM_DISABLED_ACCOUNT_EXISTS` (stop immediately and track separately).
+  - `NO_ACCOUNT_CONFIRMED` requires exactly 4 submit invocations with $\ge 3$ confirmed accepted responses.
+  - Cashier verification with DOM quiescence before declaring `SUCCESSFUL_LOGIN`.
 
 ---
 
 ## 🚀 Quick Start
 
-1. **Install Dependencies**
-   ```bash
-   npm ci
-   ```
-2. **Setup Environment**
-   Copy `.env.example` to `.env` and fill in required variables (Proxy keys, AI tokens if using visual fallback).
-3. **Start the Engine (Daemon Mode - Recommended)**
-   ```bash
-   npm run daemon:install
-   ```
-   *This installs PM2, registers it to start on boot, and launches the 24/7 background process.*
-4. **Monitor the Daemon**
-   ```bash
-   npm run daemon:status
-   npm run daemon:logs
-   ```
-5. **Run the Dashboard (Manual Mode)**
-   ```bash
-   npm run gui
-   ```
-   *Note: `npm run start` maps to the same command. The dashboard runs on `http://localhost:3011`.*
-6. **Run the Test Suite**
-   ```bash
-   npm run test
-   ```
-
-### 🔄 Maintenance
-To ensure peak evasion performance, routinely update the core browser engines:
+### 1. Install Dependencies
 ```bash
-npm update
-npm install cloakbrowser@latest camoufox-js@latest
+npm ci
+```
+
+### 2. Configure Environment
+Copy `.env.example` to `.env` and set your proxy configurations and credentials:
+```bash
+cp .env.example .env
+```
+
+### 3. Start Engine Server (Background Daemon)
+```bash
+npm start
+```
+*The dashboard runs on `http://localhost:3011` with real-time WebSocket telemetry and live stream feeds.*
+
+### 4. Launch Autonomous Batch via CLI
+Launch a batch in headless stealth mode with dynamic concurrency:
+```bash
+npx tsx src/scripts/cli-start-batch.ts --backend=stealth --concurrency=3
+```
+
+Launch Darwin Mode for automated backend selection & performance optimization:
+```bash
+npx tsx src/scripts/cli-start-batch.ts --backend=darwin --concurrency=3
+```
+
+Dynamically adjust concurrency during live runs:
+```bash
+npx tsx src/scripts/cli-set-concurrency.ts --concurrency=4
+```
+
+### 5. Run System Audits & Verification
+```bash
+npm run audit:all
+npm run typecheck
+npm run test
 ```
 
 ---
 
-## 📚 Documentation
+## 🦎 Darwin Mode — Automated Natural Selection
 
-The documentation has been completely rewritten to serve as the definitive architectural blueprint. If you are extending the engine or auditing its behavior, read these in order:
+Darwin Mode tests multiple candidate backends against live targets under identical proxy conditions:
 
-1. **[Architecture Overview](docs/1-ARCHITECTURE.md)**
-   Understand the `AutomationEngine` bootstrap lifecycle, the SQLite WAL database, and the Zombie process manager.
-2. **[Automation Flow](docs/2-AUTOMATION_FLOW.md)**
-   Step-by-step choreography: CMP dismissal, Autofill injection, and submit protocols.
-3. **[Stealth & Profiles](docs/3-STEALTH_AND_PROFILES.md)**
-   The 9-Profile system, `httpcloak` TLS masking, and backend isolation.
-4. **[Classification Gate](docs/4-CLASSIFICATION_GATE.md)**
-   The single source of truth for outcome routing, soft vs hard toxic handling, and cashier verification.
-5. **[Windows 11 Launch Guide](docs/WINDOWS_LAUNCH_GUIDE.md)**
-   System configuration, native C# resizers, Wicketkeeper solver building, and PowerShell startup.
+| Candidate Backend | Engine / Architecture | Stealth Layer |
+|---|---|---|
+| `stealth` | Camoufox Firefox C++ Binary (Headless) | Native C++ Biometrics |
+| `stealth-headed` | Camoufox Firefox C++ Binary (Headed) | Native C++ Biometrics + Visual Tiler |
+| `cloak-headless` | Chromium Playwright + Cloak (Headless) | Network TLS Cloak + Runtime Injection |
+| `cloak-headed` | Chromium Playwright + Cloak (Headed) | Network TLS Cloak + Visual Tiler |
+| `cloak-headless-nocloak` | Chromium Pure (Headless) | Runtime Fingerprint Injector |
+| `cloak-headed-nocloak` | Chromium Pure (Headed) | Runtime Fingerprint Injector |
+| `zendriver` | Zendriver CDP Undetected (Headless) | CDP Trace Stripping |
+| `zendriver-headed` | Zendriver CDP Undetected (Headed) | CDP Trace Stripping + Headed Window |
+
+*(Note: Spider backends are excluded from Darwin evaluation by architectural design).*
+
+### Elimination & Winner Discovery
+- **Auto-Elimination**: A backend that accumulates 3 WAF blocks or structural failures is automatically eliminated from the active candidate pool.
+- **Optimal Winner Crowned**: When a candidate reaches statistical confidence ($\ge 2$ evaluations with high composite score), Darwin elects the winner, emits `darwin-winner-selected`, persists insights to SQLite and `learning/hermes-memory.json`, and **automatically pivots the active batch** to that optimal backend.
 
 ---
 
 ## 🛠 Project Structure
 
 ```
-├── backends/       # The 5 Browser Backends (Cloak, Stealth, Zendriver, Spider Local/Cloud)
-├── data/           # SQLite Database & CSV Imports (gitignored)
-├── docs/           # Architecture Blueprints
-├── scripts/        # Standalone maintenance/audit scripts
+├── backends/       # Browser Backends (Stealth, Cloak, Zendriver, Spider)
+├── data/           # SQLite Database & Storage (WAL mode)
+├── docs/           # Architecture Blueprints & Guides
+├── learning/       # Hermes Long-Term Memory & Historical Insights
+├── reports/darwin/ # Darwin Diagnostic Reports & Post-Mortems
 ├── src/
-│   ├── core/       # Engine, Database, Framework Config, Logger
-│   ├── hermes/     # DOM Healer, Visual Verifier
-│   ├── intelligence/# AI Decoys, Humanized Mouse Movement
-│   ├── profiles/   # Profile generators (Geo, Font, UA, Display)
-│   ├── proxy/      # Proxy rotators and score trackers
-│   ├── server/     # Express + WebSocket UI Backend
-│   ├── services/   # Process cleaner, screenshotters, codegen
-│   ├── stealth/    # Wicketkeeper handling, recaptcha interceptors
-│   └── targets/    # login-flow.ts (The canonical trigger logic)
-└── tests/          # Vitest suite (980+ tests)
+│   ├── core/       # AutomationEngine, DarwinEngine, Database, Logger
+│   ├── hermes/     # Hermes AI, Darwin Analyzer, Self-Healing, Strategy Engine
+│   ├── guards/     # CookieGuard, SubmitButtonTracker
+│   ├── proxy/      # Mullvad Adapter, Wireproxy Forwarder, Health Checker
+│   ├── server/     # Express + WebSocket UI Server (Single Source of Truth)
+│   ├── stealth/    # Random Login Actions, Fingerprint Blender
+│   └── targets/    # universal-login.ts, login-flow.ts, site definitions
+└── tests/          # System Audits and Test Suites
 ```

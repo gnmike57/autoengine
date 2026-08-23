@@ -14,6 +14,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { AnomalyDetector } from "./anomaly-detector.js";
+import { hermesDarwinAnalyzer } from "./darwin-analyzer.js";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -168,6 +169,11 @@ export class StrategyEngine {
       }
     }
 
+    const learnedOptimal = hermesDarwinAnalyzer.getLearnedOptimalBackend();
+    if (learnedOptimal) {
+      rationale.push(`🦎 Darwin Intelligence: Proven optimal backend from natural selection is '${learnedOptimal}'`);
+    }
+
     for (const backend of this.config.availableBackends) {
       const stats = this.backendStats.get(backend) || { total: 0, successes: 0, blocks: 0, errors: 0, successRate: 0, backend };
 
@@ -180,16 +186,17 @@ export class StrategyEngine {
         continue;
       }
 
-      // UCB1 calculation
+      // UCB1 calculation with Darwin prior bonus
       let score: number;
+      const darwinBonus = (backend === learnedOptimal) ? 0.75 : 0;
       if (stats.total === 0) {
-        score = Infinity;
+        score = Infinity + darwinBonus;
         rationale.push(`Backend '${backend}' UCB1 Score: Infinity (Untested - Exploration favored)`);
       } else {
         const successRateNorm = stats.successRate / 100;
         const exploration = Math.sqrt((2 * Math.log(totalBatches || 1)) / stats.total);
-        score = successRateNorm + exploration;
-        rationale.push(`Backend '${backend}' UCB1 Score: ${score.toFixed(3)} (SR: ${successRateNorm.toFixed(2)}, Expl: ${exploration.toFixed(3)})`);
+        score = successRateNorm + exploration + darwinBonus;
+        rationale.push(`Backend '${backend}' UCB1 Score: ${score.toFixed(3)} (SR: ${successRateNorm.toFixed(2)}, Expl: ${exploration.toFixed(3)}${darwinBonus > 0 ? ', DarwinBonus: +0.75' : ''})`);
       }
 
       if (score > bestScore) {
@@ -198,7 +205,7 @@ export class StrategyEngine {
       }
     }
 
-    rationale.push(`Selected backend '${bestBackend}' with optimal UCB1 score.`);
+    rationale.push(`Selected backend '${bestBackend}' with optimal composite score.`);
 
     // 2. Determine concurrency based on recent performance
     let concurrency: number;

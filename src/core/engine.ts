@@ -88,6 +88,8 @@ function getCircuitBreakerExpiry(targetName: string): number {
 }
 import { DynamicTimings } from "./timings.js";
 import { createLogger } from "./logger.js";
+import { DarwinEngine, type DarwinScorecard } from "./darwin-engine.js";
+import { hermesDarwinAnalyzer } from "../hermes/darwin-analyzer.js";
 import { flowTracer } from "../services/flow-tracer.js";
 import { FlowScreenshotter } from "../services/flow-screenshotter.js";
 import { TimelineRecorder } from "../services/timeline-recorder.js";
@@ -910,6 +912,9 @@ export class AutomationEngine extends EventEmitter {
   private runStartTime: number = 0;
   /** DB-backed per-site TEMP_DISABLED requeue scheduler. Started with the engine. */
   private tempDisabledScheduler: TempDisabledScheduler | null = null;
+  /** Darwin natural selection engine instance for multi-candidate optimization */
+  private darwinEngine: DarwinEngine | null = null;
+  private _darwinWinnerElected: boolean = false;
   constructor() {
     super();
     this._screenshotSvc = new ScreenshotService({
@@ -1793,6 +1798,13 @@ export class AutomationEngine extends EventEmitter {
     if ((this as any)._ignitionVerifBypass) {
       this.log("INFO", "🎲 Ignition LOGIN VERIFICATION bypass enabled — random 6-digit code + retry");
     }
+    if (config.experimentalModeType === "darwin") {
+      this.darwinEngine = new DarwinEngine({ proxyPool: config.proxyPool });
+      this._darwinWinnerElected = false;
+      this.log("INFO", "🦎 [DarwinEngine] Initialized with candidate backends (Spider excluded). Auto-pivoting enabled.");
+    } else {
+      this.darwinEngine = null;
+    }
     const allTargets = config.targets || DEFAULT_TARGETS;
 
     // Defensive denylist re-filter: callers may pass a credential array that
@@ -2226,38 +2238,57 @@ export class AutomationEngine extends EventEmitter {
 
         // Stagger removed (Optimization 9: Eliminate Stagger/Cleanup this.sleep)
         if (config.isExperimental) {
-          if (anomalyPauseActive) {
-            while (anomalyPauseActive) await new Promise(r => setTimeout(r, 1000));
-          }
-          if (activeExpConfigs.length === 0) {
-            const totalFails = (config.experimentalConfigs || []).reduce((acc, c) => acc + c.fails + c.blocks, 0);
-            if (totalFails <= (config.experimentalConfigs?.length || 7) * 3) {
-              anomalyPauseActive = true;
-              this.log("WARN", `🚨 ANOMALY DETECTED: All backends eliminated exceptionally fast. Target may be down or globally rate-limiting. Pausing engine for 60 seconds...`);
-              await new Promise(r => setTimeout(r, 60000));
-              this.log("WARN", `🚨 Resuming execution and restoring backends to try again...`);
-              config.experimentalConfigs?.forEach(c => { c.eliminated = false; c.fails = 0; c.blocks = 0; });
-              activeExpConfigs = config.experimentalConfigs ? [...config.experimentalConfigs] : [];
-              anomalyPauseActive = false;
-            } else {
-              if (config.experimentalModeType === "darwin") {
-                // Darwin mode: hard stop — the darwin-all-eliminated event already triggered Hermes
-                this.log("WARN", `🦎🛑 Darwin Mode: All backends confirmed eliminated after extended testing. Engine stopping for hard review.`);
-                this.log("WARN", `🦎 Check darwin-reports/ directory for the full diagnostic. Hermes review has been triggered.`);
-                this.shouldStop = true;
-                return;
+          if (config.experimentalModeType === "darwin" && this.darwinEngine) {
+            const nextCandidate = this.darwinEngine.getNextCandidate(expConfigCounter);
+            if (!nextCandidate) {
+              this.log("WARN", `🦎🛑 Darwin Mode: All backends confirmed eliminated after extended testing. Engine stopping for hard review.`);
+              const report = this.darwinEngine.generateDiagnosticReport();
+              await this.darwinEngine.saveDiagnosticReport();
+              hermesDarwinAnalyzer.learnFromDarwinReport(report);
+              this.emit("darwin-all-eliminated", report);
+              this.shouldStop = true;
+              return;
+            }
+            expConfigCounter++;
+            effectiveBackend = nextCandidate as any;
+            assignedExpConfig = {
+              backend: nextCandidate as any,
+              proxyPool: config.proxyPool,
+              fails: 0,
+              blocks: 0,
+              decisive: 0,
+              eliminated: false,
+              totalAttempts: 0,
+              totalDurationMs: 0,
+              errors: {},
+            };
+            isExp = true;
+            this.log("INFO", `🦎 Darwin Mode: Assigned candidate [${effectiveBackend}] to ${cred.email}`);
+          } else {
+            if (anomalyPauseActive) {
+              while (anomalyPauseActive) await new Promise(r => setTimeout(r, 1000));
+            }
+            if (activeExpConfigs.length === 0) {
+              const totalFails = (config.experimentalConfigs || []).reduce((acc, c) => acc + c.fails + c.blocks, 0);
+              if (totalFails <= (config.experimentalConfigs?.length || 7) * 3) {
+                anomalyPauseActive = true;
+                this.log("WARN", `🚨 ANOMALY DETECTED: All backends eliminated exceptionally fast. Target may be down or globally rate-limiting. Pausing engine for 60 seconds...`);
+                await new Promise(r => setTimeout(r, 60000));
+                this.log("WARN", `🚨 Resuming execution and restoring backends to try again...`);
+                config.experimentalConfigs?.forEach(c => { c.eliminated = false; c.fails = 0; c.blocks = 0; });
+                activeExpConfigs = config.experimentalConfigs ? [...config.experimentalConfigs] : [];
+                anomalyPauseActive = false;
               } else {
                 this.log("WARN", `🧪 Experimental Mode: All configuration sets eliminated! Falling back to safe defaults.`);
                 activeExpConfigs = [{ backend: "cloak-headless", proxyPool: "3", fails: 0, blocks: 0, decisive: 0, eliminated: false, totalAttempts: 0, totalDurationMs: 0, errors: {} }];
               }
             }
+            assignedExpConfig = activeExpConfigs[expConfigCounter % activeExpConfigs.length]!;
+            expConfigCounter++;
+            effectiveBackend = assignedExpConfig.backend as any;
+            isExp = true;
+            this.log("INFO", `🧪 Experimental Mode: Assigned [${assignedExpConfig.backend} / Pool ${assignedExpConfig.proxyPool}] to ${cred.email}`);
           }
-          assignedExpConfig = activeExpConfigs[expConfigCounter % activeExpConfigs.length]!;
-          expConfigCounter++;
-          effectiveBackend = assignedExpConfig.backend as any;
-          isExp = true;
-          const modeLabel = config.experimentalModeType === "darwin" ? "🦎 Darwin" : "🧪 Experimental";
-          this.log("INFO", `${modeLabel} Mode: Assigned [${assignedExpConfig.backend} / Pool ${assignedExpConfig.proxyPool}] to ${cred.email}`);
         }
 
         // Mark row as testing
@@ -3537,131 +3568,78 @@ export class AutomationEngine extends EventEmitter {
         }
         // ----------------------------------------------------
 
-        if (isExp && assignedExpConfig) {
-          // Issue H: Count the attempt BEFORE the elimination check so the
-          // diagnostic report's successRate denominator is accurate.
-          assignedExpConfig.totalAttempts++;
-          assignedExpConfig.totalDurationMs += (Date.now() - rowStartTime);
-          let isFingerprinted = false;
-          let isFailure = false;
-          // Issue F: 'incorrect' and '2FA' ARE decisive — the backend successfully reached
-          // the auth endpoint and got a real answer. Excluding them undercounts the
-          // backend's success rate and causes premature Darwin elimination.
-          let isDecisive = true;
-          for (const t of targets) {
-            // @ts-expect-error noUncheckedIndexedAccess
-            const outcome = this.rows[idx].sites[t.name].outcome;
-            if (outcome === "N/A" || outcome === "skipped") isFailure = true;
-            if (outcome === "N/A" && lastError?.message?.toLowerCase().includes("cloudflare")) isFingerprinted = true;
-            if (outcome !== "success" && outcome !== "permdisabled" && outcome !== "noaccount" && outcome !== "incorrect" && outcome !== "2FA" && outcome !== "tempdisabled") isDecisive = false;
-          }
-          if (isFingerprinted) assignedExpConfig.blocks++;
-          else if (isFailure) assignedExpConfig.fails++;
-          else if (isDecisive) assignedExpConfig.decisive++;
+        if (isExp) {
+          if (config.experimentalModeType === "darwin" && this.darwinEngine) {
+            let rowOutcome = "unknown";
+            for (const t of targets) {
+              const out = (this.rows[idx] as any)?.sites?.[t.name]?.outcome;
+              if (out) rowOutcome = out;
+            }
+            const duration = Date.now() - rowStartTime;
+            const res = this.darwinEngine.recordOutcome(
+              effectiveBackend,
+              rowOutcome,
+              duration,
+              lastError?.message || String(lastError || "")
+            );
 
-          if (config.experimentalModeType === "experimental-elimination" || config.experimentalModeType === "darwin") {
-            // Darwin mode uses higher thresholds — 3 failures before elimination (vs 2 for standard elimination)
-            const eliminationThreshold = config.experimentalModeType === "darwin" ? 3 : 2;
+            const scorecard = this.darwinEngine.getScorecard();
+            this.emit("darwin-status", scorecard);
+
+            if (res.eliminated) {
+              this.log("WARN", `🦎 Darwin Mode: Eliminating [${effectiveBackend}] — ${res.eliminationReason}`);
+              this.emit("darwin-elimination", { backend: effectiveBackend, reason: res.eliminationReason });
+            }
+
+            // Continuous winner discovery & auto-pivoting
+            const optimal = this.darwinEngine.getOptimalBackend();
+            if (optimal && optimal.confidence >= 60 && !this._darwinWinnerElected) {
+              this._darwinWinnerElected = true;
+              this.log("INFO", `🦎🏆 [Darwin Natural Selection] WINNER ELECTED: ${optimal.backend} (Score: ${optimal.score}, Decisive: ${optimal.decisiveRate}%, Confidence: ${optimal.confidence}%)`);
+              const report = this.darwinEngine.generateDiagnosticReport();
+              this.darwinEngine.saveDiagnosticReport().catch(() => {});
+              hermesDarwinAnalyzer.learnFromDarwinReport(report);
+              this.emit("darwin-winner-selected", {
+                backend: optimal.backend,
+                score: optimal.score,
+                decisiveRate: optimal.decisiveRate,
+                confidence: optimal.confidence,
+                report,
+              });
+            }
+
+            if (this.darwinEngine.getActiveCandidates().length === 0 && !(this as any).__darwinReported) {
+              (this as any).__darwinReported = true;
+              this.log("WARN", `🦎🔴 DARWIN MODE: ALL candidate backends have been eliminated!`);
+              const report = this.darwinEngine.generateDiagnosticReport();
+              this.darwinEngine.saveDiagnosticReport().catch(() => {});
+              hermesDarwinAnalyzer.learnFromDarwinReport(report);
+              this.emit("darwin-all-eliminated", report);
+            }
+          } else if (assignedExpConfig) {
+            assignedExpConfig.totalAttempts++;
+            assignedExpConfig.totalDurationMs += (Date.now() - rowStartTime);
+            let isFingerprinted = false;
+            let isFailure = false;
+            let isDecisive = true;
+            for (const t of targets) {
+              const outcome = this.rows[idx]?.sites?.[t.name]?.outcome;
+              if (outcome === "N/A" || outcome === "skipped") isFailure = true;
+              if (outcome === "N/A" && lastError?.message?.toLowerCase().includes("cloudflare")) isFingerprinted = true;
+              if (outcome !== "success" && outcome !== "permdisabled" && outcome !== "noaccount" && outcome !== "incorrect" && outcome !== "2FA" && outcome !== "tempdisabled") isDecisive = false;
+            }
+            if (isFingerprinted) assignedExpConfig.blocks++;
+            else if (isFailure) assignedExpConfig.fails++;
+            else if (isDecisive) assignedExpConfig.decisive++;
+
+            const eliminationThreshold = 2;
             if (assignedExpConfig.blocks >= eliminationThreshold || assignedExpConfig.fails >= eliminationThreshold) {
               assignedExpConfig.eliminated = true;
-              const modeLabel = config.experimentalModeType === "darwin" ? "🦎 Darwin" : "🧪 Experimental";
-              this.log("WARN", `${modeLabel} Mode: Eliminating [${assignedExpConfig.backend} / Pool ${assignedExpConfig.proxyPool}] (Blocks: ${assignedExpConfig.blocks}/${eliminationThreshold}, Failures: ${assignedExpConfig.fails}/${eliminationThreshold}, Decisive: ${assignedExpConfig.decisive})`);
-
-              try {
-                // fs and path are already imported at the top
-                const dir = path.join(process.cwd(), 'eliminations');
-                await fs.promises.mkdir(dir, { recursive: true }).catch(() => { });
-                const postMortem = {
-                  backend: assignedExpConfig.backend,
-                  pool: assignedExpConfig.proxyPool,
-                  timestamp: new Date().toISOString(),
-                  target: config.targets?.[0]?.url,
-                  blocks: assignedExpConfig.blocks,
-                  fails: assignedExpConfig.fails,
-                  errors: assignedExpConfig.errors,
-                  lastError: String(lastError?.message || lastError || "Unknown error"),
-                  lastOutcome: "eliminated",
-                  mode: config.experimentalModeType
-                };
-                await fs.promises.writeFile(path.join(dir, `${assignedExpConfig.backend}-${Date.now()}.json`), JSON.stringify(postMortem, null, 2));
-              } catch (e) {
-                this.log("ERROR", `Failed to write post-mortem: ${String(e)}`);
-              }
+              this.log("WARN", `🧪 Experimental Mode: Eliminating [${assignedExpConfig.backend} / Pool ${assignedExpConfig.proxyPool}]`);
               activeExpConfigs = activeExpConfigs.filter(c => !c.eliminated);
-
-              // Broadcast remaining count
-              const surviving = activeExpConfigs.length;
-              const total = config.experimentalConfigs?.length || 0;
-              this.log("INFO", `  📊 ${surviving}/${total} backends still active`);
-
-              if (activeExpConfigs.length === 0 && !(this as any).__darwinReported) {
-                (this as any).__darwinReported = true;
-
-                if (config.experimentalModeType === "darwin") {
-                  // 🦎 Darwin Hard Review: ALL backends failed — build comprehensive diagnostic
-                  this.log("WARN", `🦎🔴 DARWIN MODE: ALL ${total} backends have been eliminated!`);
-                  this.log("WARN", `🦎🔴 Triggering hard review with full diagnostic payload...`);
-
-                  const diagnostic = {
-                    mode: "darwin",
-                    timestamp: new Date().toISOString(),
-                    totalBackendsTested: total,
-                    totalAttempts: (config.experimentalConfigs || []).reduce((a, c) => a + c.totalAttempts, 0),
-                    totalDurationMs: (config.experimentalConfigs || []).reduce((a, c) => a + c.totalDurationMs, 0),
-                    backends: (config.experimentalConfigs || []).map(c => ({
-                      backend: c.backend,
-                      proxyPool: c.proxyPool,
-                      attempts: c.totalAttempts,
-                      decisive: c.decisive,
-                      blocks: c.blocks,
-                      fails: c.fails,
-                      errors: c.errors,
-                      avgDurationMs: c.totalAttempts > 0 ? Math.round(c.totalDurationMs / c.totalAttempts) : 0,
-                      successRate: c.totalAttempts > 0 ? Math.round((c.decisive / c.totalAttempts) * 100) : 0,
-                    })),
-                    recommendations: [] as string[],
-                  };
-
-                  // Generate recommendations based on error patterns
-                  const allErrors = (config.experimentalConfigs || []).flatMap(c => Object.entries(c.errors));
-                  const errorAgg: Record<string, number> = {};
-                  for (const [sig, count] of allErrors) errorAgg[sig] = (errorAgg[sig] || 0) + count;
-
-                  if ((errorAgg["cloudflare block"] || 0) > total * 2) {
-                    diagnostic.recommendations.push("CRITICAL: Cloudflare blocks dominate — proxy pool is likely burned. Rotate ALL proxy endpoints immediately.");
-                  }
-                  if ((errorAgg["proxy connect error"] || 0) > total) {
-                    diagnostic.recommendations.push("HIGH: Proxy connection failures detected — check proxy provider uptime and credentials.");
-                  }
-                  if ((errorAgg["timeout"] || 0) > total) {
-                    diagnostic.recommendations.push("MEDIUM: Excessive timeouts — target may be rate-limiting. Consider reducing concurrency or adding delay between attempts.");
-                  }
-                  if ((errorAgg["selector failed"] || 0) > total) {
-                    diagnostic.recommendations.push("HIGH: Selector failures detected — target website may have changed its DOM structure. Login flow selectors need updating.");
-                  }
-                  if (diagnostic.recommendations.length === 0) {
-                    diagnostic.recommendations.push("INFO: No dominant error pattern detected — failures may be distributed across multiple root causes. Manual investigation recommended.");
-                  }
-
-                  // Write diagnostic report to file
-                  try {
-                    const reportDir = path.join(process.cwd(), 'darwin-reports');
-                    await fs.promises.mkdir(reportDir, { recursive: true }).catch(() => { });
-                    const reportPath = path.join(reportDir, `darwin-report-${Date.now()}.json`);
-                    await fs.promises.writeFile(reportPath, JSON.stringify(diagnostic, null, 2));
-                    this.log("INFO", `🦎 Darwin diagnostic report saved to: ${reportPath}`);
-                  } catch (e) {
-                    this.log("ERROR", `Failed to write Darwin diagnostic report: ${String(e)}`);
-                  }
-
-                  // Emit event for server to handle (triggers Hermes hard review)
-                  this.emit("darwin-all-eliminated", diagnostic);
-                } else {
-                  this.log("WARN", `🧪 Experimental Mode: All configurations have been eliminated. Concurrency scale-down imminent.`);
-                }
-              }
             }
           }
+        }
 
           // Issue H: Moved BEFORE elimination check so diagnostic reports
           // include the attempt that triggered elimination (was off-by-one).
