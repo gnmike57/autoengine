@@ -87,7 +87,7 @@ export class Watchdog {
         
         const drainInterval = setInterval(() => {
           timeWaited += 5000;
-          const active = this.getActiveSessions ? this.getActiveSessions() : 0;
+          const active = this.config.getActiveSessions ? this.config.getActiveSessions() : 0;
           
           if (active === 0 || timeWaited >= drainTimeoutMs) {
             clearInterval(drainInterval);
