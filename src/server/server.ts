@@ -43,6 +43,7 @@ import { emailDenylist } from "../core/email-denylist.js";
 import { timelineEvents } from "../hermes/timeline-analyzer.js";
 import { parseRowUpdate, trackRequest } from "../hermes/telemetry.js";
 import { WsMessageSchema, SetConcurrencySchema, SetBackendSchema } from "./schemas.js";
+import { IpcQueue } from "../hermes/ipc-queue.js";
 
 import { proxyScoreTracker } from "../../backends/index.js";
 import { isVerificationAvailable, validateAiConfig } from "../services/video-verifier.js";
@@ -1094,6 +1095,7 @@ process.env.VITEST ? null : setInterval(() => {
 }, 5000).unref();
 engine.on("row-update", (data) => {
   broadcast({ type: "row-update", data });
+  IpcQueue.push("row-update", data);
   if (hermesProcess && !hermesProcess.killed && hermesProcess.connected) {
     hermesProcess.send({ type: "row-update", data });
   }

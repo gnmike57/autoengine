@@ -4,7 +4,7 @@ import logging
 import os
 from collections import deque
 
-import websockets
+import ipc_queue
 from dotenv import load_dotenv
 from google.antigravity import Agent, LocalAgentConfig, types
 from google.antigravity.triggers import TriggerContext
@@ -48,66 +48,67 @@ load_dotenv()
 # WebSocket Listener (enhanced with #11 telemetry + #18 anomaly + #19 triage)
 # ---------------------------------------------------------------------------
 
-async def websocket_listener():
+async def ipc_queue_listener():
     consecutive_count = 0
+    logging.info("🔌 Hermes AI polling durable SQLite IPC queue")
 
     while True:
         try:
-            async with websockets.connect(ws_url) as ws:
-                logging.info("🔌 Hermes AI Connected to Dashboard WebSocket")
-                async for message in ws:
-                    try:
-                        data = json.loads(message)
-                        if data.get("type") != "row-update":
-                            continue
+            msg = ipc_queue.pull_next_message("row-update")
+            if not msg:
+                await asyncio.sleep(1.0)
+                continue
+            
+            data = msg["payload"]
+            msg_id = msg["id"]
+            
+            outcome = data.get("data", {}).get("outcome", "")
+            recent_outcomes.append(outcome)
+            all_events.append(data)
 
-                        outcome = data.get("data", {}).get("outcome", "")
-                        recent_outcomes.append(outcome)
-                        all_events.append(data)
+            # --- #11 Structured Telemetry ---
+            telemetry: FailureTelemetry = parse_row_update(
+                data, recent_outcomes=list(recent_outcomes)
+            )
+            telemetry.consecutive_count = consecutive_count
 
-                        # --- #11 Structured Telemetry ---
-                        telemetry: FailureTelemetry = parse_row_update(
-                            data, recent_outcomes=list(recent_outcomes)
-                        )
-                        telemetry.consecutive_count = consecutive_count
+            # --- #18 Anomaly Detection ---
+            credits = float(data.get("data", {}).get("creditsSpent", 0))
+            if credits > 0:
+                alert = anomaly_detector.check("credits_per_credential", credits)
+                if alert:
+                    logging.warning("Anomaly alert: %s", alert)
 
-                        # --- #18 Anomaly Detection ---
-                        credits = float(data.get("data", {}).get("creditsSpent", 0))
-                        if credits > 0:
-                            alert = anomaly_detector.check("credits_per_credential", credits)
-                            if alert:
-                                logging.warning("Anomaly alert: %s", alert)
+            # Check for failures
+            is_failure = outcome.startswith(("blocked", "N/A", "api-error", "error"))
+            if is_failure:
+                consecutive_count += 1
+                telemetry.consecutive_count = consecutive_count
 
-                        # Check for failures
-                        is_failure = outcome.startswith(("blocked", "N/A", "api-error", "error"))
-                        if is_failure:
-                            consecutive_count += 1
-                            telemetry.consecutive_count = consecutive_count
+                # --- #19 Triage classification ---
+                category = classify_failure(data)
+                data["_triage_category"] = category
+                data["_triage_remediation"] = get_remediation(category)
+                data["_telemetry"] = {
+                    "failure_type": telemetry.failure_type,
+                    "consecutive_count": telemetry.consecutive_count,
+                    "screenshot_paths": telemetry.screenshot_paths,
+                    "recording_path": telemetry.recording_path,
+                    "credits_spent": telemetry.credits_spent,
+                    "backend_used": telemetry.backend_used,
+                    "proxy_region": telemetry.proxy_region,
+                }
 
-                            # --- #19 Triage classification ---
-                            category = classify_failure(data)
-                            # Attach triage info to the event for downstream use
-                            data["_triage_category"] = category
-                            data["_triage_remediation"] = get_remediation(category)
-                            data["_telemetry"] = {
-                                "failure_type": telemetry.failure_type,
-                                "consecutive_count": telemetry.consecutive_count,
-                                "screenshot_paths": telemetry.screenshot_paths,
-                                "recording_path": telemetry.recording_path,
-                                "credits_spent": telemetry.credits_spent,
-                                "backend_used": telemetry.backend_used,
-                                "proxy_region": telemetry.proxy_region,
-                            }
+                await failure_queue.put(data)
+            else:
+                consecutive_count = 0
 
-                            await failure_queue.put(data)
-                        else:
-                            consecutive_count = 0  # reset on any non-failure
-
-                    except json.JSONDecodeError:
-                        pass
+            # Message successfully processed by AI queue systems, ack it
+            ipc_queue.ack_message(msg_id)
+            
         except Exception as e:
-            logging.error(f"WebSocket disconnected: {e}. Reconnecting...")
-            await asyncio.sleep(5)
+            logging.error(f"Error in IPC polling loop: {e}")
+            await asyncio.sleep(2.0)
 
 # ---------------------------------------------------------------------------
 # Failure Trigger (enhanced with #16 evidence + #19 triage)
@@ -269,8 +270,8 @@ ADDITIONAL CAPABILITIES:
         mcp_servers=mcp_servers
     )
 
-    # Start the websocket listener in the background
-    asyncio.create_task(websocket_listener())
+    # Start the ipc listener in the background
+    asyncio.create_task(ipc_queue_listener())
 
     async with Agent(config) as agent:
         logging.info("🤖 Hermes AI God-Mode initialized. Standing by for failures...")
