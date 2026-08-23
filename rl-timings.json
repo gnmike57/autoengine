@@ -1,26 +1,26 @@
 {
   "decoy_count": {
-    "mean": 1.680872856043154,
-    "stdDev": 0.9628924784760453,
+    "mean": 1.7139793950506943,
+    "stdDev": 0.991800446093778,
     "min": 0,
     "max": 2,
-    "successes": 27,
-    "failures": 37
+    "successes": 29,
+    "failures": 39
   },
   "decoy_scroll": {
-    "mean": 260.0036335574984,
-    "stdDev": 95.85524587778828,
+    "mean": 262.5516691663619,
+    "stdDev": 97.28348904136733,
     "min": 50,
     "max": 400,
-    "successes": 20,
-    "failures": 35
+    "successes": 21,
+    "failures": 36
   },
   "decoy_read_pause": {
-    "mean": 173.33575570499903,
-    "stdDev": 95.85524587778828,
+    "mean": 175.03444611090802,
+    "stdDev": 97.28348904136733,
     "min": 10,
     "max": 200,
-    "successes": 20,
-    "failures": 35
+    "successes": 21,
+    "failures": 36
   }
 }
