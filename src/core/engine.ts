@@ -1531,11 +1531,17 @@ export class AutomationEngine extends EventEmitter {
    *  for this attempt rather than send a known-wrong password (which
    *  pollutes noaccount classification and burns the attempt budget). */
   private async inputText(page: Page, selector: string, value: string): Promise<boolean> {
-    const current = await page.locator(selector).inputValue({ timeout: 50 }).catch(() => undefined);
+    const loc = page.locator(selector).first();
+    const current = await loc.inputValue({ timeout: 50 }).catch(() => undefined);
     if (current === value) return true;
 
     let actual: string | undefined = undefined;
-    await page.locator(selector).fill(value, { force: true, timeout: 3000 }).catch(() => { });
+    try {
+      await loc.click({ force: true, timeout: 1000 }).catch(() => {});
+      await page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A").catch(() => {});
+      await page.keyboard.press("Backspace").catch(() => {});
+      await loc.fill(value, { force: true, timeout: 3000 });
+    } catch { }
 
     // Fast polling verify
     for (let i = 0; i < 3; i++) {

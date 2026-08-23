@@ -206,17 +206,42 @@ export async function enterTextWithVariant(
   selector: string,
   value: string,
   variant: LoginEntryVariant,
-  fallback: (page: Page, selector: string, value: string) => Promise<boolean>,
+  fallback?: (page: Page, selector: string, value: string) => Promise<boolean>,
   delayMs = 20,
 ): Promise<boolean> {
-  if (variant === "input_text") return fallback(page, selector, value);
-  try {
-    const locator = page.locator(selector).first();
-    await locator.click();
-    await locator.fill("");
-    await locator.pressSequentially(value, { delay: delayMs });
-    return await locator.inputValue() === value;
-  } catch {
-    return false;
+  const tryFill = async (sel: string): Promise<boolean> => {
+    try {
+      const locator = page.locator(sel).first();
+      if (await locator.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await locator.click({ force: true }).catch(() => {});
+        await locator.fill(value);
+        const val = await locator.inputValue().catch(() => "");
+        return val === value;
+      }
+      return false;
+    } catch (err) {
+      console.warn(`[enterTextWithVariant] tryFill failed for "${sel}": ${err instanceof Error ? err.message : String(err)}`);
+      return false;
+    }
+  };
+
+  if (typeof fallback === "function" && variant === "input_text") {
+    const ok = await fallback(page, selector, value);
+    if (ok) return true;
   }
+
+  if (await tryFill(selector)) return true;
+
+  // Fallback to type-based candidates
+  const isPassword = selector.toLowerCase().includes("password");
+  const candidates = isPassword
+    ? ['input[type="password"]', 'input[name*="password" i]', '#password']
+    : ['input[type="email"]', 'input[name*="email" i]', 'input[name*="user" i]', '#email', '#username', 'input[type="text"]'];
+
+  for (const candidate of candidates) {
+    if (candidate === selector) continue;
+    if (await tryFill(candidate)) return true;
+  }
+
+  return false;
 }

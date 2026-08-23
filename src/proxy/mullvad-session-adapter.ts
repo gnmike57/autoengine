@@ -145,7 +145,7 @@ async function defaultLaunchWireproxy(input: {
 }): Promise<ManagedWireproxy> {
   fs.mkdirSync(input.runtimeDir, { recursive: true, mode: 0o700 });
   const runtimeConfig = path.join(input.runtimeDir, "wireproxy.conf");
-  fs.copyFileSync(input.sourceConfig, runtimeConfig, fs.constants.COPYFILE_EXCL);
+  fs.copyFileSync(input.sourceConfig, runtimeConfig);
   fs.chmodSync(runtimeConfig, 0o600);
   fs.appendFileSync(runtimeConfig, `\n\n[Socks5]\nBindAddress = ${input.bindHost}:${input.bindPort}\n`, { encoding: "utf8" });
 

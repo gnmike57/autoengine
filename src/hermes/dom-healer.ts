@@ -6,49 +6,46 @@ export async function healSelector(page: Page, targetDescription: string): Promi
   try {
     console.log(`[Hermes Healer] Attempting to heal selector for: "${targetDescription}"`);
 
-    const evaluateResult = await page.evaluate(() => {
-      function cleanNode(node: Element | ShadowRoot): any {
-        // Fallback for ShadowRoot (nodeType 11) or Element (nodeType 1)
-        if (node.nodeType !== 1 && node.nodeType !== 11) return null;
+    const evaluateResult = await page.evaluate(`(() => {
+      function cleanNode(node) {
+        if (!node || (node.nodeType !== 1 && node.nodeType !== 11)) return null;
         
-        const tag = (node as Element).tagName ? (node as Element).tagName.toLowerCase() : 'shadow-root';
-        if (['script', 'style', 'svg', 'path', 'noscript', 'meta', 'link'].includes(tag)) return null;
+        var tag = node.tagName ? String(node.tagName).toLowerCase() : 'shadow-root';
+        if (['script', 'style', 'svg', 'path', 'noscript', 'meta', 'link'].indexOf(tag) !== -1) return null;
 
-        let x = 0, y = 0, width = 1, height = 1;
-        if (node.nodeType === 1) { // Element
-          const el = node as Element;
-          const rect = el.getBoundingClientRect();
+        var x = 0, y = 0, width = 1, height = 1;
+        if (node.nodeType === 1) {
+          var rect = node.getBoundingClientRect();
           if (rect.width === 0 || rect.height === 0) return null;
-          x = Math.round(rect.x + window.scrollX);
-          y = Math.round(rect.y + window.scrollY);
+          x = Math.round(rect.x + (window.scrollX || 0));
+          y = Math.round(rect.y + (window.scrollY || 0));
           width = rect.width;
           height = rect.height;
         }
 
-        const obj: any = { tag, x, y };
+        var obj = { tag: tag, x: x, y: y };
 
         if (node.nodeType === 1) {
-          const el = node as Element;
-          const id = el.getAttribute("id");
+          var id = node.getAttribute("id");
           if (id) obj.id = id;
-          const name = el.getAttribute("name");
+          var name = node.getAttribute("name");
           if (name) obj.name = name;
-          const type = el.getAttribute("type");
+          var type = node.getAttribute("type");
           if (type) obj.type = type;
-          const placeholder = el.getAttribute("placeholder");
+          var placeholder = node.getAttribute("placeholder");
           if (placeholder) obj.placeholder = placeholder;
-          const ariaLabel = el.getAttribute("aria-label");
+          var ariaLabel = node.getAttribute("aria-label");
           if (ariaLabel) obj.ariaLabel = ariaLabel;
 
-          if (['button', 'a', 'label', 'span', 'div', 'iframe', 'input'].includes(tag)) {
-            const text = el.textContent?.trim();
+          if (['button', 'a', 'label', 'span', 'div', 'iframe', 'input'].indexOf(tag) !== -1) {
+            var text = node.textContent ? node.textContent.trim() : '';
             if (text && text.length < 50) obj.text = text;
           }
         }
 
-        const childrenNodes = (node as Element).shadowRoot ? Array.from((node as Element).shadowRoot!.children) : Array.from(node.children || []);
-        const children = childrenNodes
-          .map(cleanNode)
+        var childrenNodes = node.shadowRoot ? Array.from(node.shadowRoot.children) : Array.from(node.children || []);
+        var children = childrenNodes
+          .map(function(child) { return cleanNode(child); })
           .filter(Boolean);
 
         if (children.length > 0) obj.children = children;
@@ -56,7 +53,7 @@ export async function healSelector(page: Page, targetDescription: string): Promi
         return Object.keys(obj).length > 3 ? obj : null;
       }
       return cleanNode(document.body);
-    });
+    })()`);
 
     const compactedDOM = evaluateResult || {};
     const domString = JSON.stringify(compactedDOM).slice(0, 15000); // Prevent massive payloads
