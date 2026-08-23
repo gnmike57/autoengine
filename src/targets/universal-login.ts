@@ -70,6 +70,11 @@ export async function universalLoginFlow(options: UniversalLoginOptions): Promis
   const { page, siteName, mode } = options;
   console.log(`[UniversalLogin] Starting universal flow for ${siteName} (mode: ${mode})`);
 
+  if (options.cookieGuard && options.attemptIdx === 0) {
+    console.log(`[UniversalLogin] Fresh launch on ${siteName} — awaiting mandatory cookie notice appearance & dismissal...`);
+    await options.cookieGuard.waitUntilDismissed();
+  }
+
   // Wait for login form to exist
   console.log(`[UniversalLogin] Waiting for login form to appear...`);
   const formReady = await page.waitForSelector('input[type="email"], input[name*="email"], input#email, #username', { state: "visible", timeout: 45000 }).catch(() => null);
