@@ -1536,7 +1536,8 @@ export class AutomationEngine extends EventEmitter {
    *  for this attempt rather than send a known-wrong password (which
    *  pollutes noaccount classification and burns the attempt budget). */
   private async inputText(page: Page, selector: string, value: string): Promise<boolean> {
-    const loc = page.locator(selector).first();
+    const rawLoc = page.locator(selector);
+    const loc = typeof (rawLoc as any)?.first === "function" ? (rawLoc as any).first() : rawLoc;
     const current = await loc.inputValue({ timeout: 50 }).catch(() => undefined);
     if (current === value) return true;
 
@@ -2253,7 +2254,7 @@ export class AutomationEngine extends EventEmitter {
             effectiveBackend = nextCandidate as any;
             assignedExpConfig = {
               backend: nextCandidate as any,
-              proxyPool: config.proxyPool,
+              proxyPool: config.proxyPool || "1",
               fails: 0,
               blocks: 0,
               decisive: 0,
@@ -3577,7 +3578,7 @@ export class AutomationEngine extends EventEmitter {
             }
             const duration = Date.now() - rowStartTime;
             const res = this.darwinEngine.recordOutcome(
-              effectiveBackend,
+              effectiveBackend || "stealth",
               rowOutcome,
               duration,
               lastError?.message || String(lastError || "")
@@ -3638,42 +3639,34 @@ export class AutomationEngine extends EventEmitter {
               this.log("WARN", `🧪 Experimental Mode: Eliminating [${assignedExpConfig.backend} / Pool ${assignedExpConfig.proxyPool}]`);
               activeExpConfigs = activeExpConfigs.filter(c => !c.eliminated);
             }
-          }
-        }
 
-          // Issue H: Moved BEFORE elimination check so diagnostic reports
-          // include the attempt that triggered elimination (was off-by-one).
-          // This block was previously after the elimination check at L3444.
-
-          if (isFailure || isFingerprinted) {
-            const rawError = lastError?.message || lastError || "Unknown error";
-            let sig = "timeout";
-            const lowerE = rawError.toString().toLowerCase();
-            if (lowerE.includes("cloudflare")) {
-              sig = "cloudflare block";
-              // Upgrade 5: Proxy Jail Cool-Down
-              if (lastProxyKey) {
-                import("../../backends/index.js").then((cloak) => {
-                  ((cloak as any).proxyJail || new Map()).set(lastProxyKey!, Date.now() + 6 * 60 * 60 * 1000);
-                  this.log("WARN", `  🚓 Proxy ${this.maskProxyCreds(lastProxyKey!)} sentenced to 6hr jail due to Cloudflare block.`);
-                }).catch(() => { });
+            if (isFailure || isFingerprinted) {
+              const rawError = lastError?.message || lastError || "Unknown error";
+              let sig = "timeout";
+              const lowerE = rawError.toString().toLowerCase();
+              if (lowerE.includes("cloudflare")) {
+                sig = "cloudflare block";
+                if (lastProxyKey) {
+                  import("../../backends/index.js").then((cloak) => {
+                    ((cloak as any).proxyJail || new Map()).set(lastProxyKey!, Date.now() + 6 * 60 * 60 * 1000);
+                    this.log("WARN", `  🚓 Proxy ${this.maskProxyCreds(lastProxyKey!)} sentenced to 6hr jail due to Cloudflare block.`);
+                  }).catch(() => { });
+                }
               }
+              else if (lowerE.includes("net::err_") || lowerE.includes("proxy")) sig = "proxy connect error";
+              else if (lowerE.includes("timeout") || lowerE.includes("timed out")) sig = "timeout";
+              else if (lowerE.includes("selector")) sig = "selector failed";
+              else sig = "other";
+
+              assignedExpConfig.errors[sig] = (assignedExpConfig.errors[sig] || 0) + 1;
+
+              this.scheduleRequeue(idx, targets, "ExperimentalBackendFailure", effectiveBackend);
+              void this.saveRequeuePending(REQUEUE_PENDING_FILE);
             }
-            else if (lowerE.includes("net::err_") || lowerE.includes("proxy")) sig = "proxy connect error";
-            else if (lowerE.includes("timeout") || lowerE.includes("timed out")) sig = "timeout";
-            else if (lowerE.includes("selector")) sig = "selector failed";
-            else sig = "other";
 
-            assignedExpConfig.errors[sig] = (assignedExpConfig.errors[sig] || 0) + 1;
-
-            // Multi-backend failure: ensure the credential is automatically requeued
-            // so it can be re-tested on a different backend.
-            this.scheduleRequeue(idx, targets, "ExperimentalBackendFailure", effectiveBackend);
-            void this.saveRequeuePending(REQUEUE_PENDING_FILE);
-          }
-
-          if (config.experimentalConfigs) {
-            this.emitExperimentalStats(config.experimentalConfigs);
+            if (config.experimentalConfigs) {
+              this.emitExperimentalStats(config.experimentalConfigs);
+            }
           }
         }
       }

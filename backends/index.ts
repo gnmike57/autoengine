@@ -163,8 +163,16 @@ export async function createSession(opts: SessionOpts): Promise<SessionHandle> {
       opts.rotation = engine.getRotation(opts.email);
     }
   }
+  const proxyRequirement = resolveProxyRequirement(opts);
+  if (proxyRequirement.required && (proxyRequirement.pool === "none" || proxyRequirement.pool === "off")) {
+    throw new Error("proxy-required-but-pool-disabled");
+  }
+
+  const isExplicitPool = !!opts.proxyPool && opts.proxyPool !== "off" && opts.proxyPool !== "none";
+  const isMullvadPool = opts.proxyPool?.startsWith("mullvad") || opts.mullvadSessionMode !== undefined;
+
   const mullvadAdapter = MullvadSessionAdapter.fromEnvironment(opts.mullvadSessionMode);
-  if (mullvadAdapter.mode !== "disabled") {
+  if (mullvadAdapter.mode !== "disabled" && (!isExplicitPool || isMullvadPool)) {
     if (opts.proxy || opts.networkLease) throw new Error("mullvad-session-conflicts-with-explicit-proxy");
     const lease = await mullvadAdapter.acquire(opts.email ?? crypto.randomUUID());
     opts = {
@@ -174,14 +182,6 @@ export async function createSession(opts: SessionOpts): Promise<SessionHandle> {
       requireProxy: true,
       networkLease: lease,
     };
-  }
-
-  // AUTO-PICK PROXY: a configured pool is a fail-closed requirement unless
-  // the caller explicitly disables it. Every page/window created by the
-  // returned BrowserContext then inherits the same launch-time proxy.
-  const proxyRequirement = resolveProxyRequirement(opts);
-  if (proxyRequirement.required && (proxyRequirement.pool === "none" || proxyRequirement.pool === "off")) {
-    throw new Error("proxy-required-but-pool-disabled");
   }
   if (!opts.proxy && opts.proxyPool && !proxyRequirement.managedByBackend) {
     const picked = pickProxy(opts.excludeProxies ?? [], opts.email, opts.backend, opts.proxyPool);

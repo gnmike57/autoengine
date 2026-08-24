@@ -33,3 +33,15 @@ The frontend UI/Dashboard MUST NEVER contain hardcoded configuration presets (e.
 1. **AI Auto-Optimization**: When the `autoOptimizePerBackend` flag is true, the server's `resolveBackendSettings` logic determines the `httpCloak`, `injectStealthJS`, `stealthBypassHttpCloak`, and `fpStrategy` flags.
 2. **Dashboard Syncing**: The UI must rely exclusively on listening for the `config-sync` WebSocket broadcasts from the server to update its checkboxes and dropdowns, ensuring the visual state 100% matches the active backend engine. 
 3. **Troubleshooting Flags**: `recordVideo` and `enablePlaywrightTracing` MUST be universally enabled in the baseline server profiles across ALL backends to guarantee forensic tracking for headless workers.
+
+## 🦎 Darwin Engine & Natural Selection Architecture (ABSOLUTE)
+
+- **Spider Exclusion**: All Spider variants are strictly excluded from Darwin candidate evaluation.
+- **Scoring Formula**: $\text{Score} = 500 \times \text{decisiveRate} + 300 \times \text{successRate} - 400 \times \text{blockRate} - 200 \times \text{failRate} - 100 \times \text{latencyPenalty}$.
+- **Auto-Elimination Threshold**: $\ge 3$ WAF blocks or failures trigger instant candidate elimination.
+- **Continuous Auto-Pivoting**: Once a candidate emerges as the decisive winner, the active batch is immediately hot-swapped to that optimal backend, and insights are persisted to SQLite and `learning/hermes-memory.json`.
+
+## 🛡️ Universal Cookie Notice Dismissal (ABSOLUTE)
+
+On fresh launches for both target sites, the engine must execute the 3-tier cascade (`window.CookieInformation?.submitAllCategories?.()` → `.coi-banner__accept` UI click → CSS force hide) with multi-stage verification at $T+300\text{ms}$, $T+1.5\text{s}$, and $T+3.5\text{s}$ before filling credentials.
+

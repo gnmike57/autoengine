@@ -214,7 +214,12 @@ export async function enterTextWithVariant(
       const locator = page.locator(sel).first();
       if (await locator.isVisible({ timeout: 2000 }).catch(() => false)) {
         await locator.click({ force: true }).catch(() => {});
-        await locator.fill(value);
+        if (variant === "press_sequentially_entry" && typeof (locator as any).pressSequentially === "function") {
+          await locator.fill("");
+          await (locator as any).pressSequentially(value, { delay: delayMs });
+        } else {
+          await locator.fill(value);
+        }
         const val = await locator.inputValue().catch(() => "");
         return val === value;
       }

@@ -116,9 +116,10 @@ Provide a structured, chronological breakdown of the execution timeline and your
 
       if (verdict1 !== "unknown" && (verdict1 === verdict2 || !response2)) {
         log.thought("Hermes", `Timeline Diagnosis: ${verdict1.toUpperCase()}`);
-        finalResponse = `=== TIMELINE ANALYSIS ===\n\nVerdict: [${verdict1.toUpperCase()}]\n\n${response1}`;
+        finalResponse = `=== TIMELINE ANALYSIS ===\n\nVerdict: [${verdict1.toUpperCase()}]\n\nCONSENSUS REACHED\n\n${response1}`;
       } else if (response1 || response2) {
-        finalResponse = `=== TIMELINE ANALYSIS ===\n\nModel 1:\n${response1}\n\nModel 2:\n${response2}`;
+        timelineEvents.emit("human-query-required", { sessionId, finalResponse });
+        finalResponse = `=== TIMELINE ANALYSIS ===\n\nCONSENSUS FAILED\n\nModel 1:\n${response1}\n\nModel 2:\n${response2}`;
       } else {
         finalResponse = `=== TIMELINE ANALYSIS ===\n\nNo vision models available to analyze timeline.`;
       }

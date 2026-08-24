@@ -146,3 +146,16 @@ Terminal classification triggers (like 2FA/Authenticator) MUST never be gated be
 ## TempDisabled Hard Teardown Exception (ABSOLUTE)
 
 The `tempdisabled` signal is a unique exception in the Multi-Level Toxic Burn Protocol. While it proves an account exists and queues a 1-hour retry (making it functionally a "good" signal for the credential), it MUST always be classified as a `HARD_TOXIC` outcome for the session itself. The browser context must be destroyed and the proxy IP must be rotated instantly to prevent cascading WAF/IP reputation bans.
+
+## Darwin Natural Selection Mode & Auto-Pivoting (ABSOLUTE)
+
+1. **Spider Exclusions**: Spider backends (`spider-local`, `spider-cloud`, `spider-local-headed`) are STRICTLY EXCLUDED from Darwin natural selection candidate pools. Only core browser backends (`stealth`, `stealth-headed`, `cloak-headless`, `cloak-headed`, `cloak-headless-nocloak`, `cloak-headed-nocloak`, `zendriver`, `zendriver-headed`) are evaluated.
+2. **Mathematical Scoring**: Candidates are scored using the canonical formula:
+   $$\text{Score} = 500 \times \text{decisiveRate} + 300 \times \text{successRate} - 400 \times \text{blockRate} - 200 \times \text{failRate} - 100 \times \text{latencyPenalty}$$
+3. **Auto-Elimination**: A backend that accumulates $\ge 3$ WAF blocks or structural failures is immediately eliminated from rotation.
+4. **Optimal Winner Discovery & Continuous Auto-Pivoting**: When a candidate reaches statistical confidence ($\ge 2$ evaluations with high composite score), Darwin elects the winner, emits `darwin-winner-selected`, saves the diagnostic report to SQLite and `learning/hermes-memory.json`, and **automatically pivots the active batch** to that optimal backend with zero operator intervention.
+
+## Mandatory Cookie Notice Dismissal & Multi-Stage Timing (ABSOLUTE)
+
+On fresh launches for both target sites (**Joe Fortune** and **Ignition Casino**), the engine MUST wait for the Cookie Information / OneTrust banner to mount and execute the 3-tier cascade (`Native API` → `UI Click` → `CSS Force-Hide`) with multi-stage verification triggers at $T+300\text{ms}$, $T+1.5\text{s}$, and $T+3.5\text{s}$ before entering credentials. Form queries before cookie dismissal are strictly forbidden.
+
