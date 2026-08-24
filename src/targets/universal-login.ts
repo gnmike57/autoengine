@@ -1,5 +1,5 @@
 import { Page } from "playwright-core";
-import { executeUnifiedLoginChoreography, type UnifiedChoreographyInput, type UnifiedLoginResult } from "./login-flow.js";
+import { executeUnifiedLoginChoreography, clickShowPasswordCanonical, type UnifiedChoreographyInput, type UnifiedLoginResult } from "./login-flow.js";
 import { getCoordinateMap, coordinateClick } from "../intelligence/coordinate-mapper.js";
 
 export type UniversalLoginOptions = UnifiedChoreographyInput & {
@@ -64,7 +64,7 @@ export async function installEarlyCookieDismissHook(page: Page) {
 
 /**
  * Universal Login Flow
- * Handles: Cookie Banners -> Early Remember Me -> Coordinate/Standard Login -> Submission -> Verification
+ * Handles: Cookie Banners -> Early Remember Me & Show Password -> Coordinate/Standard Login -> Submission -> Verification
  */
 export async function universalLoginFlow(options: UniversalLoginOptions): Promise<UnifiedLoginResult> {
   const { page, siteName, mode } = options;
@@ -83,14 +83,38 @@ export async function universalLoginFlow(options: UniversalLoginOptions): Promis
     return { success: false };
   }
 
-  // Brief settle for React event handler attachment (handlers bind within ~1 frame)
-  await new Promise(r => setTimeout(r, 500));
+  // ── Early Remember Me & Show Password (before any details/mail/password are entered) ──
+  if (options.attemptIdx === 0) {
+    try {
+      const rememberMe = page.locator('label:has-text("Remember"), input[type="checkbox"][id*="remember"], input[type="checkbox"][name*="remember"]').first();
+      if (await rememberMe.isVisible({ timeout: 500 }).catch(() => false)) {
+        await rememberMe.click({ delay: 30 }).catch(() => {});
+        console.log(`[UniversalLogin] ✅ Clicked Remember Me early.`);
+      }
+    } catch {}
+
+    try {
+      const spResult = await clickShowPasswordCanonical(page, siteName, options.selectors?.password);
+      if (spResult) {
+        console.log(`[UniversalLogin] ✅ Clicked Show Password early (${spResult}).`);
+      } else {
+        const eyeBtn = page.locator('button:has-text("Show"), .icon-eye, .eye-icon, [aria-label*="password" i], button[aria-label*="Show" i]').first();
+        if (await eyeBtn.isVisible({ timeout: 300 }).catch(() => false)) {
+          await eyeBtn.click({ delay: 30 }).catch(() => {});
+          console.log(`[UniversalLogin] ✅ Clicked Show Password early (fallback).`);
+        }
+      }
+    } catch {}
+  }
+
+  // Speed-optimized brief settle for React event handler attachment (150ms instead of 500ms)
+  await new Promise(r => setTimeout(r, 150));
 
   const coords = getCoordinateMap(siteName);
 
-  // Wait for page to fully settle before interacting with the React form
+  // Speed-optimized page settle: clamp networkidle timeout to 3000ms max
   console.log(`[UniversalLogin] Waiting for page network to settle before injecting...`);
-  await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+  await page.waitForLoadState("networkidle", { timeout: 3000 }).catch(() => {});
 
   if (mode === "benchmark-direct") {
     console.log(`[UniversalLogin] benchmark-direct uses the canonical one-action choreography for evidence parity`);

@@ -209,6 +209,15 @@ async function fillCredentials(page: Page): Promise<boolean> {
 
   console.log(`[GOLDEN] Using selectors: user=${userSel}, pass=${passSel}`);
 
+  // Early Show Password click before filling any credentials
+  try {
+    const earlyEye = page.locator('button:has-text("Show"), .show-password, [aria-label*="password" i], [aria-label*="Show" i]').first();
+    if (await earlyEye.isVisible({ timeout: 500 }).catch(() => false)) {
+      await earlyEye.click({ timeout: 1000 }).catch(() => {});
+      console.log("[GOLDEN] ✅ Clicked Show Password early before filling credentials.");
+    }
+  } catch {}
+
   // Focus the email field first (matches engine's click-before-fill pattern)
   await page.getByRole("textbox", { name: /E-mail/i }).click({ force: true, timeout: 3000 }).catch(() => {});
 

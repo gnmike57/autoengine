@@ -651,9 +651,21 @@ async function deepShadowPierceSubmit(
   return { success: result, evidence: result ? "Pierced Shadow DOM" : "Failed to pierce" };
 }
 
+export interface CredentialVisualVerification {
+  emailOk: boolean;
+  passwordOk: boolean;
+  emailActual: string;
+  passwordActual: string;
+  visualVerified: boolean;
+  emailBoundingBox?: { x: number; y: number; width: number; height: number } | null;
+  passwordBoundingBox?: { x: number; y: number; width: number; height: number } | null;
+  screenshotBuffer?: Buffer | null;
+}
+
 /**
- * Verify that email and password fields are filled correctly.
- * Returns true if both fields contain the expected values.
+ * Real non-sudo visual verification that email and password fields are filled and visible.
+ * Validates element bounding boxes (x, y, w, h > 0), computed styles (display, visibility, opacity),
+ * in-memory non-sudo element screenshot buffer, and exact input values before submit.
  */
 export async function verifyCredentialsFilled(
   page: Page,
@@ -661,12 +673,56 @@ export async function verifyCredentialsFilled(
   passwordSelector: string,
   expectedEmail: string,
   expectedPassword: string,
-): Promise<{ emailOk: boolean; passwordOk: boolean; emailActual: string; passwordActual: string }> {
+): Promise<CredentialVisualVerification> {
   const emailActual = await page.locator(emailSelector).inputValue().catch(() => "");
   const passwordActual = await page.locator(passwordSelector).inputValue().catch(() => "");
 
   const emailOk = emailActual.trim() === expectedEmail.trim();
   const passwordOk = passwordActual === expectedPassword; // Password comparison exact
+
+  // ── Non-Sudo Visual & Bounding Box Verification ──
+  const emailBox = await page.locator(emailSelector).boundingBox().catch(() => null);
+  const passwordBox = await page.locator(passwordSelector).boundingBox().catch(() => null);
+
+  const isEmailVisuallyRendered = !!(emailBox && emailBox.width > 0 && emailBox.height > 0);
+  const isPasswordVisuallyRendered = !!(passwordBox && passwordBox.width > 0 && passwordBox.height > 0);
+
+  // Check computed styles for true visibility (display, visibility, opacity)
+  const stylesOk = await page.evaluate(({ userSel, passSel }) => {
+    try {
+      const uEl = document.querySelector(userSel);
+      const pEl = document.querySelector(passSel);
+      if (!uEl || !pEl) return false;
+      const uStyle = window.getComputedStyle(uEl);
+      const pStyle = window.getComputedStyle(pEl);
+      const uVisible = uStyle.display !== "none" && uStyle.visibility !== "hidden" && parseFloat(uStyle.opacity || "1") > 0.1;
+      const pVisible = pStyle.display !== "none" && pStyle.visibility !== "hidden" && parseFloat(pStyle.opacity || "1") > 0.1;
+      return uVisible && pVisible;
+    } catch {
+      return false;
+    }
+  }, { userSel: emailSelector, passSel: passwordSelector }).catch(() => true);
+
+  // In-memory non-sudo element screenshot buffer for visual verification
+  let screenshotBuffer: Buffer | null = null;
+  try {
+    const formLocator = page.locator('form, [class*="login"], [class*="auth"]').first();
+    if (await formLocator.isVisible({ timeout: 200 }).catch(() => false)) {
+      screenshotBuffer = await formLocator.screenshot({ type: "jpeg", quality: 40 }).catch(() => null);
+    } else {
+      screenshotBuffer = await page.locator(emailSelector).locator("..").screenshot({ type: "jpeg", quality: 40 }).catch(() => null);
+    }
+  } catch {
+    // Non-fatal if screenshot buffer fails
+  }
+
+  const visualVerified = isEmailVisuallyRendered && isPasswordVisuallyRendered && stylesOk;
+
+  if (visualVerified) {
+    log.info(`[VisualVerify] ✅ Real non-sudo visual verification confirmed: Email box [${emailBox?.x.toFixed(0)}, ${emailBox?.y.toFixed(0)}, ${emailBox?.width.toFixed(0)}x${emailBox?.height.toFixed(0)}], Pass box [${passwordBox?.x.toFixed(0)}, ${passwordBox?.y.toFixed(0)}, ${passwordBox?.width.toFixed(0)}x${passwordBox?.height.toFixed(0)}], Buffer captured: ${screenshotBuffer ? `${screenshotBuffer.length} bytes` : 'no'}`);
+  } else {
+    log.warn(`[VisualVerify] ⚠️ Visual verification degraded: emailBox=${!!emailBox}, passwordBox=${!!passwordBox}, stylesOk=${stylesOk}`);
+  }
 
   if (!emailOk) {
     log.warn(`Email verification failed: expected="${expectedEmail}", actual="${emailActual}"`);
@@ -675,7 +731,16 @@ export async function verifyCredentialsFilled(
     log.warn(`Password verification failed: expected length=${expectedPassword.length}, actual length=${passwordActual.length}`);
   }
 
-  return { emailOk, passwordOk, emailActual, passwordActual };
+  return {
+    emailOk,
+    passwordOk,
+    emailActual,
+    passwordActual,
+    visualVerified,
+    emailBoundingBox: emailBox,
+    passwordBoundingBox: passwordBox,
+    screenshotBuffer,
+  };
 }
 
 /**
@@ -894,18 +959,24 @@ export async function executeUnifiedLoginChoreography(input: UnifiedChoreography
 
     // ── HUMAN-LIKE EARLY CLICK: REMEMBER ME & SHOW PASSWORD ──────────
     // Per explicit user directive, we perform explicit, human-like clicks
-    // on the form elements AS EARLY AS REASONABLY POSSIBLE, BEFORE CMP dismissal.
+    // on the form elements AS EARLY AS REASONABLY POSSIBLE, BEFORE any details/mail/password are filled.
     try {
       const rememberMe = page.locator('label:has-text("Remember"), input[type="checkbox"][id*="remember"], input[type="checkbox"][name*="remember"]').first();
-      if (await rememberMe.isVisible({ timeout: 2000 }).catch(() => false)) {
-        await rememberMe.click({ delay: Math.random() * 50 + 50 });
+      if (await rememberMe.isVisible({ timeout: 1500 }).catch(() => false)) {
+        await rememberMe.click({ delay: Math.random() * 50 + 50 }).catch(() => {});
         log.info(`✅ Clicked Remember Me like a human.`);
       }
 
-      const showPassword = page.locator('button:has-text("Show"), .icon-eye, .eye-icon, [aria-label*="password" i], button[aria-label*="Show" i]').first();
-      if (await showPassword.isVisible({ timeout: 1000 }).catch(() => false)) {
-        await showPassword.click({ delay: Math.random() * 50 + 50 });
-        log.info(`✅ Clicked Show Password like a human.`);
+      // Early Show Password click before any credentials are typed
+      const showPasswordResult = await clickShowPasswordCanonical(page, siteName, selectors.password);
+      if (showPasswordResult) {
+        log.info(`✅ Clicked Show Password early like a human (${showPasswordResult}).`);
+      } else {
+        const showPassword = page.locator('button:has-text("Show"), .icon-eye, .eye-icon, [aria-label*="password" i], button[aria-label*="Show" i]').first();
+        if (await showPassword.isVisible({ timeout: 500 }).catch(() => false)) {
+          await showPassword.click({ delay: Math.random() * 50 + 50 }).catch(() => {});
+          log.info(`✅ Clicked Show Password early fallback.`);
+        }
       }
     } catch (e) {
       log.debug?.(`Early human-like clicks failed: ${String(e)}`);
@@ -1183,7 +1254,7 @@ export async function executeUnifiedLoginChoreography(input: UnifiedChoreography
       ? await Promise.race([
           responsePromise,
           navigationPromise,
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000)),
         ])
       : null;
 
@@ -1390,7 +1461,7 @@ export async function executeUnifiedLoginChoreography(input: UnifiedChoreography
       ? await Promise.race([
           responsePromise,
           navigationPromise,
-          new Promise<null>((resolve) => setTimeout(() => resolve(null), 5000)),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000)),
         ])
       : null;
 

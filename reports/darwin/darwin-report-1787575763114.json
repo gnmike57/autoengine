@@ -1,0 +1,175 @@
+{
+  "mode": "darwin",
+  "timestamp": "2026-08-24T12:49:23.114Z",
+  "totalBackendsTested": 8,
+  "totalAttempts": 19,
+  "totalDurationMs": 3837186,
+  "eliminationThreshold": 3,
+  "activeBackends": [
+    "stealth",
+    "stealth-headed",
+    "cloak-headless",
+    "cloak-headed",
+    "cloak-headless-nocloak",
+    "cloak-headed-nocloak",
+    "zendriver",
+    "zendriver-headed"
+  ],
+  "eliminatedBackends": [],
+  "scorecard": {
+    "timestamp": "2026-08-24T12:49:23.114Z",
+    "totalEvaluated": 19,
+    "activeCount": 8,
+    "eliminatedCount": 0,
+    "rankedBackends": [
+      {
+        "backend": "stealth-headed",
+        "proxyPool": "none",
+        "totalAttempts": 3,
+        "decisive": 2,
+        "successes": 0,
+        "blocks": 0,
+        "fails": 1,
+        "consecutiveFails": 1,
+        "consecutiveBlocks": 0,
+        "errors": {},
+        "totalDurationMs": 659861,
+        "avgDurationMs": 219954,
+        "eliminated": false,
+        "compositeScore": 367
+      },
+      {
+        "backend": "cloak-headless-nocloak",
+        "proxyPool": "none",
+        "totalAttempts": 2,
+        "decisive": 1,
+        "successes": 0,
+        "blocks": 0,
+        "fails": 1,
+        "consecutiveFails": 0,
+        "consecutiveBlocks": 0,
+        "errors": {},
+        "totalDurationMs": 450906,
+        "avgDurationMs": 225453,
+        "eliminated": false,
+        "compositeScore": 250
+      },
+      {
+        "backend": "stealth",
+        "proxyPool": "none",
+        "totalAttempts": 3,
+        "decisive": 1,
+        "successes": 0,
+        "blocks": 0,
+        "fails": 2,
+        "consecutiveFails": 2,
+        "consecutiveBlocks": 0,
+        "errors": {},
+        "totalDurationMs": 644991,
+        "avgDurationMs": 214997,
+        "eliminated": false,
+        "compositeScore": 133
+      },
+      {
+        "backend": "cloak-headless",
+        "proxyPool": "none",
+        "totalAttempts": 3,
+        "decisive": 1,
+        "successes": 0,
+        "blocks": 0,
+        "fails": 2,
+        "consecutiveFails": 0,
+        "consecutiveBlocks": 0,
+        "errors": {},
+        "totalDurationMs": 766046,
+        "avgDurationMs": 255349,
+        "eliminated": false,
+        "compositeScore": 133
+      },
+      {
+        "backend": "cloak-headed",
+        "proxyPool": "none",
+        "totalAttempts": 2,
+        "decisive": 0,
+        "successes": 0,
+        "blocks": 0,
+        "fails": 2,
+        "consecutiveFails": 2,
+        "consecutiveBlocks": 0,
+        "errors": {},
+        "totalDurationMs": 518511,
+        "avgDurationMs": 259256,
+        "eliminated": false,
+        "compositeScore": 1
+      },
+      {
+        "backend": "cloak-headed-nocloak",
+        "proxyPool": "none",
+        "totalAttempts": 2,
+        "decisive": 0,
+        "successes": 0,
+        "blocks": 0,
+        "fails": 2,
+        "consecutiveFails": 2,
+        "consecutiveBlocks": 0,
+        "errors": {
+          "page.addInitScript: Target page, context or browser has been closed": 1
+        },
+        "totalDurationMs": 531618,
+        "avgDurationMs": 265809,
+        "eliminated": false,
+        "compositeScore": 1
+      },
+      {
+        "backend": "zendriver",
+        "proxyPool": "none",
+        "totalAttempts": 2,
+        "decisive": 0,
+        "successes": 0,
+        "blocks": 0,
+        "fails": 2,
+        "consecutiveFails": 2,
+        "consecutiveBlocks": 0,
+        "errors": {
+          "Failed to connect to Zendriver CDP at ws://127.0.0.1:63649/devtools/browser/703b2a32-998d-42e1-9545-": 1,
+          "Failed to connect to Zendriver CDP at ws://127.0.0.1:64962/devtools/browser/204de63f-4c7f-44b5-b658-": 1
+        },
+        "totalDurationMs": 78868,
+        "avgDurationMs": 39434,
+        "eliminated": false,
+        "compositeScore": 1
+      },
+      {
+        "backend": "zendriver-headed",
+        "proxyPool": "none",
+        "totalAttempts": 2,
+        "decisive": 0,
+        "successes": 0,
+        "blocks": 0,
+        "fails": 2,
+        "consecutiveFails": 2,
+        "consecutiveBlocks": 0,
+        "errors": {
+          "Failed to connect to Zendriver CDP at ws://127.0.0.1:63783/devtools/browser/ae1ca218-e1be-4e21-b621-": 1,
+          "Failed to connect to Zendriver CDP at ws://127.0.0.1:65256/devtools/browser/c1e0f86d-8e95-4496-9ee0-": 1
+        },
+        "totalDurationMs": 186385,
+        "avgDurationMs": 93193,
+        "eliminated": false,
+        "compositeScore": 1
+      }
+    ],
+    "winner": {
+      "backend": "stealth-headed",
+      "score": 367,
+      "decisiveRate": 67,
+      "blockRate": 0,
+      "avgDurationMs": 219954,
+      "confidence": 60
+    }
+  },
+  "optimalBackend": "stealth-headed",
+  "recommendations": [
+    "Primary Recommendation: Lock active engine to optimal backend 'stealth-headed' (Score: 367, Decisive: 67%)."
+  ]
+}
