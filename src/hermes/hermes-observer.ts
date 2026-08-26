@@ -88,6 +88,8 @@ export interface ObserverSession {
   llmInsights: string[];
   startTime: number;
   lastVerdict?: string;
+  submitOccurred?: boolean;
+  cleanupListeners?: () => void;
   attemptResults: Array<{
     attemptIdx?: number;
     site?: string;
@@ -198,7 +200,54 @@ export class HermesObserver {
       llmInsights: [],
       startTime: Date.now(),
       attemptResults: [],
+      submitOccurred: false,
     };
+
+    if (page) {
+      const onFrameNavigated = (frame: any) => {
+        try {
+          if (frame === page.mainFrame()) {
+            const url = (frame.url() || "").toLowerCase();
+            const isLoginPage = url.includes("/login") || url.includes("/signin");
+            if (session.submitOccurred && isLoginPage) {
+              this.recordAnomaly(sessionId, `redirect_loop_to_login: URL bounced back to ${url}`);
+              this.reportAnomaly("redirect_loop_to_login", { sessionId, url, email, site });
+            }
+          }
+        } catch { /* page might be closing */ }
+      };
+
+      const onResponse = (res: any) => {
+        try {
+          const status = res.status();
+          const url = (res.url() || "").toLowerCase();
+          if (status === 403) {
+            this.recordAnomaly(sessionId, `http_403_waf_block on ${url.substring(0, 80)}`);
+            this.reportAnomaly("http_403_waf_block", { sessionId, url, status, email, site });
+          } else if (status === 428) {
+            this.recordAnomaly(sessionId, `http_428_mfa_challenge on ${url.substring(0, 80)}`);
+            this.reportAnomaly("http_428_mfa_challenge", { sessionId, url, status, email, site });
+          } else if (status === 429) {
+            this.recordAnomaly(sessionId, `http_429_rate_limited on ${url.substring(0, 80)}`);
+            this.reportAnomaly("http_429_rate_limited", { sessionId, url, status, email, site });
+          } else if (status >= 500 && status <= 504) {
+            this.recordAnomaly(sessionId, `http_server_error_${status} on ${url.substring(0, 80)}`);
+            this.reportAnomaly("http_server_error", { sessionId, url, status, email, site });
+          }
+        } catch { /* non-blocking */ }
+      };
+
+      try {
+        page.on("framenavigated", onFrameNavigated);
+        page.on("response", onResponse);
+        session.cleanupListeners = () => {
+          try {
+            page.off("framenavigated", onFrameNavigated);
+            page.off("response", onResponse);
+          } catch { /* ignore */ }
+        };
+      } catch { /* ignore */ }
+    }
 
     this.sessions.set(sessionId, session);
     log.info(`[HermesObserver] 👁️ Session started: ${sessionId} (${email} @ ${site})`);
@@ -682,9 +731,23 @@ What is the most likely cause and what correction should be applied immediately?
   }
 
   /**
+   * Mark that a submit action has been physically triggered for this session.
+   */
+  markSubmitOccurred(sessionId: string): void {
+    const session = this.sessions.get(sessionId);
+    if (session) {
+      session.submitOccurred = true;
+    }
+  }
+
+  /**
    * End a session and clean up tracking.
    */
   endSession(sessionId: string): void {
+    const session = this.sessions.get(sessionId);
+    if (session?.cleanupListeners) {
+      session.cleanupListeners();
+    }
     const ip = sessionIPs.get(sessionId);
     if (ip && seenIPs.get(ip) === sessionId) {
       seenIPs.delete(ip);

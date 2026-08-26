@@ -58,23 +58,37 @@ export function parseRowUpdate(
 
   // Infer failure_type from outcome prefix
   let failureType: string;
-  const prefix = outcome ? outcome.split("-")[0] : "";
-  switch (prefix) {
-    case "blocked":
-      failureType = "blocked";
-      break;
-    case "api":
-      failureType = "api-error";
-      break;
-    case "error":
-      failureType = "runtime-error";
-      break;
-    case "N/A":
-      failureType = "not-available";
-      break;
-    default:
-      failureType = "unknown";
-      break;
+  const outcomeLower = outcome.toLowerCase();
+  const prefix = outcome ? (outcome.split("-")[0] || "") : "";
+
+  if (outcomeLower.includes("403") || outcomeLower.includes("waf")) {
+    failureType = "waf-block-403";
+  } else if (outcomeLower.includes("429") || outcomeLower.includes("rate_limit")) {
+    failureType = "rate-limit-429";
+  } else if (outcomeLower.includes("428") || outcomeLower.includes("mfa_required")) {
+    failureType = "mfa-challenge-428";
+  } else if (outcomeLower.includes("redirect_loop") || outcomeLower.includes("bounce")) {
+    failureType = "redirect-loop-login";
+  } else if (outcomeLower.includes("pin") || outcomeLower.includes("honeypot")) {
+    failureType = "honeypot-detected";
+  } else {
+    switch (prefix) {
+      case "blocked":
+        failureType = "blocked";
+        break;
+      case "api":
+        failureType = "api-error";
+        break;
+      case "error":
+        failureType = "runtime-error";
+        break;
+      case "N/A":
+        failureType = "not-available";
+        break;
+      default:
+        failureType = "unknown";
+        break;
+    }
   }
 
   // Collect screenshot paths from event data if present

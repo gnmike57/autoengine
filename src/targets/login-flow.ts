@@ -25,6 +25,7 @@ import { humanClickAt, humanClickSelector, humanMouseMove } from "../intelligenc
 import { executeGenerativeDecoys } from "../intelligence/ai-decoy-generator.js";
 import { healSelector } from "../hermes/dom-healer.js";
 import { persistHealedSelector } from "../hermes/selector-cache.js";
+import { getHermesObserver } from "../hermes/hermes-observer.js";
 import { getViewportCoordinateMarkdown } from "../intelligence/ai-vision-coordinator.js";
 import { handleWicketkeeper } from "../stealth/wicketkeeper-handler.js";
 import { AgentObserver } from "../intelligence/agent-observer.js";
@@ -1244,6 +1245,7 @@ export async function executeUnifiedLoginChoreography(input: UnifiedChoreography
     let actionReceipt: SubmitActionReceipt | undefined;
     try {
       log.info(`[Choreography] 4. Executing submit action (${submitMethod})...`);
+      getHermesObserver().markSubmitOccurred(observerSessionId);
       actionReceipt = await executeSubmit(page, selectors.submit, selectors.password, submitMethod);
     } catch (error) {
       invoked = false;
@@ -1451,6 +1453,7 @@ export async function executeUnifiedLoginChoreography(input: UnifiedChoreography
     let actionReceipt: SubmitActionReceipt | undefined;
     try {
       log.info(`[Fast-Loop] 4. Executing submit action (${submitMethod})...`);
+      getHermesObserver().markSubmitOccurred(observerSessionId);
       actionReceipt = await executeSubmit(page, selectors.submit, selectors.password, submitMethod);
     } catch (error) {
       invoked = false;

@@ -26,7 +26,12 @@ const log = createLogger("TimingTelemetry");
 export type FlowPhase =
   | "cookieDismiss"
   | "credentialFill"
+  | "autofill"
+  | "eyeClick"
+  | "rememberMe"
   | "submit"
+  | "submitRace"
+  | "mutationSettle"
   | "responseWait"
   | "responseClassify"
   | "cashierVerify"
@@ -35,7 +40,12 @@ export type FlowPhase =
 export interface PhaseTimings {
   cookieDismissMs?: number;
   credentialFillMs?: number;
+  autofillMs?: number;
+  eyeClickMs?: number;
+  rememberMeMs?: number;
   submitMs?: number;
+  submitRaceMs?: number;
+  mutationSettleMs?: number;
   responseWaitMs?: number;
   responseClassifyMs?: number;
   cashierVerifyMs?: number;

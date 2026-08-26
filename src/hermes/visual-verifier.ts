@@ -1,29 +1,12 @@
 
 import { Page } from "playwright-core";
 import "dotenv/config";
+import { getHermesLLM } from "./hermes-llm.js";
+import { createLogger } from "../core/logger.js";
 
-export async function verifyLoginSuccessVisually(page: Page): Promise<boolean> {
-  const DISABLE_VISUAL_VERIFICATION = process.env.DISABLE_VISUAL_VERIFICATION;
-  if (DISABLE_VISUAL_VERIFICATION === 'true') {
-    console.log("[Hermes Verifier] Visual verification disabled. Skipping.");
-    return true;
-  }
+const log = createLogger("HermesVerifier");
 
-  try {
-    console.log(`[Hermes Verifier] Capturing visual snapshot for confidence verification...`);
-    // Capture screenshot via raw CDP to bypass Python bridge latency (Zendriver fix)
-    let base64Image = "";
-    try {
-      const cdp = await page.context().newCDPSession(page);
-      const res = await cdp.send('Page.captureScreenshot', { format: 'jpeg', quality: 60 });
-      base64Image = res.data;
-    } catch {
-      // Fallback to standard Playwright if CDP fails
-      const screenshotBuffer = await page.screenshot({ type: "jpeg", quality: 60 });
-      base64Image = screenshotBuffer.toString("base64");
-    }
-
-    const promptText = `
+export const VISUAL_VERIFICATION_PROMPT = `
 You are a strict QA automation AI. Look at this screenshot of a web application.
 Your goal is to determine if the user is SUCCESSFULLY logged into their account.
 
@@ -41,43 +24,110 @@ Indicators of FAILURE / FALSE POSITIVE / HONEYPOT:
 - The page shows an error message.
 
 Output EXACTLY one word: "YES" if they are logged in, or "NO" if they are not.
-    `;
+`.trim();
 
-    // Local llama.cpp server endpoint for MiniCPM-V
-    const url = "http://127.0.0.1:8080/v1/chat/completions";
+/**
+ * Capture a high-fidelity viewport screenshot via raw CDP session,
+ * with automatic fallback to Playwright page.screenshot().
+ */
+export async function captureViewportScreenshot(page: Page): Promise<{ base64Image: string; buffer: Buffer }> {
+  try {
+    const cdp = await page.context().newCDPSession(page);
+    const res = await cdp.send("Page.captureScreenshot", {
+      format: "jpeg",
+      quality: 75,
+      fromSurface: true,
+      captureBeyondViewport: false,
+    });
+    try { await cdp.detach(); } catch { /* ignore */ }
+    if (res?.data) {
+      const buffer = Buffer.from(res.data, "base64");
+      return { base64Image: res.data, buffer };
+    }
+  } catch (cdpErr) {
+    log.debug(`[Hermes Verifier] CDP capture failed (${String(cdpErr)}), falling back to standard screenshot.`);
+  }
+
+  // Fallback to standard Playwright if CDP fails
+  const buffer = await page.screenshot({ type: "jpeg", quality: 75 });
+  return { base64Image: buffer.toString("base64"), buffer };
+}
+
+/**
+ * Verify successful login visually via multi-modal AI models.
+ * Hierarchy:
+ *   Tier 1: Cloud Vision (OpenRouter / Gemini 2.0 Flash)
+ *   Tier 2: Local llama-server fallback (MiniCPM-V)
+ *   Fail-Closed: If all vision queries fail, reject to prevent false positives.
+ */
+export async function verifyLoginSuccessVisually(page: Page): Promise<boolean> {
+  const DISABLE_VISUAL_VERIFICATION = process.env.DISABLE_VISUAL_VERIFICATION;
+  if (DISABLE_VISUAL_VERIFICATION === "true") {
+    console.log("[Hermes Verifier] Visual verification disabled. Skipping.");
+    return true;
+  }
+
+  try {
+    console.log(`[Hermes Verifier] Capturing visual snapshot for confidence verification...`);
+    const { base64Image, buffer } = await captureViewportScreenshot(page);
+
+    // ── Tier 1: Cloud Vision (OpenRouter / Gemini 2.0 Flash) ─────────────
+    const hermesLlm = getHermesLLM();
+    if (hermesLlm.isAvailable()) {
+      try {
+        log.info("[Hermes Verifier] 👁️ Evaluating visual state via Cloud Vision (Gemini Flash)...");
+        const cloudResult = await hermesLlm.analyzeScreenshot(buffer, VISUAL_VERIFICATION_PROMPT);
+        const verdict = cloudResult.content?.trim().toUpperCase() || "";
+
+        if (verdict.includes("YES")) {
+          console.log(`[Hermes Verifier] AI Confirmed successful login (Cloud Vision, Confidence: HIGH)`);
+          return true;
+        } else if (verdict.includes("NO")) {
+          console.warn(`[Hermes Verifier] AI REJECTED success classification (Cloud Vision). Output: ${verdict}`);
+          return false;
+        }
+      } catch (cloudErr) {
+        log.warn(`[Hermes Verifier] Cloud Vision query failed: ${String(cloudErr)}, falling back to local Tier 2.`);
+      }
+    }
+
+    // ── Tier 2: Local Server Fallback (MiniCPM-V on llama-server) ────────
+    const url = process.env.LOCAL_VISION_URL || "http://127.0.0.1:8080/v1/chat/completions";
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15_000);
-    const response = await fetch(url, {
-      method: 'POST',
-      signal: controller.signal,
-      headers: {
-        'Content-Type': 'application/json',
-        // Authorization header is usually not required for local llama-server unless configured
-        'Authorization': `Bearer local-dummy-key`
-      },
-      body: JSON.stringify({
-        // Model name is ignored by llama-server but required for OpenAI API compatibility
-        model: "minicpm-v-2_6-local",
-        messages: [{
-          role: "user",
-          content: [
-            { type: "text", text: promptText },
-            { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64Image}` } }
-          ]
-        }]
-      })
-    });
-    clearTimeout(timeout);
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        signal: controller.signal,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer local-dummy-key",
+        },
+        body: JSON.stringify({
+          model: "minicpm-v-2_6-local",
+          messages: [{
+            role: "user",
+            content: [
+              { type: "text", text: VISUAL_VERIFICATION_PROMPT },
+              { type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64Image}` } },
+            ],
+          }],
+        }),
+      });
+      clearTimeout(timeout);
 
-    const json = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
-    const aiResponse = json.choices?.[0]?.message?.content?.trim().toUpperCase();
+      const json = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
+      const aiResponse = json.choices?.[0]?.message?.content?.trim().toUpperCase();
 
-    if (aiResponse && aiResponse.includes("YES")) {
-      console.log(`[Hermes Verifier] AI Confirmed successful login (Confidence: HIGH)`);
-      return true;
-    } else {
-      console.warn(`[Hermes Verifier] AI REJECTED success classification. Output: ${aiResponse}`);
-      return false;
+      if (aiResponse && aiResponse.includes("YES")) {
+        console.log(`[Hermes Verifier] AI Confirmed successful login (Confidence: HIGH)`);
+        return true;
+      } else {
+        console.warn(`[Hermes Verifier] AI REJECTED success classification. Output: ${aiResponse}`);
+        return false;
+      }
+    } finally {
+      clearTimeout(timeout);
     }
   } catch (e: unknown) {
     console.warn(`[Hermes Verifier] Visual verification failed due to error: ${e instanceof Error ? e.message : String(e)}`);
@@ -85,3 +135,4 @@ Output EXACTLY one word: "YES" if they are logged in, or "NO" if they are not.
     return false; // Fail closed: if verifier crashes, don't trust the result
   }
 }
+
