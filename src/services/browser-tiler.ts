@@ -83,12 +83,21 @@ export class BrowserTiler {
     let windowsPerMonitor = this.totalWindows;
     let localSlot = slot;
 
-    if (monitors.length > 0) {
+    const validMonitors = (monitors || []).filter(m => {
+      try {
+        const b = m.getBounds();
+        return b && typeof b.width === "number" && b.width > 100 && typeof b.height === "number" && b.height > 100;
+      } catch {
+        return false;
+      }
+    });
+
+    if (validMonitors.length > 0) {
         // Distribute slots across multiple monitors
-        windowsPerMonitor = Math.ceil(this.totalWindows / monitors.length);
-        const monitorIndex = Math.min(Math.floor(slot / windowsPerMonitor), monitors.length - 1);
+        windowsPerMonitor = Math.ceil(this.totalWindows / validMonitors.length);
+        const monitorIndex = Math.min(Math.floor(slot / windowsPerMonitor), validMonitors.length - 1);
         localSlot = slot % windowsPerMonitor;
-        const monitor = monitors[monitorIndex];
+        const monitor = validMonitors[monitorIndex];
         if (monitor) {
             const rawScreen = monitor.getBounds();
             const TASKBAR_HEIGHT = process.platform === "win32" ? 48 : 0;
@@ -105,7 +114,12 @@ export class BrowserTiler {
             const raw = execFileSync("system_profiler", ["SPDisplaysDataType"]).toString();
             const m = raw.match(/Resolution:\s*(\d+)\s*x\s*(\d+)/);
             if (m && m[1] && m[2]) {
-                screen = { x: 0, y: 31, width: parseInt(m[1], 10), height: parseInt(m[2], 10) - 31 }; // Account for 31px Apple menu bar
+                const w = parseInt(m[1], 10);
+                const h = parseInt(m[2], 10);
+                // Handle retina display scaling
+                const logicalW = w > 2000 ? Math.round(w / 2) : w;
+                const logicalH = h > 1400 ? Math.round(h / 2) : h;
+                screen = { x: 0, y: 31, width: logicalW, height: logicalH - 31 }; // Account for 31px Apple menu bar
             }
         } catch {}
     }

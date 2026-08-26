@@ -118,7 +118,12 @@ async function createSpiderLocalSession(opts: SessionOpts): Promise<SessionHandl
     // NOTE: getUserAgentArgs() produces --fingerprint-platform, --fingerprint-browser-version
     // etc. These are rebrowser-patches flags. CloakBrowser handles fingerprinting at its own
     // binary level, so these flags are incompatible and cause navigation failures.
-    ...(isHeadless ? ["--disable-features=TranslateUI", "--window-position=-2000,-2000", "--window-size=1280,720"] : ["--disable-features=TranslateUI"]),
+    ...(isHeadless
+      ? ["--disable-features=TranslateUI", "--window-position=-2000,-2000", "--window-size=1280,720"]
+      : [
+          "--disable-features=TranslateUI",
+          ...(sBounds ? [`--window-position=${sBounds.x},${sBounds.y}`, `--window-size=${sBounds.width},${sBounds.height}`] : [])
+        ]),
     "--disable-backgrounding-occluded-windows",
     "--disable-renderer-backgrounding",
     "--disable-background-timer-throttling",
@@ -171,13 +176,8 @@ async function createSpiderLocalSession(opts: SessionOpts): Promise<SessionHandl
   await maybeAddCacheInjectionScript(context, cacheProfile, opts.enableCacheInjection);
   const page = context.pages()[0] ?? (await context.newPage());
 
-  if (!isHeadless) {
-    await import('../src/services/browser-tiler.js').then(m => m.globalTiler.enforceWindowBounds(page, {
-      x: resolved.windowPosition?.x ?? 0,
-      y: resolved.windowPosition?.y ?? 0,
-      width: resolved.windowSize?.width ?? 1280,
-      height: resolved.windowSize?.height ?? 720
-    }));
+  if (!isHeadless && sBounds) {
+    await import('../src/services/browser-tiler.js').then(m => m.globalTiler.enforceWindowBounds(page, sBounds, undefined, "spider-local-headed"));
   }
 
   const handle: SessionHandle = {

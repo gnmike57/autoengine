@@ -340,5 +340,101 @@ Provide:
       log.warn(`[Ops] GLM-4 Log Analysis failed: ${String(e)}`);
     }
   }
+
+  /**
+   * Autonomous Stale Context & Process Sweeper
+   */
+  public async healStaleContexts(): Promise<{ killed: number; cleanedProfiles: number }> {
+    log.info("[Ops] 🧹 Initiating autonomous context & zombie sweep...");
+    let killed = 0;
+    let cleanedProfiles = 0;
+
+    try {
+      const { killOurOrphans } = await import("../services/process-cleaner.js");
+      const result = await killOurOrphans({ timeoutMs: 5000, minEtimeSec: 180 });
+      killed = result.killed;
+    } catch (e) {
+      log.warn(`[Ops] Process cleaner failed: ${String(e)}`);
+    }
+
+    try {
+      const tempDir = path.join(process.cwd(), "data", "temp_profiles");
+      if (fs.existsSync(tempDir)) {
+        const files = fs.readdirSync(tempDir);
+        const now = Date.now();
+        for (const file of files) {
+          const filePath = path.join(tempDir, file);
+          try {
+            const stat = fs.statSync(filePath);
+            if (now - stat.mtimeMs > 30 * 60 * 1000) { // older than 30 mins
+              fs.rmSync(filePath, { recursive: true, force: true });
+              cleanedProfiles++;
+            }
+          } catch {}
+        }
+      }
+    } catch (e) {
+      log.warn(`[Ops] Temp profiles cleanup failed: ${String(e)}`);
+    }
+
+    log.info(`[Ops] 🧹 Sweep complete: Reaped ${killed} processes, purged ${cleanedProfiles} stale profile directories.`);
+    return { killed, cleanedProfiles };
+  }
+
+  /**
+   * Autonomous Dynamic Concurrency Governor
+   */
+  public dynamicConcurrencyGovernor(recentOutcomes: string[], currentConcurrency: number): { recommendedConcurrency: number; action: "throttle" | "expand" | "maintain"; reason: string } {
+    if (recentOutcomes.length < 3) {
+      return { recommendedConcurrency: currentConcurrency, action: "maintain", reason: "Insufficient sample size" };
+    }
+
+    const recent = recentOutcomes.slice(-10);
+    const blockCount = recent.filter(o => o === "blocked" || o === "rate_limited" || o === "crash").length;
+    const blockRate = blockCount / recent.length;
+
+    if (blockRate >= 0.4 && currentConcurrency > 1) {
+      const newConcurrency = Math.max(1, currentConcurrency - 1);
+      log.warn(`🚨 [Ops Governor] Block rate elevated (${Math.round(blockRate * 100)}%). Auto-throttling concurrency: ${currentConcurrency} → ${newConcurrency}`);
+      return { recommendedConcurrency: newConcurrency, action: "throttle", reason: `Elevated block rate (${Math.round(blockRate * 100)}%)` };
+    }
+
+    const successCount = recent.filter(o => o === "success" || o === "incorrect" || o === "tempdisabled" || o === "disabled").length;
+    const cleanRate = successCount / recent.length;
+
+    if (cleanRate >= 0.9 && recent.length >= 8 && currentConcurrency < 6) {
+      const newConcurrency = currentConcurrency + 1;
+      log.info(`⚡ [Ops Governor] Clean flow detected (${Math.round(cleanRate * 100)}%). Auto-expanding concurrency: ${currentConcurrency} → ${newConcurrency}`);
+      return { recommendedConcurrency: newConcurrency, action: "expand", reason: `High clean flow rate (${Math.round(cleanRate * 100)}%)` };
+    }
+
+    return { recommendedConcurrency: currentConcurrency, action: "maintain", reason: "Flow parameters stable" };
+  }
+
+  /**
+   * Autonomous High-Confidence Proposal Applicator
+   */
+  public async autoApplyProposals(minConfidence: number = 0.85): Promise<number> {
+    const { getPendingProposals, reviewProposal } = await import("./hermes-proposals.js");
+    const proposals = getPendingProposals().filter(p => p.confidence >= minConfidence);
+    let appliedCount = 0;
+
+    for (const proposal of proposals) {
+      try {
+        if (proposal.type === "timing_reduction" && proposal.constant && proposal.proposedValue !== undefined) {
+          (DynamicTimings as unknown as Record<string, number>)[proposal.constant] = proposal.proposedValue;
+          reviewProposal(proposal.id, "approved");
+          appliedCount++;
+          log.info(`⚡ [Ops] Auto-applied high-confidence timing reduction: ${proposal.constant} = ${proposal.proposedValue}ms (confidence: ${proposal.confidence})`);
+        }
+      } catch (e) {
+        log.warn(`[Ops] Failed to auto-apply proposal ${proposal.id}: ${String(e)}`);
+      }
+    }
+
+    return appliedCount;
+  }
 }
+
+
 

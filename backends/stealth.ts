@@ -126,22 +126,68 @@ export async function createStealthSession(opts: SessionOpts): Promise<SessionHa
     block_images: (opts as any).allowTrackers ? false : true,   // Native engine-level image blocking — faster & undetectable vs route interception (Issue 3)
     os: uaProfile?.os === 'macos' ? 'macos' : uaProfile?.os === 'linux' ? 'linux' : 'windows',
     i_know_what_im_doing: true,
-    // ── Issue 8b: Unlock window.moveTo/resizeTo for tiling ──
-    // Firefox blocks these by default via dom.disable_window_move_resize.
-    // Disabling this pref allows the JS fallback path in browser-tiler.ts
-    // to work as a safety net when resizer.exe and node-window-manager
-    // both fail to find the window.
+    // ── Issue 8b: Unlock window.moveTo/resizeTo for tiling & suppress session restore prompts ──
+    // Firefox blocks window move/resize by default.
+    // Also suppress all crash restore / 'Restore Previous Session' prompts permanently.
+    firefox_user_prefs: {
+      'dom.disable_window_move_resize': false,
+      'privacy.resistFingerprinting.letterboxing': false,
+      'browser.sessionstore.resume_from_crash': false,
+      'browser.sessionstore.max_resumed_crashes': 0,
+      'toolkit.startup.max_resumed_crashes': -1,
+      'toolkit.startup.recent_crashes': 0,
+      'browser.sessionstore.enabled': false,
+      'browser.sessionstore.restore_on_demand': false,
+      'browser.sessionstore.restore_tabs_lazily': false,
+      'browser.sessionstore.max_tabs_undo': 0,
+      'browser.sessionstore.privacy_level': 2,
+      'browser.sessionstore.restore_hidden_tabs': false,
+      'browser.sessionstore.collect_zoom': false,
+      'browser.sessionstore.browser_replacement': false,
+      'browser.sessionstore.persist_closed_tabs_between_sessions': false,
+      'browser.sessionstore.log.appender.console': "Fatal",
+      'browser.sessionstore.debug.no_auto_restore': true,
+      'browser.sessionstore.upgradeBackup.maxUpgradeBackups': 0,
+      'browser.sessionstore.warnOnQuit': false,
+      'browser.warnOnQuit': false,
+      'browser.warnOnQuitShortcut': false,
+      'browser.tabs.warnOnClose': false,
+      'browser.tabs.warnOnCloseOtherTabs': false,
+      'browser.shell.checkDefaultBrowser': false,
+      'browser.startup.page': 0,
+      'browser.startup.couldRestoreSession.count': -1,
+      'browser.startup.homepage_override.mstone': "ignore",
+      'services.sync.prefs.sync.browser.sessionstore.resume_from_crash': false,
+    },
     firefoxUserPrefs: {
       'dom.disable_window_move_resize': false,
       'privacy.resistFingerprinting.letterboxing': false,
       'browser.sessionstore.resume_from_crash': false,
       'browser.sessionstore.max_resumed_crashes': 0,
       'toolkit.startup.max_resumed_crashes': -1,
+      'toolkit.startup.recent_crashes': 0,
       'browser.sessionstore.enabled': false,
       'browser.sessionstore.restore_on_demand': false,
+      'browser.sessionstore.restore_tabs_lazily': false,
       'browser.sessionstore.max_tabs_undo': 0,
       'browser.sessionstore.privacy_level': 2,
+      'browser.sessionstore.restore_hidden_tabs': false,
+      'browser.sessionstore.collect_zoom': false,
+      'browser.sessionstore.browser_replacement': false,
+      'browser.sessionstore.persist_closed_tabs_between_sessions': false,
+      'browser.sessionstore.log.appender.console': "Fatal",
+      'browser.sessionstore.debug.no_auto_restore': true,
+      'browser.sessionstore.upgradeBackup.maxUpgradeBackups': 0,
+      'browser.sessionstore.warnOnQuit': false,
+      'browser.warnOnQuit': false,
+      'browser.warnOnQuitShortcut': false,
+      'browser.tabs.warnOnClose': false,
+      'browser.tabs.warnOnCloseOtherTabs': false,
+      'browser.shell.checkDefaultBrowser': false,
       'browser.startup.page': 0,
+      'browser.startup.couldRestoreSession.count': -1,
+      'browser.startup.homepage_override.mstone': "ignore",
+      'services.sync.prefs.sync.browser.sessionstore.resume_from_crash': false,
     },
   };
 
