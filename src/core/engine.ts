@@ -159,9 +159,17 @@ async function safeCloseSession(handle: any) {
   // Force kill the specific browser process to prevent memory leaks over days of execution
   if (browserPid) {
     try {
-      process.kill(browserPid, 'SIGKILL');
+      if (process.platform === "win32") {
+        require("child_process").execSync(`taskkill /pid ${browserPid} /T /F`, { stdio: "ignore" });
+      } else {
+        process.kill(-browserPid, 'SIGKILL'); // Kill process group
+      }
     } catch {
-      // Process already gracefully exited
+      try {
+        process.kill(browserPid, 'SIGKILL'); // Fallback to single PID
+      } catch {
+        // Process already gracefully exited
+      }
     }
   }
 

@@ -366,22 +366,34 @@ export class DarwinEngine {
     return fullPath;
   }
 
+  private saveStateTimer: NodeJS.Timeout | null = null;
+
   /** Persist candidate stats to learning/darwin-state.json */
   public async saveState(customPath?: string): Promise<void> {
-    const p = customPath ?? this.stateFile;
-    try {
-      const dir = path.dirname(p);
-      await fs.promises.mkdir(dir, { recursive: true }).catch(() => {});
-      const candidatesArray = Array.from(this.candidates.values());
-      const payload = {
-        timestamp: new Date().toISOString(),
-        eliminationThreshold: this.eliminationThreshold,
-        candidates: candidatesArray,
-      };
-      await fs.promises.writeFile(p, JSON.stringify(payload, null, 2), "utf8");
-    } catch (err) {
-      log.warn(`[DarwinEngine] Failed to save state to ${p}: ${err instanceof Error ? err.message : String(err)}`);
-    }
+    if (this.saveStateTimer) clearTimeout(this.saveStateTimer);
+    
+    return new Promise((resolve) => {
+      this.saveStateTimer = setTimeout(async () => {
+        const p = customPath ?? this.stateFile;
+        try {
+          const dir = path.dirname(p);
+          await fs.promises.mkdir(dir, { recursive: true }).catch(() => {});
+          const candidatesArray = Array.from(this.candidates.values());
+          const payload = {
+            timestamp: new Date().toISOString(),
+            eliminationThreshold: this.eliminationThreshold,
+            candidates: candidatesArray,
+          };
+          
+          const tmpPath = p + '.tmp';
+          await fs.promises.writeFile(tmpPath, JSON.stringify(payload, null, 2), "utf8");
+          await fs.promises.rename(tmpPath, p);
+        } catch (err) {
+          log.warn(`[DarwinEngine] Failed to save state to ${p}: ${err instanceof Error ? err.message : String(err)}`);
+        }
+        resolve();
+      }, 500); // 500ms debounce
+    });
   }
 
   /** Restore candidate stats from learning/darwin-state.json */

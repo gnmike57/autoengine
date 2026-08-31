@@ -35,6 +35,18 @@ export class IdleWatchdog {
 
     check() {
         if (this.isDestroyed) return;
+        
+        // Memory Pre-emption (1.5GB limit)
+        const rss = process.memoryUsage().rss;
+        if (rss > 1.5 * 1024 * 1024 * 1024) {
+          console.error(`[IdleWatchdog] CRITICAL: RSS Memory exceeded 1.5GB (${Math.round(rss / 1024 / 1024)}MB). Triggering graceful drain.`);
+          this.onIdle();
+          this.destroy();
+          this.page.close({ runBeforeUnload: false }).catch(() => {});
+          this.page.context().close().catch(() => {});
+          return;
+        }
+
         if (Date.now() - this.lastActivity >= this.timeoutMs) {
           // 🚨 Automatic fallback system: aggressively close the window on 30s timeout
           this.onIdle();

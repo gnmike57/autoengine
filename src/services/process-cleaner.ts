@@ -129,7 +129,7 @@ async function findOurOrphansWindows(opts: { minEtimeSec?: number; excludePids?:
   // Strategy 1: Use PowerShell Get-CimInstance for reliable command-line extraction.
   // wmic is deprecated on modern Windows; PowerShell is universally available.
   try {
-    const psCmd = `powershell -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'chrome|chromium|firefox|camoufox|cloakbrowser' } | Select-Object ProcessId,CommandLine,CreationDate | ConvertTo-Csv -NoTypeInformation"`;
+    const psCmd = `powershell -NoLogo -NonInteractive -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'chrome|chromium|firefox|camoufox|cloakbrowser' } | Select-Object ProcessId,CommandLine,CreationDate | ConvertTo-Csv -NoTypeInformation"`;
     const { stdout } = await execAsync(psCmd, { maxBuffer: 10 * 1024 * 1024, timeout: 15000 });
 
     const lines = stdout.split(/\r?\n/).filter((l) => l.trim());
@@ -251,8 +251,23 @@ async function findOurOrphansUnix(opts: { minEtimeSec?: number; excludePids?: nu
   const excludeSelf = new Set<number>([process.pid, ...(opts.excludePids ?? []), ...protectedPids]);
   let stdout = "";
   try {
-    const { stdout: out } = await execAsync("ps -axo pid=,etime=,command=");
-    stdout = out;
+    await new Promise<void>((resolve, reject) => {
+      const { spawn } = require("child_process");
+      const ps = spawn("ps", ["-axo", "pid=,etime=,command="]);
+      ps.stdout.on("data", (chunk: Buffer) => {
+        stdout += chunk.toString("utf8");
+        // prevent runaway memory if ps outputs gigabytes
+        if (stdout.length > 20 * 1024 * 1024) {
+          ps.kill();
+          reject(new Error("ps output exceeded 20MB limit"));
+        }
+      });
+      ps.on("close", (code: number | null) => {
+        if (code === 0 || code === null) resolve();
+        else reject(new Error(`ps exited with code ${code}`));
+      });
+      ps.on("error", reject);
+    });
   } catch {
     return [];
   }
