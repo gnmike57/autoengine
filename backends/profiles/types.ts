@@ -25,6 +25,7 @@ export interface BackendProfile {
 
   // ── Concurrency ──
   concurrencyWeight: number;    // 1.0 = full slot, 0.5 = half (headed uses more resources)
+  maxConcurrency?: number;      // Optional per-backend cap override
 
   // ── Session behavior ──
   recordVideo: boolean;

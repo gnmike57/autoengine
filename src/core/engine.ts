@@ -753,7 +753,15 @@ export function loadAllTargets(): SiteConfig[] {
 const DEFAULT_CONCURRENCY = 3;
 function getMaxConcurrencyForBackend(backend?: string): number {
   if (!backend) return 12;
-  if (backend.includes("headed")) return 3;
+  const opt = BACKEND_OPTIMAL_SETTINGS[backend];
+  if (opt?.maxConcurrency && typeof opt.maxConcurrency === "number") {
+    return opt.maxConcurrency;
+  }
+  if (backend.includes("headed")) {
+    const cols = parseInt(process.env.HEADED_GRID_COLS || "2", 10);
+    const rows = parseInt(process.env.HEADED_GRID_ROWS || "2", 10);
+    return Math.max(1, cols * rows);
+  }
   if (backend.includes("cloud") || backend.includes("rest")) return 20;
   return 12; // local headless
 }
@@ -800,17 +808,26 @@ class DynamicLimit {
     this._lockChain = new Promise<void>((resolve) => { releaseMutex = resolve; });
     await prev;
 
+    const createSafeRelease = () => {
+      let released = false;
+      return () => {
+        if (released) return;
+        released = true;
+        this.release();
+      };
+    };
+
     try {
       if (this.active < this._max) {
         this.active++;
         releaseMutex!();
-        return () => this.release();
+        return createSafeRelease();
       }
       return new Promise<() => void>((resolve) => {
         this.waiters.push(() => {
           this.active++;
           releaseMutex!();
-          resolve(() => this.release());
+          resolve(createSafeRelease());
         });
       });
     } catch (e) {
@@ -821,8 +838,10 @@ class DynamicLimit {
 
   private release(): void {
     if (this.active <= 0) {
-      // Underflow guard — silently ignoring would mask a real leak.
-      this.log?.("WARN", "DynamicLimit: release() called with active=0 — ignoring");
+      // Underflow guard — log warning and ensure clean non-negative state
+      this.log?.("WARN", "DynamicLimit: release() called with active=0");
+      this.active = 0;
+      this.drain();
       return;
     }
     this.active--;

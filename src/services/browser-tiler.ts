@@ -15,6 +15,8 @@ const log = createLogger("BrowserTiler");
  * Manages slots and mathematically calculates screen bounds for headed browser windows.
  * Can be imported by any automation backend to ensure consistent window packing.
  */
+let cachedMacScreen: { bounds: { x: number; y: number; width: number; height: number }; expiresAt: number } | null = null;
+
 export class BrowserTiler {
   private totalWindows: number;
   private freeSlots: number[];
@@ -40,9 +42,17 @@ export class BrowserTiler {
     }
     if (concurrency > this.totalWindows) {
       for (let i = this.totalWindows; i < concurrency; i++) {
-        this.freeSlots.push(i);
+        if (!this.freeSlots.includes(i)) {
+          this.freeSlots.push(i);
+        }
       }
       this.totalWindows = concurrency;
+      // Drain any waiters that can now be fulfilled by new freeSlots
+      while (this.waiters.length > 0 && this.freeSlots.length > 0) {
+        const nextWaiter = this.waiters.shift()!;
+        const freeSlot = this.freeSlots.shift()!;
+        nextWaiter(freeSlot);
+      }
     } else if (concurrency < this.totalWindows) {
       this.totalWindows = concurrency;
       this.freeSlots = this.freeSlots.filter(slot => slot < this.totalWindows);
@@ -55,6 +65,9 @@ export class BrowserTiler {
     if (this.freeSlots.length > 0) {
       return this.freeSlots.shift()!;
     }
+    if (this.waiters.length > this.totalWindows * 3) {
+      log.warn(`acquireSlot: high queue depth (${this.waiters.length} waiters for ${this.totalWindows} total windows) — possible slot leak`);
+    }
     return new Promise<number>((resolve) => this.waiters.push(resolve));
   }
   /**
@@ -64,7 +77,7 @@ export class BrowserTiler {
     if (this.waiters.length > 0) {
       const nextWaiter = this.waiters.shift()!;
       nextWaiter(slot);
-    } else {
+    } else if (!this.freeSlots.includes(slot) && slot < this.totalWindows) {
       this.freeSlots.push(slot);
     }
   }
@@ -109,19 +122,25 @@ export class BrowserTiler {
             };
         }
     } else if (process.platform === 'darwin') {
-        try {
-            // Fallback for macOS accessibility block
-            const raw = execFileSync("system_profiler", ["SPDisplaysDataType"]).toString();
-            const m = raw.match(/Resolution:\s*(\d+)\s*x\s*(\d+)/);
-            if (m && m[1] && m[2]) {
-                const w = parseInt(m[1], 10);
-                const h = parseInt(m[2], 10);
-                // Handle retina display scaling
-                const logicalW = w > 2000 ? Math.round(w / 2) : w;
-                const logicalH = h > 1400 ? Math.round(h / 2) : h;
-                screen = { x: 0, y: 31, width: logicalW, height: logicalH - 31 }; // Account for 31px Apple menu bar
-            }
-        } catch {}
+        const now = Date.now();
+        if (cachedMacScreen && now < cachedMacScreen.expiresAt) {
+            screen = cachedMacScreen.bounds;
+        } else {
+            try {
+                // Fallback for macOS accessibility block (cached for 60 seconds)
+                const raw = execFileSync("system_profiler", ["SPDisplaysDataType"]).toString();
+                const m = raw.match(/Resolution:\s*(\d+)\s*x\s*(\d+)/);
+                if (m && m[1] && m[2]) {
+                    const w = parseInt(m[1], 10);
+                    const h = parseInt(m[2], 10);
+                    // Handle retina display scaling
+                    const logicalW = w > 2000 ? Math.round(w / 2) : w;
+                    const logicalH = h > 1400 ? Math.round(h / 2) : h;
+                    screen = { x: 0, y: 31, width: logicalW, height: logicalH - 31 }; // Account for 31px Apple menu bar
+                    cachedMacScreen = { bounds: screen, expiresAt: now + 60000 };
+                }
+            } catch {}
+        }
     }
 
     if (this.totalWindows <= 1) {

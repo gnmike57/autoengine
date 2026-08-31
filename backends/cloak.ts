@@ -121,6 +121,14 @@ async function createCloakSession(opts: SessionOpts): Promise<SessionHandle> {
   const mode = (headlessEffective ? (opts.liveTest ? "headless-live" : "headless") : (configConcurrency > 1 ? "headed-grid" : "headed-live"));
   let slot: number | undefined;
   let sBounds: ScreenBounds | undefined;
+  let slotReleased = false;
+  const releaseSlot = () => {
+    if (slot !== undefined && !slotReleased) {
+      slotReleased = true;
+      releaseHeadedSlot(slot);
+    }
+  };
+
   if (!headlessEffective) {
     slot = await acquireHeadedSlot();
     sBounds = await gridBounds(slot);
@@ -136,16 +144,14 @@ async function createCloakSession(opts: SessionOpts): Promise<SessionHandle> {
   });
   const recordVideoOptions = localRecordVideoOptions(recordLocalVideo, resolved, sessionId);
 
-  await checkAiFingerprint(opts, { email: opts.email, uaProfile, hardwareProfile, geoProfile, fontProfile, cacheProfile, proxyServerStr, resolved });
+  try {
+    await checkAiFingerprint(opts, { email: opts.email, uaProfile, hardwareProfile, geoProfile, fontProfile, cacheProfile, proxyServerStr, resolved });
+  } catch (err) {
+    releaseSlot();
+    throw err;
+  }
 
   if (!headlessEffective && slot !== undefined && sBounds !== undefined) {
-    // Slot-release flag for this createCloakSession call. Shared between the
-    // newly-installed "close" listener (in the !pooled branch below) and the
-    // returned handle's close(), guaranteeing exactly-one releaseHeadedSlot().
-    // For the reused-pooled path the original context already has its own
-    // independent flag from its original creation; this one only guards
-    // double-release within the current call.
-    let slotReleased = false;
     const currentProxyKey = effectiveProxy ? proxyEntryKey(effectiveProxy) : undefined;
     if (cleanLocalProfile) {
       const stalePooled = headedPool.get(slot);
@@ -286,6 +292,7 @@ async function createCloakSession(opts: SessionOpts): Promise<SessionHandle> {
           throw err;
         });
       } catch (e: unknown) {
+        releaseSlot();
         await proxyForwarder?.close().catch(() => { });
         if (cleanLocalProfile) await cleanupIsolatedProfile(headedUserDataDir);
         const err = e instanceof Error ? e : new Error(String(e));
@@ -414,22 +421,12 @@ async function createCloakSession(opts: SessionOpts): Promise<SessionHandle> {
             log.info(`[${sessionId}] Cleaning up isolated profile...`);
             await cleanupIsolatedProfile(headedUserDataDir).catch((e: any) => log.warn(`[${sessionId}] Error cleaning up isolated profile: ${e.message || e}`));
           }
-          // Guarded so we never double-release if the context's "close" listener
-          // already returned the slot. The slotReleased closure variable is
-          // shared with the listener above (same scope, !pooled branch).
-          if (!slotReleased) {
-            slotReleased = true;
-            releaseHeadedSlot(slot);
-            log.info(`[${sessionId}] Released headed slot.`);
-          }
+          releaseSlot();
           log.info(`[${sessionId}] Session closed.`);
         }
       },
       forceKill: () => {
-        if (!slotReleased && slot !== undefined) {
-          slotReleased = true;
-          import("./index.js").then(m => m.releaseHeadedSlot(slot)).catch(() => {});
-        }
+        releaseSlot();
         ctxRef.close().catch(() => {});
         proxyForwarder?.close().catch(() => {});
         if (cleanLocalProfile) {

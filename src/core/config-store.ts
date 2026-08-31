@@ -8,7 +8,7 @@ const log = createLogger('ConfigStore');
 export interface AppConfig {
   backend: string;
   concurrency: number;
-  inputMode: "instant" | "chrome-autofill";
+  inputMode: "instant" | "fast-human" | "chrome-autofill";
   allowHumanTyping: boolean; // strict rule: must always be false
   alwaysClickRememberMe: boolean; // strict rule: must always be true
   maxRetries: number;
@@ -99,6 +99,9 @@ export class ConfigStore {
     try {
       const data = fs.readFileSync(CONFIG_PATH, 'utf8');
       const parsed = JSON.parse(data);
+      if (parsed.inputMode && parsed.inputMode !== "instant" && parsed.inputMode !== "fast-human" && parsed.inputMode !== "chrome-autofill") {
+        parsed.inputMode = "instant";
+      }
       return { ...DEFAULT_CONFIG, ...parsed };
     } catch (err) {
       log.warn(`Failed to read app-config.json, using defaults: ${String(err)}`);

@@ -85,6 +85,10 @@ function chooseModalComponent(components: PixelComponent[], width: number, heigh
 }
 
 function detectWhiteModalCrop(data: Buffer, width: number, height: number, padding: number): ClipBox | null {
+  // Guard against massive pixel buffers at 4K / retina viewports under high concurrency
+  if (width <= 0 || height <= 0 || width > 2560 || height > 1600 || width * height > 3_000_000) {
+    return null;
+  }
   const mask = new Uint8Array(width * height);
   const visited = new Uint8Array(width * height);
   for (let p = 0; p < width * height; p++) {

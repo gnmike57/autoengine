@@ -3,9 +3,16 @@
  * Unified session creation, proxy pool, session pooling, and stealth utilities.
  * All logic is defined inline (canonical source of truth).
  */
+import "dotenv/config";
+import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
+import { type BrowserContext, type Page } from "playwright-core";
+import ffmpeg from "fluent-ffmpeg";
+import ffmpegInstaller from "ffmpeg-static";
+
 import { createSpiderCloudSession } from "./spider-cloud.js";
 import { createSpiderLocalSession } from "./spider-local.js";
-
 import { createCloakSession } from "./cloak.js";
 import { createStealthSession } from "./stealth.js";
 import { createZendriverSession } from "./zendriver.js";
@@ -20,6 +27,34 @@ import {
   type MullvadSessionLease,
   type MullvadSessionMode,
 } from "../src/proxy/mullvad-session-adapter.js";
+import { createLogger } from "../src/core/logger.js";
+import { type HardwareProfile } from "../src/profiles/profile-determinism.js";
+import { DEFAULT_COUNTRY, type GeoProfile } from "../src/profiles/profile-geo-alignment.js";
+import { type CredentialNoiseProfile } from "../src/profiles/profile-credential-noise.js";
+import { getConsistentUserAgent, type TargetOS, type UAProfile } from "../src/profiles/profile-useragent.js";
+import { type FontProfile } from "../src/profiles/profile-fonts.js";
+import { type Resolution } from "../src/profiles/profile-resolution.js";
+import { resolveScreenBounds, type ScreenBounds } from "../src/profiles/viewport-resolver.js";
+import { type InteractionPattern } from "../src/profiles/profile-interaction.js";
+import { getExtensionInjectionScript, type ExtensionProfile } from "../src/profiles/profile-extensions.js";
+import { getCacheInjectionScript, type CacheProfile } from "../src/profiles/profile-cache.js";
+import { verifyFingerprintCoherence } from "../src/stealth/fingerprint-ai-verifier.js";
+import { getEnvInt } from "../src/core/env-utils.js";
+import { type Backend, type ProxyProtocol, type SpiderSettings } from "../src/core/spider-settings.js";
+import { ProxyScoreTracker, proxyEntryKey } from "../src/proxy/proxy-score-tracker.js";
+import { type ClipBox } from "../src/services/screenshot-service.js";
+import { buildStealthScripts } from "../src/stealth/stealth-scripts.js";
+import { sanitizeBrowserContext } from "../src/stealth/context-sanitizer.js";
+import { profileMetrics } from "../src/profiles/profile-metrics.js";
+import { evaluateReuse, QuarantineSet } from "../src/core/pool-decisions.js";
+import { misdirectionDenylist } from "../src/core/misdirection-denylist.js";
+
+if (ffmpegInstaller) {
+  ffmpeg.setFfmpegPath(ffmpegInstaller as unknown as string);
+}
+
+export const log = createLogger("cloak-backend");
+export const poolLog = createLogger("cloak-pool");
 // ─── Spider Kill-Switch ────────────────────────────────────────────────────────
 // Set to `true` to re-enable spider-cloud and spider-local
 // backends app-wide. When `false`, all spider session creation is blocked at
@@ -248,62 +283,6 @@ export async function createSession(opts: SessionOpts): Promise<SessionHandle> {
   return launchSessionWithContract(() => createCloakSession(fallbackOpts), fallbackOpts, proxyRequirement);
 }
 
-/**
- * Backend adapter — switches between Spider Cloud, Spider Local
- * (cloud), and CloakBrowser (local, real Chromium with C++ source-level stealth patches).
- *
- * Selected via env: BACKEND=spider-cloud | spider-local | cloak
- * (default: spider-cloud; legacy BACKEND=spider normalises to spider-cloud).
- * For cloak: AU_PROXY_URL controls outbound proxy; if empty, runs direct.
- *
- * Returns a uniform SessionHandle so engine.ts and fingerprint-test.ts
- * stay backend-agnostic from the consumer side.
- */
-import "dotenv/config";
-import crypto from 'node:crypto';
-import fs from 'node:fs';
-import path from 'node:path';
-import { createLogger } from "../src/core/logger.js";
-
-export const log = createLogger("cloak-backend");
-export const poolLog = createLogger("cloak-pool");
-// playwright-core: shared BrowserContext/Page types (what cloakbrowser's
-// launchContext() returns) and the chromium client used to connect to
-// cloud-managed browser over CDP.
-import { type BrowserContext, type Page } from "playwright-core";
-import { type HardwareProfile } from "../src/profiles/profile-determinism.js";
-import { DEFAULT_COUNTRY, type GeoProfile } from "../src/profiles/profile-geo-alignment.js";
-import {
-  type CredentialNoiseProfile,
-} from "../src/profiles/profile-credential-noise.js";
-import { getConsistentUserAgent, type TargetOS, type UAProfile } from "../src/profiles/profile-useragent.js";
-import { type FontProfile } from "../src/profiles/profile-fonts.js";
-import {
-  type Resolution,
-} from "../src/profiles/profile-resolution.js";
-import { resolveScreenBounds, type ScreenBounds } from "../src/profiles/viewport-resolver.js";
-import { type InteractionPattern } from "../src/profiles/profile-interaction.js";
-import {
-  getExtensionInjectionScript,
-  type ExtensionProfile,
-} from "../src/profiles/profile-extensions.js";
-import { getCacheInjectionScript, type CacheProfile } from "../src/profiles/profile-cache.js";
-import { verifyFingerprintCoherence } from "../src/stealth/fingerprint-ai-verifier.js";
-import { getEnvInt } from "../src/core/env-utils.js";
-import { type Backend, type ProxyProtocol, type SpiderSettings } from "../src/core/spider-settings.js";
-import { ProxyScoreTracker, proxyEntryKey } from "../src/proxy/proxy-score-tracker.js";
-import { type ClipBox } from "../src/services/screenshot-service.js";
-import { buildStealthScripts  } from "../src/stealth/stealth-scripts.js";
-import { sanitizeBrowserContext } from "../src/stealth/context-sanitizer.js";
-import { profileMetrics } from "../src/profiles/profile-metrics.js";
-import { evaluateReuse, QuarantineSet } from "../src/core/pool-decisions.js";
-import { misdirectionDenylist } from "../src/core/misdirection-denylist.js";
-import ffmpeg from "fluent-ffmpeg";
-import ffmpegInstaller from "ffmpeg-static";
-
-if (ffmpegInstaller) {
-  ffmpeg.setFfmpegPath(ffmpegInstaller as unknown as string);
-}
 export type ProxyEntry = {
   server: string;
   username?: string;

@@ -25,6 +25,12 @@ import { FingerprintInjector } from "fingerprint-injector";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const log = createLogger("zendriver");
 
+const activeZendriverPids = new Set<number>();
+
+/** Export active zendriver python PIDs for process-cleaner inspection */
+export function getActiveZendriverPids(): number[] {
+  return Array.from(activeZendriverPids);
+}
 
 export async function createZendriverSession(opts: SessionOpts): Promise<SessionHandle> {
   const seed = opts.fingerprintSeed ?? Math.floor(Math.random() * 89999) + 10000;
@@ -45,6 +51,14 @@ export async function createZendriverSession(opts: SessionOpts): Promise<Session
   
   let slot: number | undefined;
   let sBounds: any;
+  let slotReleased = false;
+  const releaseSlot = () => {
+    if (slot !== undefined && !slotReleased) {
+      slotReleased = true;
+      releaseHeadedSlot(slot);
+    }
+  };
+
   if (isHeaded) {
     slot = await acquireHeadedSlot();
     sBounds = await gridBounds(slot);
@@ -72,8 +86,18 @@ export async function createZendriverSession(opts: SessionOpts): Promise<Session
     env: { ...process.env, PATH: pathEnv, PYTHONUNBUFFERED: "1" }
   });
 
+  if (zendriverProcess.pid) {
+    activeZendriverPids.add(zendriverProcess.pid);
+  }
+  zendriverProcess.on("exit", () => {
+    if (zendriverProcess.pid) activeZendriverPids.delete(zendriverProcess.pid);
+  });
+
   zendriverProcess.on("error", (err) => {
     log.error(`[${sessionId}] Failed to spawn uv (zendriver): ${err.message}`);
+    releaseSlot();
+    if (zendriverProcess.pid) activeZendriverPids.delete(zendriverProcess.pid);
+    if (forwarder) forwarder.close().catch(() => {});
   });
 
 
@@ -114,8 +138,10 @@ export async function createZendriverSession(opts: SessionOpts): Promise<Session
     }) + "\n");
     zendriverProcess.stdin.end();
   } catch (e) {
-    zendriverProcess.kill();
-    if (forwarder) await forwarder.close();
+    releaseSlot();
+    if (zendriverProcess.pid) activeZendriverPids.delete(zendriverProcess.pid);
+    try { zendriverProcess.kill(); } catch {}
+    if (forwarder) await forwarder.close().catch(() => {});
     throw new Error(`Zendriver stdin write failed: ${String(e)}`);
   }
 
@@ -126,7 +152,7 @@ export async function createZendriverSession(opts: SessionOpts): Promise<Session
     
     // Safety check: ensure we kill the python script if we timeout
     const timeoutId = setTimeout(() => {
-      zendriverProcess.kill();
+      try { zendriverProcess.kill(); } catch {}
       reject(new Error("Zendriver launcher timeout"));
     }, 15000);
 
@@ -163,7 +189,9 @@ export async function createZendriverSession(opts: SessionOpts): Promise<Session
       }
     });
   }).catch((e) => {
-    zendriverProcess.kill();
+    releaseSlot();
+    if (zendriverProcess.pid) activeZendriverPids.delete(zendriverProcess.pid);
+    try { zendriverProcess.kill(); } catch {}
     if (forwarder) forwarder.close().catch(() => {});
     throw e;
   });
@@ -180,8 +208,10 @@ export async function createZendriverSession(opts: SessionOpts): Promise<Session
     } catch (e) {
       retries--;
       if (retries === 0) {
-        zendriverProcess.kill();
-        if (forwarder) await forwarder.close();
+        releaseSlot();
+        if (zendriverProcess.pid) activeZendriverPids.delete(zendriverProcess.pid);
+        try { zendriverProcess.kill(); } catch {}
+        if (forwarder) await forwarder.close().catch(() => {});
         throw new Error(`Failed to connect to Zendriver CDP at ${wsEndpoint}: ${String(e)}`);
       }
       await new Promise(r => setTimeout(r, 100 * Math.pow(2, 5 - retries)));
@@ -193,7 +223,10 @@ export async function createZendriverSession(opts: SessionOpts): Promise<Session
     contextPromise,
     new Promise((_, rej) => setTimeout(() => rej(new Error("Zendriver newContext timed out")), 15000))
   ]).catch((e: any) => {
-    zendriverProcess.kill();
+    releaseSlot();
+    if (zendriverProcess.pid) activeZendriverPids.delete(zendriverProcess.pid);
+    try { zendriverProcess.kill(); } catch {}
+    if (forwarder) forwarder.close().catch(() => {});
     throw e;
   });
 
@@ -202,7 +235,10 @@ export async function createZendriverSession(opts: SessionOpts): Promise<Session
     pagePromise,
     new Promise((_, rej) => setTimeout(() => rej(new Error("Zendriver newPage timed out")), 15000))
   ]).catch((e: any) => {
-    zendriverProcess.kill();
+    releaseSlot();
+    if (zendriverProcess.pid) activeZendriverPids.delete(zendriverProcess.pid);
+    try { zendriverProcess.kill(); } catch {}
+    if (forwarder) forwarder.close().catch(() => {});
     throw e;
   });
 
@@ -360,11 +396,12 @@ export async function createZendriverSession(opts: SessionOpts): Promise<Session
     cdpInitPromise,
     new Promise((_, rej) => setTimeout(() => rej(new Error("Zendriver CDP initialization timed out")), 15000))
   ]).catch((e: any) => {
-    zendriverProcess.kill();
+    releaseSlot();
+    if (zendriverProcess.pid) activeZendriverPids.delete(zendriverProcess.pid);
+    try { zendriverProcess.kill(); } catch {}
+    if (forwarder) forwarder.close().catch(() => {});
     throw e;
   });
-
-
 
   const handle: SessionHandle = {
     context,
@@ -390,10 +427,7 @@ export async function createZendriverSession(opts: SessionOpts): Promise<Session
     email: opts.email,
     interactionProfile: opts.email ? getInteractionPattern(opts.email, opts.requeueCount) : undefined,
     close: async () => {
-      // Issue 33: Release headed slot if applicable (slot is only set for headed mode)
-      if (slot !== undefined) {
-        releaseHeadedSlot(slot);
-      }
+      releaseSlot();
       
       if (handle.traceStarted && !handle.traceFinalized) {
         try {
@@ -413,16 +447,35 @@ export async function createZendriverSession(opts: SessionOpts): Promise<Session
       }
 
       await browser.close().catch(() => {});
-      zendriverProcess.kill();
-      if (forwarder) await forwarder.close();
+      if (zendriverProcess.pid) {
+        activeZendriverPids.delete(zendriverProcess.pid);
+        try {
+          if (process.platform === "win32") {
+            void import("child_process").then(cp => cp.exec(`taskkill /PID ${zendriverProcess.pid} /F /T`, () => {}));
+          } else {
+            zendriverProcess.kill("SIGTERM");
+            setTimeout(() => {
+              try { zendriverProcess.kill("SIGKILL"); } catch {}
+            }, 3000);
+          }
+        } catch {}
+      }
+      if (forwarder) await forwarder.close().catch(() => {});
     },
     // Issue 38: Fast teardown for hard timeouts — don't await anything
     forceKill: () => {
-      if (slot !== undefined) {
-        releaseHeadedSlot(slot);
+      releaseSlot();
+      if (zendriverProcess.pid) {
+        activeZendriverPids.delete(zendriverProcess.pid);
+        try {
+          if (process.platform === "win32") {
+            void import("child_process").then(cp => cp.exec(`taskkill /PID ${zendriverProcess.pid} /F /T`, () => {}));
+          } else {
+            zendriverProcess.kill("SIGKILL");
+          }
+        } catch {}
       }
       browser.close().catch(() => {});
-      zendriverProcess.kill();
       if (forwarder) forwarder.close().catch(() => {});
     },
   };

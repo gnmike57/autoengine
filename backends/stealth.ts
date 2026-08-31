@@ -220,6 +220,14 @@ export async function createStealthSession(opts: SessionOpts): Promise<SessionHa
   }
   
   let slot: number | undefined;
+  let slotReleased = false;
+  const releaseSlot = () => {
+    if (slot !== undefined && !slotReleased) {
+      slotReleased = true;
+      releaseHeadedSlot(slot);
+    }
+  };
+
   if (!headlessEffective) {
     slot = await acquireHeadedSlot();
     const bounds = await gridBounds(slot);
@@ -337,7 +345,11 @@ export async function createStealthSession(opts: SessionOpts): Promise<SessionHa
     });
   } catch (err: unknown) {
     log.error(`[${sessionId}] StealthBrowser launch failed: ${err instanceof Error ? err.message : String(err)}`);
+    releaseSlot();
     if (forwarder) await forwarder.close().catch(() => {});
+    for (const d of extDirs) {
+      try { fs.rmSync(d, { recursive: true, force: true }); } catch { /* best-effort */ }
+    }
     throw err;
   }
 
@@ -452,8 +464,12 @@ export async function createStealthSession(opts: SessionOpts): Promise<SessionHa
     }
   } catch (e: unknown) {
     log.error(`[${sessionId}] Context/page creation failed: ${e instanceof Error ? e.message : String(e)}`);
-    if (forwarder) await forwarder.close();
+    releaseSlot();
+    if (forwarder) await forwarder.close().catch(() => {});
     if (browser) await browser.close().catch(() => {});
+    for (const d of extDirs) {
+      try { fs.rmSync(d, { recursive: true, force: true }); } catch { /* best-effort */ }
+    }
     throw e;
   }
 
@@ -514,9 +530,7 @@ export async function createStealthSession(opts: SessionOpts): Promise<SessionHa
     cacheProfile,
     interactionProfile,
     close: async () => {
-      if (slot !== undefined) {
-        releaseHeadedSlot(slot);
-      }
+      releaseSlot();
       
       if (handle.traceStarted && !handle.traceFinalized) {
         try {
@@ -561,13 +575,11 @@ export async function createStealthSession(opts: SessionOpts): Promise<SessionHa
       for (const d of extDirs) {
         try { fs.rmSync(d, { recursive: true, force: true }); } catch { /* best-effort */ }
       }
-      if (forwarder) await forwarder.close();
+      if (forwarder) await forwarder.close().catch(() => {});
       log.info(`[${sessionId}] Session entirely eradicated from memory.`);
     },
     forceKill: () => {
-      if (slot !== undefined) {
-        releaseHeadedSlot(slot);
-      }
+      releaseSlot();
       if (browserPid) {
         log.warn(`[${sessionId}] INSTANT FORCE KILL triggered on PID ${browserPid}`);
         try {

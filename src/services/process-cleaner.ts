@@ -97,7 +97,7 @@ const BROWSER_EXE_NAMES = [
 
 function looksLikeBrowserProcess(cmd: string): boolean {
   return /(^|\/)(chromium|chrome|google chrome|cloakbrowser|cloak-browser|firefox|camoufox)(\s|$)/i.test(cmd) ||
-    /\b(chromium|chrome|cloakbrowser|cloak-browser|firefox|camoufox)\b/i.test(cmd);
+    /\b(chromium|chrome|cloakbrowser|cloak-browser|firefox|camoufox|zendriver_launcher|zendriver_headed_launcher)\b/i.test(cmd);
 }
 
 /** Windows-specific: match image name against known browser executables. */
@@ -169,9 +169,9 @@ async function findOurOrphansWindows(opts: { minEtimeSec?: number; excludePids?:
         const dir = path.resolve(udd);
         if (!roots.some((r) => dir === r || dir.startsWith(r + path.sep))) continue;
       }
-      // On Windows, if no --user-data-dir in command line, still match camoufox unconditionally
-      // (Camoufox uses -profile which may not be detected, and zombie camoufox MUST be killed)
-      if (!udd && !/(camoufox)/i.test(cmdLine)) continue;
+      // On Windows, if no --user-data-dir in command line, still match camoufox / zendriver unconditionally
+      // (Camoufox uses -profile which may not be detected, and zombie processes MUST be killed)
+      if (!udd && !/(camoufox|zendriver_launcher|zendriver_headed_launcher)/i.test(cmdLine)) continue;
 
       if (opts.minEtimeSec != null && etimeSec < opts.minEtimeSec) continue;
 
@@ -277,9 +277,9 @@ async function findOurOrphansUnix(opts: { minEtimeSec?: number; excludePids?: nu
       const dir = path.resolve(udd);
       if (!roots.some((r) => dir === r || dir.startsWith(r + path.sep))) continue;
     } else {
-      // On Unix, if no --user-data-dir in command line, still match camoufox unconditionally
-      // (Camoufox uses -profile which may not be detected, and zombie camoufox MUST be killed)
-      if (!/(camoufox)/i.test(cmd)) continue;
+      // On Unix, if no --user-data-dir in command line, still match camoufox / zendriver unconditionally
+      // (Camoufox uses -profile which may not be detected, and zombie processes MUST be killed)
+      if (!/(camoufox|zendriver_launcher|zendriver_headed_launcher)/i.test(cmd)) continue;
     }
     if (opts.minEtimeSec != null && etimeSec < opts.minEtimeSec) continue;
     found.push({ pid, etimeSec, cmd });

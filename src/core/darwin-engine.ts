@@ -68,6 +68,7 @@ export class DarwinEngine {
   private eliminationThreshold: number;
   private minEvaluationsForWinner: number;
   private reportDir: string;
+  private stateFile: string;
 
   constructor(options?: {
     candidateBackends?: string[];
@@ -75,11 +76,14 @@ export class DarwinEngine {
     minEvaluationsForWinner?: number;
     reportDir?: string;
     proxyPool?: string;
+    stateFile?: string;
+    persistState?: boolean;
   }) {
     const list = options?.candidateBackends ?? DARWIN_BACKENDS;
     this.eliminationThreshold = options?.eliminationThreshold ?? 3;
     this.minEvaluationsForWinner = options?.minEvaluationsForWinner ?? 2;
     this.reportDir = options?.reportDir ?? path.join(process.cwd(), "reports", "darwin");
+    this.stateFile = options?.stateFile ?? path.join(process.cwd(), "learning", "darwin-state.json");
 
     for (const b of list) {
       // Strictly filter out spider backends
@@ -100,6 +104,10 @@ export class DarwinEngine {
         eliminated: false,
         compositeScore: 100,
       });
+    }
+
+    if (options?.persistState !== false) {
+      this.loadState();
     }
 
     log.info(`[DarwinEngine] Initialized with ${this.candidates.size} candidate backends (Spider excluded). Elimination threshold: ${this.eliminationThreshold}`);
@@ -204,6 +212,7 @@ export class DarwinEngine {
     }
 
     this.recomputeScores();
+    void this.saveState();
 
     return {
       eliminated: stats.eliminated,
@@ -355,5 +364,64 @@ export class DarwinEngine {
     await fs.promises.writeFile(fullPath, JSON.stringify(report, null, 2), "utf8");
     log.info(`[DarwinEngine] Diagnostic report saved to: ${fullPath}`);
     return fullPath;
+  }
+
+  /** Persist candidate stats to learning/darwin-state.json */
+  public async saveState(customPath?: string): Promise<void> {
+    const p = customPath ?? this.stateFile;
+    try {
+      const dir = path.dirname(p);
+      await fs.promises.mkdir(dir, { recursive: true }).catch(() => {});
+      const candidatesArray = Array.from(this.candidates.values());
+      const payload = {
+        timestamp: new Date().toISOString(),
+        eliminationThreshold: this.eliminationThreshold,
+        candidates: candidatesArray,
+      };
+      await fs.promises.writeFile(p, JSON.stringify(payload, null, 2), "utf8");
+    } catch (err) {
+      log.warn(`[DarwinEngine] Failed to save state to ${p}: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
+  /** Restore candidate stats from learning/darwin-state.json */
+  public loadState(customPath?: string): boolean {
+    const p = customPath ?? this.stateFile;
+    try {
+      if (!fs.existsSync(p)) return false;
+      const raw = fs.readFileSync(p, "utf8");
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed.candidates)) {
+        for (const c of parsed.candidates) {
+          if (c && typeof c.backend === "string" && this.candidates.has(c.backend)) {
+            this.candidates.set(c.backend, {
+              ...this.candidates.get(c.backend)!,
+              ...c,
+            });
+          }
+        }
+        log.info(`[DarwinEngine] Restored state from ${p} (${parsed.candidates.length} candidates loaded)`);
+        return true;
+      }
+    } catch (err) {
+      log.warn(`[DarwinEngine] Failed to load state from ${p}: ${err instanceof Error ? err.message : String(err)}`);
+    }
+    return false;
+  }
+
+  /** Un-eliminate or reset a specific candidate backend */
+  public resetCandidate(backend: string): boolean {
+    const stats = this.candidates.get(backend);
+    if (!stats) return false;
+    stats.eliminated = false;
+    stats.eliminationReason = undefined;
+    stats.blocks = 0;
+    stats.fails = 0;
+    stats.consecutiveBlocks = 0;
+    stats.consecutiveFails = 0;
+    this.recomputeScores();
+    void this.saveState();
+    log.info(`[DarwinEngine] Reset candidate backend [${backend}]`);
+    return true;
   }
 }

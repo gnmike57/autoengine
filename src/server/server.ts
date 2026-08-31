@@ -284,6 +284,14 @@ const ROTATION_MODE_BACKENDS: Record<string, { backends: string[]; threshold: nu
   "headed-recon": { backends: ["stealth-headed", "cloak-headed", "cloak-headed-nocloak", "zendriver-headed"], threshold: 6, label: "🎭 Headed Recon" },
 };
 
+const SPECIAL_MODES = ["split-local-stealth", "experimental", "experimental-elimination", "curl-api", "golden-benchmark", "darwin"] as const;
+
+export const ALL_VALID_BACKENDS = new Set<string>([
+  ...Object.keys(BACKEND_OPTIMAL_SETTINGS),
+  ...Object.keys(ROTATION_MODE_BACKENDS),
+  ...SPECIAL_MODES,
+]);
+
 /** Return the filtered backend list for a rotation mode, excluding disabled backends. */
 function getRotateList(mode: string, disabledBackends: string[]): string[] {
   const entry = ROTATION_MODE_BACKENDS[mode];
@@ -2121,11 +2129,11 @@ wss.on("connection", (ws: any, req: import("http").IncomingMessage) => {
             }
             const v = parsedData.data.value.toLowerCase();
             const normalized = v;
-            if (normalized !== "cloak-headed" && normalized !== "cloak-headless" && normalized !== "cloak-headless-nocloak" && normalized !== "cloak-headed-nocloak" && normalized !== "split-local-stealth" && normalized !== "experimental" && normalized !== "experimental-elimination" && normalized !== "curl-api" && normalized !== "golden-benchmark" && normalized !== "stealth" && normalized !== "stealth-headed" && normalized !== "zendriver" && normalized !== "zendriver-headed" && normalized !== "rotate-backends" && normalized !== "rotate-backends-headless" && normalized !== "stealth-fortress" && normalized !== "speed-blitz" && normalized !== "headed-recon" && normalized !== "darwin") {
-              ws.send(JSON.stringify({ type: "error", data: { message: "set-backend: invalid backend value" } }));
+            if (!ALL_VALID_BACKENDS.has(normalized)) {
+              ws.send(JSON.stringify({ type: "error", data: { message: `set-backend: invalid backend value '${v}'` } }));
               return;
             }
-            currentBackend = normalized;
+            currentBackend = normalized as DashboardBackend;
             if (currentEngineConfig) {
               if (currentBackend === "experimental" || currentBackend === "experimental-elimination") {
                 currentEngineConfig.isExperimental = true;
@@ -4026,6 +4034,5 @@ process.on("uncaughtException", (err) => {
 });
 
 app.post("/api/grid/arrange", (req, res) => {
-  void globalTiler.acquireSlot(); // dummy acquire to trigger refresh
-  res.json({ success: true });
+  res.json({ success: true, message: "Grid layout updated" });
 });
