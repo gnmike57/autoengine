@@ -466,15 +466,45 @@ export class ScreenshotService extends EventEmitter {
     return null;
   }
 
+  // Concurrency semaphore (max 2 parallel Sharp raw buffer extractions)
+  private static sharpExtractionActive = 0;
+  private static sharpExtractionQueue: Array<() => void> = [];
+
+  private static async acquireSharpSemaphore(): Promise<() => void> {
+    if (ScreenshotService.sharpExtractionActive < 2) {
+      ScreenshotService.sharpExtractionActive++;
+      return () => {
+        ScreenshotService.sharpExtractionActive--;
+        const next = ScreenshotService.sharpExtractionQueue.shift();
+        if (next) next();
+      };
+    }
+    return new Promise((resolve) => {
+      ScreenshotService.sharpExtractionQueue.push(() => {
+        ScreenshotService.sharpExtractionActive++;
+        resolve(() => {
+          ScreenshotService.sharpExtractionActive--;
+          const next = ScreenshotService.sharpExtractionQueue.shift();
+          if (next) next();
+        });
+      });
+    });
+  }
+
   private async cropWhiteModalFromBuffer(buf: Buffer): Promise<{ buffer: Buffer; cropBox?: ClipBox } | null> {
-    const { data, info } = await sharp(buf).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-    const crop = detectWhiteModalCrop(data, info.width, info.height, this.opts.modalPadding ?? DEFAULT_MODAL_PADDING);
-    if (!crop) return null;
-    const out = sharp(buf).extract({ left: crop.x, top: crop.y, width: crop.width, height: crop.height });
-    const croppedBuf = this.opts.defaultFormat === "png"
-      ? await out.png().toBuffer()
-      : await out.jpeg({ quality: this.opts.defaultQuality, mozjpeg: true }).toBuffer();
-    return { buffer: croppedBuf, cropBox: crop };
+    const release = await ScreenshotService.acquireSharpSemaphore();
+    try {
+      const { data, info } = await sharp(buf).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+      const crop = detectWhiteModalCrop(data, info.width, info.height, this.opts.modalPadding ?? DEFAULT_MODAL_PADDING);
+      if (!crop) return null;
+      const out = sharp(buf).extract({ left: crop.x, top: crop.y, width: crop.width, height: crop.height });
+      const croppedBuf = this.opts.defaultFormat === "png"
+        ? await out.png().toBuffer()
+        : await out.jpeg({ quality: this.opts.defaultQuality, mozjpeg: true }).toBuffer();
+      return { buffer: croppedBuf, cropBox: crop };
+    } finally {
+      release();
+    }
   }
 
   private enqueueWriteAndEmit(buf: Buffer, ctx: ScreenshotCaptureCtx, fullPath: string, relativePath: string) {

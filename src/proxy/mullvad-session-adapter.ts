@@ -499,12 +499,12 @@ export class MullvadSessionAdapter {
     
     // Set location using mullvad CLI
     try {
-      await execAsync(`mullvad relay set location ${country}`);
-      await execAsync("mullvad connect");
+      await execAsync(`mullvad relay set location ${country}`, { timeout: 5000 });
+      await execAsync("mullvad connect", { timeout: 5000 });
       // Wait for it to connect
       let connected = false;
       for (let i = 0; i < 20; i++) {
-        const { stdout } = await execAsync("mullvad status");
+        const { stdout } = await execAsync("mullvad status", { timeout: 5000 });
         if (stdout.toLowerCase().includes("connected")) {
           connected = true;
           break;

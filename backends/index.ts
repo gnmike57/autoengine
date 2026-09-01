@@ -61,6 +61,34 @@ export const poolLog = createLogger("cloak-pool");
 // This gateway and callers fall through to cloak-headless.
 export const SPIDER_ENABLED = true;
 
+// ─── CDP / Traces Boot-time Janitor ──────────────────────────────────────────
+async function cleanOldTracesAndEvidence(): Promise<void> {
+  const dirs = [
+    path.join(process.cwd(), "traces"),
+    path.join(process.cwd(), "reports", "cdp"),
+  ];
+  const maxAgeMs = 24 * 60 * 60 * 1000; // 24 hours
+  const now = Date.now();
+
+  for (const dir of dirs) {
+    try {
+      if (!fs.existsSync(dir)) continue;
+      const entries = await fs.promises.readdir(dir);
+      for (const entry of entries) {
+        if (!entry.endsWith(".zip") && !entry.endsWith(".trace")) continue;
+        const filePath = path.join(dir, entry);
+        try {
+          const stats = await fs.promises.stat(filePath);
+          if (now - stats.mtimeMs > maxAgeMs) {
+            await fs.promises.unlink(filePath).catch(() => {});
+          }
+        } catch { /* intentional */ }
+      }
+    } catch { /* intentional */ }
+  }
+}
+void cleanOldTracesAndEvidence();
+
 // Proxy pre-ping cache — avoids redundant 8s pings for the same proxy within 60s.
 // Exported for use by proxy-pre-ping consumers.
 export { preValidateProxy, DEFAULT_TARGETS };

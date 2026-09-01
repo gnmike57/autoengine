@@ -82,10 +82,21 @@ export function evaluateReuse(inputs: ReuseInputs): ReuseDecision {
  * counter out of sync with the set.
  */
 export class QuarantineSet<K> {
-  private readonly set = new Set<K>();
+  private readonly map = new Map<K, number>();
+  private readonly ttlMs: number;
+
+  constructor(ttlMs: number = 10 * 60 * 1000) {
+    this.ttlMs = ttlMs;
+  }
 
   has(key: K): boolean {
-    return this.set.has(key);
+    const timestamp = this.map.get(key);
+    if (!timestamp) return false;
+    if (Date.now() - timestamp > this.ttlMs) {
+      this.map.delete(key);
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -95,19 +106,27 @@ export class QuarantineSet<K> {
    * Returns true when the metric was recorded.
    */
   add(key: K): boolean {
-    if (this.set.has(key)) return false;
-    this.set.add(key);
+    const isAlreadyQuarantined = this.has(key);
+    this.map.set(key, Date.now());
+    if (isAlreadyQuarantined) return false;
     profileMetrics.recordQuarantined();
     return true;
   }
 
   /** Remove a key from quarantine (e.g. after a fresh launch). Idempotent. */
   clear(key: K): void {
-    this.set.delete(key);
+    this.map.delete(key);
   }
 
   size(): number {
-    return this.set.size;
+    // Evict expired before calculating size
+    const now = Date.now();
+    for (const [key, timestamp] of this.map.entries()) {
+      if (now - timestamp > this.ttlMs) {
+        this.map.delete(key);
+      }
+    }
+    return this.map.size;
   }
 
   /**

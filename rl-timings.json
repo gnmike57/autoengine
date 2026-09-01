@@ -22,5 +22,13 @@
     "max": 200,
     "successes": 42,
     "failures": 239
+  },
+  "decoy_inter_click": {
+    "mean": 50,
+    "stdDev": 25,
+    "min": 10,
+    "max": 100,
+    "successes": 0,
+    "failures": 0
   }
 }

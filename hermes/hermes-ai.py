@@ -5,9 +5,36 @@ import os
 from collections import deque
 
 import ipc_queue
-from dotenv import load_dotenv
-from google.antigravity import Agent, LocalAgentConfig, types
-from google.antigravity.triggers import TriggerContext
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    def load_dotenv():
+        pass
+
+try:
+    from google.antigravity import Agent, LocalAgentConfig, types
+    from google.antigravity.triggers import TriggerContext
+except ImportError:
+    class TriggerContext:  # type: ignore
+        async def send(self, msg: str):
+            pass
+
+    class Agent:  # type: ignore
+        def __init__(self, config):
+            self.config = config
+        async def __aenter__(self):
+            return self
+        async def __aexit__(self, *args):
+            pass
+
+    class LocalAgentConfig:  # type: ignore
+        def __init__(self, **kwargs):
+            pass
+
+    class types:  # type: ignore
+        class McpStdioServer:
+            def __init__(self, **kwargs):
+                pass
 
 # ---------------------------------------------------------------------------
 # Hermes sub-modules (#11–#20)

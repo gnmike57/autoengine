@@ -48,6 +48,33 @@ export class ThreatMonitor {
             this.requestStartTimes.delete(req);
           }
         });
+
+        // Invisible Turnstile & Cloudflare challenge detection
+        if (typeof this.page?.evaluate === "function") {
+          this.page.evaluate(() => {
+            try {
+              const checkChallenges = () => {
+                const turnstile = document.querySelector('div.cf-turnstile, iframe[src*="challenges.cloudflare.com"], iframe[src*="turnstile"], [data-sitekey]');
+                if (turnstile) {
+                  console.debug('__cf_turnstile_detected__');
+                }
+              };
+              const observer = new MutationObserver(() => checkChallenges());
+              if (document.body) {
+                observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+              }
+              checkChallenges();
+            } catch { /* intentional */ }
+          }).catch(() => {});
+        }
+
+        page.on('console', (msg) => {
+          if (msg.text().includes('__cf_turnstile_detected__')) {
+            this.threatScore += 50;
+            this.engine.log("WARN", `🚨 [ThreatMonitor] Cloudflare Turnstile / Challenge element detected in DOM!`);
+            this.evaluateThreat();
+          }
+        });
     }
 
     private evaluateThreat() {

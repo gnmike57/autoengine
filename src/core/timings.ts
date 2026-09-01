@@ -112,3 +112,16 @@ export const Timings = {
 export const DynamicTimings = { ...Timings };
 
 export type TimingKey = keyof typeof Timings;
+
+/**
+ * Computes an elastic timeout dynamically scaled by proxy network latency.
+ * If proxy latency exceeds 500ms, timeouts scale up gracefully (up to 1.5x)
+ * to prevent false-positive timeouts on slow rotating proxy nodes.
+ */
+export function computeElasticTimeout(baseTimeoutMs: number, proxyPingLatencyMs?: number): number {
+  if (!proxyPingLatencyMs || proxyPingLatencyMs <= 300) {
+    return baseTimeoutMs;
+  }
+  const jitterFactor = Math.min(1.5, 1.0 + (proxyPingLatencyMs - 300) / 1000);
+  return Math.round(baseTimeoutMs * jitterFactor);
+}

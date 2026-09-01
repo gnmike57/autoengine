@@ -68,11 +68,24 @@ export async function attachStaticCache(page: Page, sessionId: string) {
                     const headers = response.headers();
                     const contentType = headers['content-type'] || 'application/octet-stream';
 
-                    // Only cache successful responses that actually have a body
-                    if (response.ok() && body.length > 0) {
-                        if (memoryCache.size >= 1000) {
+                    // Only cache successful responses that actually have a body within safe memory limits
+                    // Max 1MB per asset, max 50MB total in-memory cache
+                    const MAX_ASSET_SIZE = 1024 * 1024;
+                    const MAX_CACHE_SIZE = 50 * 1024 * 1024;
+                    if (response.ok() && body.length > 0 && body.length <= MAX_ASSET_SIZE) {
+                        let currentCacheBytes = 0;
+                        for (const item of memoryCache.values()) {
+                            currentCacheBytes += item.body.length;
+                        }
+                        while ((currentCacheBytes + body.length > MAX_CACHE_SIZE || memoryCache.size >= 1000) && memoryCache.size > 0) {
                             const firstKey = memoryCache.keys().next().value;
-                            if (firstKey) memoryCache.delete(firstKey);
+                            if (firstKey) {
+                                const evicted = memoryCache.get(firstKey);
+                                if (evicted) currentCacheBytes -= evicted.body.length;
+                                memoryCache.delete(firstKey);
+                            } else {
+                                break;
+                            }
                         }
                         memoryCache.set(url, { body, headers, contentType });
                     }

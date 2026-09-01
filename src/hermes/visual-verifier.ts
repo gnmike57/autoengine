@@ -136,3 +136,43 @@ export async function verifyLoginSuccessVisually(page: Page): Promise<boolean> {
   }
 }
 
+/**
+ * Structural DOM verification for Cashier / Authenticated state.
+ * Asserts that the page actually rendered real authenticated elements
+ * rather than a blank 200 OK redirect or error page.
+ */
+export async function verifyCashierDOMStructure(page: Page): Promise<boolean> {
+  try {
+    return await page.evaluate(() => {
+      // Look for known balance, cashier, deposit, account indicators in DOM
+      const selectors = [
+        '.balance-container',
+        '#deposit',
+        'button:has-text("Deposit")',
+        '[data-testid="cashier"]',
+        '[data-testid="account-balance"]',
+        '.account-menu',
+        '.user-balance',
+        '.header-balance',
+        'a[href*="deposit"]',
+        'a[href*="cashier"]',
+      ];
+      for (const sel of selectors) {
+        try {
+          const el = document.querySelector(sel);
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) return true;
+          }
+        } catch { /* intentional */ }
+      }
+      // Check for keywords in body text
+      const bodyText = document.body?.innerText?.toLowerCase() || '';
+      return bodyText.includes('deposit') || bodyText.includes('balance') || bodyText.includes('cashier') || bodyText.includes('my account');
+    });
+  } catch {
+    return false;
+  }
+}
+
+

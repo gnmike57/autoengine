@@ -36,17 +36,10 @@ export class RLLedger {
     }
   }
 
-  private saveTimer: NodeJS.Timeout | null = null;
-
   public save() {
-    if (this.saveTimer) clearTimeout(this.saveTimer);
-    this.saveTimer = setTimeout(async () => {
-      try {
-        const tmpPath = LEDGER_PATH + '.tmp';
-        await fs.promises.writeFile(tmpPath, JSON.stringify(this.data, null, 2), "utf-8");
-        await fs.promises.rename(tmpPath, LEDGER_PATH);
-      } catch { /* intentional */ }
-    }, 500); // 500ms debounce
+    try {
+      fs.writeFileSync(LEDGER_PATH, JSON.stringify(this.data, null, 2), "utf-8");
+    } catch { /* intentional */ }
   }
 
   /**

@@ -70,11 +70,15 @@ export async function humanMouseMove(
   toY: number,
   _speedFactor: number = 1.0,
 ): Promise<void> {
+  const vp = typeof page.viewportSize === "function" ? (page.viewportSize() || { width: 1280, height: 720 }) : { width: 1280, height: 720 };
+  const safeX = Math.max(5, Math.min(vp.width - 5, Math.round(toX)));
+  const safeY = Math.max(5, Math.min(vp.height - 5, Math.round(toY)));
+
   // Camoufox: native humanization handles this — just do the move
   if (isCamoufoxPage(page)) {
     const steps = Math.floor(Math.random() * 10) + 5;
-    await page.mouse.move(Math.round(toX), Math.round(toY), { steps });
-    setMousePos(page, toX, toY);
+    await page.mouse.move(safeX, safeY, { steps });
+    setMousePos(page, safeX, safeY);
     return;
   }
 
@@ -82,16 +86,16 @@ export async function humanMouseMove(
   const cursor = await getCursorForPage(page);
   if (cursor?.actions?.move) {
     try {
-      await cursor.actions.move(Math.round(toX), Math.round(toY));
-      setMousePos(page, toX, toY);
+      await cursor.actions.move(safeX, safeY);
+      setMousePos(page, safeX, safeY);
       return;
     } catch { /* fall through to basic */ }
   }
 
   // Fallback: stepped movement (better than teleport)
   const steps = Math.floor(Math.random() * 10) + 5;
-  await page.mouse.move(Math.round(toX), Math.round(toY), { steps });
-  setMousePos(page, toX, toY);
+  await page.mouse.move(safeX, safeY, { steps });
+  setMousePos(page, safeX, safeY);
 }
 
 export async function injectMicroTremor(
@@ -112,7 +116,10 @@ export async function humanScroll(
 
 export function resetMousePosition(x: number = 400, y: number = 300, page?: Page): void {
   if (page) {
-    setMousePos(page, x, y);
+    const vp = typeof page.viewportSize === "function" ? (page.viewportSize() || { width: 1280, height: 720 }) : { width: 1280, height: 720 };
+    const safeX = Math.max(5, Math.min(vp.width - 5, Math.round(x)));
+    const safeY = Math.max(5, Math.min(vp.height - 5, Math.round(y)));
+    setMousePos(page, safeX, safeY);
   }
 }
 
@@ -133,12 +140,14 @@ export async function humanClickAt(
   y: number,
   options?: { clickCount?: number; skipJitter?: boolean },
 ): Promise<void> {
+  const vp = typeof page.viewportSize === "function" ? (page.viewportSize() || { width: 1280, height: 720 }) : { width: 1280, height: 720 };
+  const targetX = Math.max(5, Math.min(vp.width - 5, Math.round(x)));
+  const targetY = Math.max(5, Math.min(vp.height - 5, Math.round(y)));
+
   if ((page as unknown as AutomatiPage).__sessionId) {
-    codegenExporter.logAction((page as unknown as AutomatiPage).__sessionId!, `await page.mouse.click(${Math.round(x)}, ${Math.round(y)});`);
+    codegenExporter.logAction((page as unknown as AutomatiPage).__sessionId!, `await page.mouse.click(${targetX}, ${targetY});`);
   }
   const count = options?.clickCount ?? 1;
-  const targetX = Math.round(x);
-  const targetY = Math.round(y);
 
   // Camoufox: native humanization — use simple click (Camoufox adds Bézier paths internally)
   if (isCamoufoxPage(page)) {
@@ -204,25 +213,29 @@ export async function humanClickSelector(
 
   // Calculate 70% inner bounding box
   try {
-    const loc = page.locator(selector).first();
-    const box = await loc.boundingBox();
-    if (box) {
-      const xMin = box.x + box.width * 0.15;
-      const xMax = box.x + box.width * 0.85;
-      const yMin = box.y + box.height * 0.15;
-      const yMax = box.y + box.height * 0.85;
-      const rx = Math.random() * (xMax - xMin) + xMin;
-      const ry = Math.random() * (yMax - yMin) + yMin;
-      await humanClickAt(page, rx, ry, opts);
-      return;
+    if (typeof page.locator === "function") {
+      const loc = page.locator(selector).first();
+      const box = await loc.boundingBox();
+      if (box) {
+        const xMin = box.x + box.width * 0.15;
+        const xMax = box.x + box.width * 0.85;
+        const yMin = box.y + box.height * 0.15;
+        const yMax = box.y + box.height * 0.85;
+        const rx = Math.random() * (xMax - xMin) + xMin;
+        const ry = Math.random() * (yMax - yMin) + yMin;
+        await humanClickAt(page, rx, ry, opts);
+        return;
+      }
     }
   } catch { /* fallback to basic click if element is missing */ }
 
   // STRICT RULE: native click with humanized 60-150ms delay
-  await page.click(selector, {
-    delay: Math.floor(Math.random() * (150 - 60 + 1)) + 60,
-    force: opts?.force,
-    timeout: opts?.timeout,
-    clickCount: opts?.clickCount ?? 1,
-  });
+  if (typeof page.click === "function") {
+    await page.click(selector, {
+      delay: Math.floor(Math.random() * (150 - 60 + 1)) + 60,
+      force: opts?.force,
+      timeout: opts?.timeout,
+      clickCount: opts?.clickCount ?? 1,
+    });
+  }
 }
