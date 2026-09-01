@@ -22,8 +22,8 @@ export async function injectDualClassifier(page: Page, _siteName: string) {
         const origAttach = Element.prototype.attachShadow;
         const captured = new WeakMap();
         (window as any).__capturedShadowRoots = captured;
-        Element.prototype.attachShadow = function(init) {
-          const root = origAttach.apply(this, arguments as any);
+        Element.prototype.attachShadow = function(...args: any[]) {
+          const root = origAttach.apply(this, args as [ShadowRootInit]);
           captured.set(this, root);
           return root;
         };
@@ -77,7 +77,7 @@ export async function injectDualClassifier(page: Page, _siteName: string) {
             const tag = (root as Element).tagName.toLowerCase();
             if (tag === "script" || tag === "style" || tag === "noscript") return "";
             const shadow = (root as Element).shadowRoot || (window as any).__capturedShadowRoots?.get(root);
-            if (shadow) text += " " + getDeepText(shadow as unknown as Node);
+            if (shadow) text += " " + getDeepText(shadow);
           }
           const childNodes = root.childNodes || [];
           for (let i = 0; i < childNodes.length; i++) {

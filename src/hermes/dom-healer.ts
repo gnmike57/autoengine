@@ -202,7 +202,7 @@ Rules for your output:
       return null;
     }, targetDescription).catch(() => null);
 
-    if (heuristic) {
+    if (typeof heuristic === "string" && heuristic.length > 0) {
       log.info(`[Hermes Healer] Heuristic fallback discovered selector: ${heuristic}`);
       return heuristic;
     }

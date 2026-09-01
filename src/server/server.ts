@@ -2052,6 +2052,88 @@ wss.on("connection", (ws: any, req: import("http").IncomingMessage) => {
             break;
           }
 
+          case "get-state": {
+            let liveRows: any[] = restoredRows;
+            if (engine.isRunning) {
+              liveRows = restoredRows.map((r) => {
+                const active = engine.rowStatuses.find((s) => s.email === r.email);
+                return active ? { ...r, ...active } : r;
+              });
+            }
+            ws.send(JSON.stringify({
+              type: "init",
+              data: {
+                credentials: restoredRows.map((r) => ({ email: r.email })),
+                config: {
+                  concurrency: currentConcurrency,
+                  proxyPool: currentProxyPool,
+                  mullvadSessionMode: currentMullvadMode,
+                  fpStrategy: currentFpStrategy,
+                  emulateMobile: currentEmulateMobile,
+                  spiderApiKey: currentSpiderApiKey,
+                  inputMode: currentInputMode,
+                  backend: currentBackend,
+                  enableCacheInjection: currentEnableCacheInjection,
+                  recordVideo: currentRecordVideo,
+                  enablePlaywrightTracing: currentEnablePlaywrightTracing,
+                  maxRetries: currentMaxRetries,
+                  targets: DEFAULT_TARGETS.map((t) => t.name),
+                  screenshotCarouselMax: Timings.SCREENSHOT_CAROUSEL_MAX,
+                  csrfToken: CSRF_TOKEN,
+                  enableVerification: currentEnableVerification,
+                  hasVerificationKey: isVerificationAvailable(),
+                  parallelSiteTesting: currentParallelSiteTesting,
+                  disabledBackends: currentDisabledBackends,
+                  ignitionVerifBypass: currentIgnitionVerifBypass,
+                  useHttpCloak: currentUseHttpCloak,
+                  stealthBypassHttpCloak: currentStealthBypass,
+                  injectStealthJS: currentInjectStealthJS,
+                  rotateOnFingerprint: currentRotateOnFingerprint,
+                  burnOnlyOnPermDisabled: currentBurnOnlyOnPermDisabled,
+                  mutateOnRetry: currentMutateOnRetry,
+                  proxyRotateUrl: currentProxyRotateUrl,
+                  manualCaptchaMode: currentManualCaptchaMode,
+                  autoOptimizePerBackend: currentAutoOptimizePerBackend,
+                  proxyPools: (() => { try { return JSON.parse(fs.readFileSync(path.join(process.cwd(), "proxy-config.json"), "utf8")).pools; } catch { return []; } })(),
+                },
+                isRunning: engine.isRunning,
+                enginePaused: engine.isPaused,
+                rows: liveRows,
+                proxyHealth: proxyScoreTracker.getDetailedScores(),
+                hermes: { ...hermesStatus, alive: !!(hermesProcess && !hermesProcess.killed && hermesProcess.connected) },
+              }
+            }));
+            break;
+          }
+
+          case "get-config": {
+            ws.send(JSON.stringify({
+              type: "config-sync",
+              data: {
+                config: {
+                  concurrency: currentConcurrency,
+                  proxyPool: currentProxyPool,
+                  mullvadSessionMode: currentMullvadMode,
+                  fpStrategy: currentFpStrategy,
+                  emulateMobile: currentEmulateMobile,
+                  backend: currentBackend,
+                  enableCacheInjection: currentEnableCacheInjection,
+                  recordVideo: currentRecordVideo,
+                  enablePlaywrightTracing: currentEnablePlaywrightTracing,
+                  maxRetries: currentMaxRetries,
+                  parallelSiteTesting: currentParallelSiteTesting,
+                  disabledBackends: currentDisabledBackends,
+                  ignitionVerifBypass: currentIgnitionVerifBypass,
+                  useHttpCloak: currentUseHttpCloak,
+                  stealthBypassHttpCloak: currentStealthBypass,
+                  injectStealthJS: currentInjectStealthJS,
+                  autoOptimizePerBackend: currentAutoOptimizePerBackend,
+                }
+              }
+            }));
+            break;
+          }
+
           case "set-concurrency": {
             const parsedData = SetConcurrencySchema.safeParse(msg.data);
             if (!parsedData.success) {

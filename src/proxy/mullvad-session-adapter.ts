@@ -377,7 +377,7 @@ export class MullvadSessionAdapter {
         close: async () => {
           if (closed) return;
           closed = true;
-          activeReservedPorts.delete(bindPort);
+          if (typeof bindPort === "number") activeReservedPorts.delete(bindPort);
           await managed?.close();
           fs.rmSync(runtimeDir, { recursive: true, force: true });
           fs.rmSync(lockPath, { force: true });
@@ -495,7 +495,7 @@ export class MullvadSessionAdapter {
         close: async () => {
           if (closed) return;
           closed = true;
-          activeReservedPorts.delete(bindPort);
+          if (typeof bindPort === "number") activeReservedPorts.delete(bindPort);
           activeWireguardSessions.delete(runtimeDir);
           await managed?.close();
           fs.rmSync(runtimeDir, { recursive: true, force: true });

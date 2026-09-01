@@ -2274,7 +2274,7 @@ export class AutomationEngine extends EventEmitter {
               await this.darwinEngine.saveDiagnosticReport();
               hermesDarwinAnalyzer.learnFromDarwinReport(report);
               this.emit("darwin-all-eliminated", report);
-              effectiveBackend = "stealth" as any;
+              effectiveBackend = "stealth";
               assignedExpConfig = undefined;
               isExp = false;
             } else {
