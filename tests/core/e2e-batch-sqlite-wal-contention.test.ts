@@ -38,7 +38,7 @@ describe("E2E SQLite WAL Multi-Worker High-Concurrency Edge Cases", () => {
           );
           resolve();
         } catch (err) {
-          reject(err);
+          reject(err instanceof Error ? err : new Error(String(err)));
         }
       });
     });

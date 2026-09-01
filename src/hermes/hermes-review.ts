@@ -1085,7 +1085,7 @@ export async function scanDomain(domain: string, vectors: string[]): Promise<Arr
   const results: Array<{ vector: string; script: string }> = [];
   for (const vector of vectors) {
     const vLower = vector.toLowerCase();
-    let patchScript = "";
+    let patchScript: string;
 
     if (vLower.includes("canvas")) {
       patchScript = `

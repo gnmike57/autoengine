@@ -72,7 +72,7 @@ export async function injectDualClassifier(page: Page, _siteName: string) {
           return text;
         };
         
-        let bodyText = "";
+        let bodyText: string;
         try {
           bodyText = getDeepText(document.body).replace(/\s+/g, " ").trim().toLowerCase();
         } catch {

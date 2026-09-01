@@ -115,7 +115,7 @@ export class HermesLLM {
         return res;
       }, { contextName: "HermesLLM.analyzeText" });
 
-      const data = await response.json() as any;
+      const data = (await response.json()) as Record<string, any>;
       const latencyMs = Math.round(performance.now() - start);
       this.requestCount++;
       this.totalLatencyMs += latencyMs;
@@ -187,7 +187,7 @@ export class HermesLLM {
         return res;
       }, { contextName: "HermesLLM.analyzeScreenshot" });
 
-      const data = await response.json() as any;
+      const data = (await response.json()) as Record<string, any>;
       const latencyMs = Math.round(performance.now() - start);
       this.requestCount++;
       this.totalLatencyMs += latencyMs;

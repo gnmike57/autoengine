@@ -121,7 +121,7 @@ export class OpsOrchestrator {
     // 1. Rollback mechanism
     if (context.successRate !== undefined && context.successRate < 0.4) {
       // Success rate is below 40% (a severe drop), let's check for recent revisions to rollback
-      const lastRevision = getLastActiveRevision() as any;
+      const lastRevision = getLastActiveRevision();
       if (lastRevision) {
         log.warn(`🚨 [Ops] Success rate dropped to ${Math.round(context.successRate * 100)}%. Triggering rollback of revision ${lastRevision.id} (${lastRevision.revision_type}).`);
         

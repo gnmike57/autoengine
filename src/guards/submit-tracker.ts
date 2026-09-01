@@ -422,7 +422,7 @@ export class SubmitButtonStateTracker {
         if (parent) target = parent;
       }
       
-      let text = "";
+      let text: string;
       try {
         text = getDeepText(target).replace(/\s+/g, " ").trim().substring(0, 2000).toLowerCase();
       } catch {

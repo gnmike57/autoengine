@@ -2280,7 +2280,7 @@ export class AutomationEngine extends EventEmitter {
             expConfigCounter++;
             effectiveBackend = nextCandidate as any;
             assignedExpConfig = {
-              backend: nextCandidate as any,
+              backend: nextCandidate,
               proxyPool: config.proxyPool || "1",
               fails: 0,
               blocks: 0,

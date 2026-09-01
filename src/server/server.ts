@@ -2069,7 +2069,7 @@ wss.on("connection", (ws: any, req: import("http").IncomingMessage) => {
           case "set-mullvad-mode": {
             const v = String(msg.data?.value || "disabled");
             if (v === "disabled" || v === "mullvad-cli" || v === "wireproxy-api") {
-              currentMullvadMode = v as "mullvad-cli" | "wireproxy-api" | "disabled";
+              currentMullvadMode = v;
               if (currentEngineConfig) currentEngineConfig.mullvadSessionMode = currentMullvadMode;
               broadcast({ type: "config-sync", data: { config: { mullvadSessionMode: v } } });
             }
