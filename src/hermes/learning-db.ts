@@ -72,6 +72,8 @@ function connect(): Database.Database {
   try {
     sharedDb = new Database(DB_PATH);
     sharedDb.pragma("journal_mode = WAL");
+    sharedDb.pragma("busy_timeout = 5000");
+    sharedDb.pragma("wal_autocheckpoint = 1000");
     sharedDb.exec(CREATE_TABLE);
   } catch (err: unknown) {
     const msg = (err instanceof Error ? err.message : String(err)).toLowerCase();
@@ -80,6 +82,8 @@ function connect(): Database.Database {
       nukeCorruptedDb();
       sharedDb = new Database(DB_PATH);
       sharedDb.pragma("journal_mode = WAL");
+      sharedDb.pragma("busy_timeout = 5000");
+      sharedDb.pragma("wal_autocheckpoint = 1000");
       sharedDb.exec(CREATE_TABLE);
     } else {
       throw err;

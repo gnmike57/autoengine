@@ -171,7 +171,43 @@ Rules for your output:
       return trimmedResponse;
     }
 
-    log.warn(`[Hermes Healer] AI could not determine a new selector.`);
+    // Tier 3: Heuristic DOM TreeWalker Fallback
+    const heuristic = await page.evaluate((targetDesc: string) => {
+      const desc = targetDesc.toLowerCase();
+      if (desc.includes("submit") || desc.includes("login button") || desc.includes("sign in")) {
+        const candidates = ['button[type="submit"]', 'button:not([disabled])', 'input[type="submit"]', 'a[role="button"]'];
+        for (const sel of candidates) {
+          const el = document.querySelector(sel);
+          if (el && (el as HTMLElement).offsetParent !== null) return sel;
+        }
+      } else if (desc.includes("email") || desc.includes("username")) {
+        const candidates = ['input[type="email"]', 'input[name*="email" i]', 'input[name*="user" i]', 'input[type="text"]'];
+        for (const sel of candidates) {
+          const el = document.querySelector(sel);
+          if (el && (el as HTMLElement).offsetParent !== null) return sel;
+        }
+      } else if (desc.includes("password")) {
+        const candidates = ['input[type="password"]', 'input[name*="pass" i]'];
+        for (const sel of candidates) {
+          const el = document.querySelector(sel);
+          if (el && (el as HTMLElement).offsetParent !== null) return sel;
+        }
+      } else if (desc.includes("remember")) {
+        const candidates = ['input[type="checkbox"]', '#rememberMe', 'input[name*="remember" i]'];
+        for (const sel of candidates) {
+          const el = document.querySelector(sel);
+          if (el) return sel;
+        }
+      }
+      return null;
+    }, targetDescription).catch(() => null);
+
+    if (heuristic) {
+      log.info(`[Hermes Healer] Heuristic fallback discovered selector: ${heuristic}`);
+      return heuristic;
+    }
+
+    log.warn(`[Hermes Healer] AI and Heuristics could not determine a new selector.`);
     return null;
   } catch (e: unknown) {
     log.warn(`[Hermes Healer] Healing failed: ${e instanceof Error ? e.message : String(e)}`);

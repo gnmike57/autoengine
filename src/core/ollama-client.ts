@@ -16,18 +16,22 @@ export async function askLlama(prompt: string, systemPrompt?: string, jsonMode =
     messages.push({ role: 'user', content: prompt });
 
     try {
-        const response = await ollamaClient.chat({
+        const ollamaPromise = ollamaClient.chat({
             model: 'llama3',
             messages,
             format: jsonMode ? 'json' : undefined,
         });
+        const timeoutPromise = new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error("ollama-timeout-1500ms")), 1500)
+        );
+        const response = await Promise.race([ollamaPromise, timeoutPromise]);
         return response.message.content || "";
     } catch (error) {
-        log.warn(`Local Llama3 failed (${String(error)}), falling back to External API...`);
+        log.warn(`Local Llama3 failed (${String(error)}), falling back to External Cloud API (3s timeout)...`);
         const fallbackPrompt = systemPrompt ? `${systemPrompt}\n\n${prompt}` : prompt;
         const result = await generateContentWithFallback({
             prompt: fallbackPrompt,
-            timeoutMs: 15000
+            timeoutMs: 3000
         });
         return result.text;
     }

@@ -2269,29 +2269,31 @@ export class AutomationEngine extends EventEmitter {
           if (config.experimentalModeType === "darwin" && this.darwinEngine) {
             const nextCandidate = this.darwinEngine.getNextCandidate(expConfigCounter);
             if (!nextCandidate) {
-              this.log("WARN", `🦎🛑 Darwin Mode: All backends confirmed eliminated after extended testing. Engine stopping for hard review.`);
+              this.log("WARN", `🦎🛑 Darwin Mode: All experimental backends eliminated. Gracefully auto-pivoting to Golden Template (stealth).`);
               const report = this.darwinEngine.generateDiagnosticReport();
               await this.darwinEngine.saveDiagnosticReport();
               hermesDarwinAnalyzer.learnFromDarwinReport(report);
               this.emit("darwin-all-eliminated", report);
-              this.shouldStop = true;
-              return;
+              effectiveBackend = "stealth" as any;
+              assignedExpConfig = undefined;
+              isExp = false;
+            } else {
+              expConfigCounter++;
+              effectiveBackend = nextCandidate as any;
+              assignedExpConfig = {
+                backend: nextCandidate,
+                proxyPool: config.proxyPool || "1",
+                fails: 0,
+                blocks: 0,
+                decisive: 0,
+                eliminated: false,
+                totalAttempts: 0,
+                totalDurationMs: 0,
+                errors: {},
+              };
+              isExp = true;
+              this.log("INFO", `🦎 Darwin Mode: Assigned candidate [${effectiveBackend}] to ${cred.email}`);
             }
-            expConfigCounter++;
-            effectiveBackend = nextCandidate as any;
-            assignedExpConfig = {
-              backend: nextCandidate,
-              proxyPool: config.proxyPool || "1",
-              fails: 0,
-              blocks: 0,
-              decisive: 0,
-              eliminated: false,
-              totalAttempts: 0,
-              totalDurationMs: 0,
-              errors: {},
-            };
-            isExp = true;
-            this.log("INFO", `🦎 Darwin Mode: Assigned candidate [${effectiveBackend}] to ${cred.email}`);
           } else {
             if (anomalyPauseActive) {
               while (anomalyPauseActive) await new Promise(r => setTimeout(r, 1000));

@@ -108,6 +108,15 @@ export class CookieGuard {
     this._installed = true;
 
     await this.page.addInitScript(() => {
+      // Tier 0: Seed consent tokens in localStorage and cookies before DOM mounts
+      try {
+        localStorage.setItem('CookieInformationConsent', JSON.stringify({
+          consents_approved: ["necessary", "functional", "statistical", "marketing"],
+          created: new Date().toISOString()
+        }));
+        document.cookie = "CookieInformationConsent=" + encodeURIComponent(JSON.stringify({ consents_approved: ["necessary", "functional", "statistical", "marketing"] })) + "; path=/; max-age=31536000; SameSite=Lax";
+      } catch { /* intentional */ }
+
       let lastRun = 0;
       const COOKIE_HIDE_SELECTORS = [
         ".coi-banner",

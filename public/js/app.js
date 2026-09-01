@@ -255,6 +255,8 @@
         reconnectDelay = 1000;
         addLog('INFO', 'Connected to WebSocket'); 
         flushCommandQueue();
+        sendWsMessage({ type: 'get-state' });
+        sendWsMessage({ type: 'get-config' });
       };
       
       ws.onmessage = (e) => { 

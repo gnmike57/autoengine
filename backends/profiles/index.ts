@@ -64,11 +64,23 @@ export const BACKEND_MOBILE_SETTINGS: BackendSettingsMap = {
 };
 
 /**
+ * Normalize any alias, UI dropdown value, or legacy name to a canonical backend key.
+ */
+export function normalizeBackendName(rawName: string): string {
+  const lower = (rawName || '').toLowerCase().trim();
+  if (lower === 'camoufox' || lower === 'stealth-playwright' || lower === 'auto') return 'stealth';
+  if (lower === 'cloak' || lower === 'cloakbrowser') return 'cloak-headless';
+  if (lower === 'zendriver' || lower === 'nodriver') return 'zendriver';
+  return lower || 'stealth';
+}
+
+/**
  * Get the profile for a backend, auto-selecting desktop or mobile.
  */
 export function getBackendProfile(backendName: string, isMobile: boolean = false): Partial<BackendProfile> {
+  const normalized = normalizeBackendName(backendName);
   const map = isMobile ? BACKEND_MOBILE_SETTINGS : BACKEND_OPTIMAL_SETTINGS;
-  return map[backendName] || {};
+  return map[normalized] || map[backendName] || {};
 }
 
 /**

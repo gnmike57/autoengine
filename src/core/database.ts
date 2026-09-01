@@ -74,6 +74,8 @@ export function getStmt(sql: string): Database.Statement {
 // block readers. This is the recommended mode for applications that need
 // instant persistence without explicit fsync calls.
 db.pragma('journal_mode = WAL');
+db.pragma('busy_timeout = 5000');
+db.pragma('wal_autocheckpoint = 1000');
 // NORMAL synchronous is sufficient with WAL — commits are durable against
 // application crashes (only a power failure in the middle of a WAL checkpoint
 // could theoretically lose the last transaction, which is acceptable here).

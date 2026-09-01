@@ -100,16 +100,26 @@ async function defaultProbeProxy(proxy: SessionProxyEntry): Promise<string> {
   return sanitizedId(body);
 }
 
-function defaultReservePort(host: string): Promise<number> {
-  return new Promise((resolve, reject) => {
-    const server = net.createServer();
-    server.once("error", reject);
-    server.listen(0, host, () => {
-      const address = server.address();
-      const port = typeof address === "object" && address ? address.port : 0;
-      server.close((error) => error ? reject(error) : resolve(port));
+const activeReservedPorts = new Set<number>();
+
+async function defaultReservePort(host: string): Promise<number> {
+  for (let attempt = 0; attempt < 10; attempt++) {
+    const port = await new Promise<number>((resolve, reject) => {
+      const server = net.createServer();
+      server.once("error", reject);
+      server.listen(0, host, () => {
+        const address = server.address();
+        const p = typeof address === "object" && address ? address.port : 0;
+        server.close((error) => error ? reject(error) : resolve(p));
+      });
     });
-  });
+    if (port > 0 && !activeReservedPorts.has(port)) {
+      activeReservedPorts.add(port);
+      return port;
+    }
+    await new Promise((r) => setTimeout(r, 20 + Math.random() * 50));
+  }
+  throw new Error("mullvad-could-not-reserve-unique-port");
 }
 
 function waitForPort(host: string, port: number, timeoutMs: number, child: ChildProcess): Promise<void> {
@@ -338,8 +348,9 @@ export class MullvadSessionAdapter {
 
     const runtimeDir = path.join(this.options.stateDir, `session-${sanitizedId(sessionKey)}-${configId}`);
     let managed: ManagedWireproxy | undefined;
+    let bindPort: number | undefined;
     try {
-      const bindPort = await this.dependencies.reservePort(this.options.bindHost);
+      bindPort = await this.dependencies.reservePort(this.options.bindHost);
       managed = await this.dependencies.launchWireproxy({
         binary: this.options.wireproxyBinary,
         sourceConfig,
@@ -366,12 +377,14 @@ export class MullvadSessionAdapter {
         close: async () => {
           if (closed) return;
           closed = true;
+          activeReservedPorts.delete(bindPort);
           await managed?.close();
           fs.rmSync(runtimeDir, { recursive: true, force: true });
           fs.rmSync(lockPath, { force: true });
         },
       };
     } catch (error) {
+      if (typeof bindPort === "number") activeReservedPorts.delete(bindPort);
       await managed?.close().catch(() => {});
       fs.rmSync(runtimeDir, { recursive: true, force: true });
       fs.rmSync(lockPath, { force: true });
@@ -446,6 +459,7 @@ export class MullvadSessionAdapter {
     const runtimeDir = path.join(this.options.stateDir, `api-session-${sanitizedId(sessionKey)}-${configId}`);
     
     let managed: ManagedWireproxy | undefined;
+    let bindPort: number | undefined;
     
     try {
       fs.mkdirSync(runtimeDir, { recursive: true, mode: 0o700 });
@@ -454,7 +468,7 @@ export class MullvadSessionAdapter {
       const sourceConfigPath = path.join(runtimeDir, "base.conf");
       fs.writeFileSync(sourceConfigPath, configContent, { encoding: "utf8", mode: 0o600 });
       
-      const bindPort = await this.dependencies.reservePort(this.options.bindHost);
+      bindPort = await this.dependencies.reservePort(this.options.bindHost);
       managed = await this.dependencies.launchWireproxy({
         binary: this.options.wireproxyBinary,
         sourceConfig: sourceConfigPath,
@@ -481,12 +495,14 @@ export class MullvadSessionAdapter {
         close: async () => {
           if (closed) return;
           closed = true;
+          activeReservedPorts.delete(bindPort);
           activeWireguardSessions.delete(runtimeDir);
           await managed?.close();
           fs.rmSync(runtimeDir, { recursive: true, force: true });
         },
       };
     } catch (error) {
+      if (typeof bindPort === "number") activeReservedPorts.delete(bindPort);
       activeWireguardSessions.delete(runtimeDir);
       await managed?.close().catch(() => {});
       fs.rmSync(runtimeDir, { recursive: true, force: true });

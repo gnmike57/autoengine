@@ -17,6 +17,18 @@ export async function injectDualClassifier(page: Page, _siteName: string) {
     await page.addInitScript(() => {
       const STATUS_SYM = Symbol.for("cloak_status");
 
+      // Hook attachShadow to capture both open and closed shadow roots
+      try {
+        const origAttach = Element.prototype.attachShadow;
+        const captured = new WeakMap();
+        (window as any).__capturedShadowRoots = captured;
+        Element.prototype.attachShadow = function(init) {
+          const root = origAttach.apply(this, arguments as any);
+          captured.set(this, root);
+          return root;
+        };
+      } catch {}
+
       // We only want to classify after the form is submitted, but the script
       // runs early. We'll start observing once DOMContentLoaded fires.
       let observer: MutationObserver | null = null;
@@ -30,8 +42,9 @@ export async function injectDualClassifier(page: Page, _siteName: string) {
         let node = walker.nextNode();
         while (node) {
           const el = node as Element;
-          if (el.shadowRoot) {
-            const shadowWalker = document.createTreeWalker(el.shadowRoot, NodeFilter.SHOW_ELEMENT);
+          const shadow = el.shadowRoot || (window as any).__capturedShadowRoots?.get(el);
+          if (shadow) {
+            const shadowWalker = document.createTreeWalker(shadow, NodeFilter.SHOW_ELEMENT);
             let shadowNode = shadowWalker.nextNode();
             while (shadowNode) {
                const sel = shadowNode as Element;
@@ -63,7 +76,8 @@ export async function injectDualClassifier(page: Page, _siteName: string) {
           if (root.nodeType === Node.ELEMENT_NODE) {
             const tag = (root as Element).tagName.toLowerCase();
             if (tag === "script" || tag === "style" || tag === "noscript") return "";
-            if ((root as Element).shadowRoot) text += " " + getDeepText((root as Element).shadowRoot as unknown as Node);
+            const shadow = (root as Element).shadowRoot || (window as any).__capturedShadowRoots?.get(root);
+            if (shadow) text += " " + getDeepText(shadow as unknown as Node);
           }
           const childNodes = root.childNodes || [];
           for (let i = 0; i < childNodes.length; i++) {

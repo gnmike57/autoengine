@@ -2058,7 +2058,11 @@ wss.on("connection", (ws: any, req: import("http").IncomingMessage) => {
               ws.send(JSON.stringify({ type: "error", data: { message: "set-concurrency: value must be an integer between 1 and 500" } }));
               return;
             }
-            const requested = parsedData.data.value;
+            let requested = parsedData.data.value;
+            if (currentMullvadMode !== "disabled" && requested > 4) {
+              requested = 4;
+              log.warn(`Mullvad mode active: Concurrency capped at 4 (device slots limit)`);
+            }
             const applied = engine.setConcurrency(requested);
             currentConcurrency = applied;
             globalTiler.reconfigure(applied);
@@ -2072,6 +2076,15 @@ wss.on("connection", (ws: any, req: import("http").IncomingMessage) => {
               currentMullvadMode = v;
               if (currentEngineConfig) currentEngineConfig.mullvadSessionMode = currentMullvadMode;
               broadcast({ type: "config-sync", data: { config: { mullvadSessionMode: v } } });
+              
+              if (v !== "disabled" && currentConcurrency > 4) {
+                const capped = 4;
+                engine.setConcurrency(capped);
+                currentConcurrency = capped;
+                globalTiler.reconfigure(capped);
+                broadcast({ type: "concurrency", data: { value: capped } });
+                log.info(`Mullvad mode enabled: Clamped active concurrency to 4`);
+              }
             }
             break;
           }
@@ -3588,15 +3601,15 @@ process.env.VITEST ? null : setInterval(async () => {
   if (isShuttingDown) return;
   try {
     const { killOurOrphans } = await import("../services/process-cleaner.js");
-    const r = await killOurOrphans({ minEtimeSec: 300 }); // Only processes >5min old
+    const r = await killOurOrphans({ timeoutMs: 1500, minEtimeSec: 45 }); // Processes >45s old
     if (r.killed > 0) {
-      log.info(`[Maintenance] Zombie sweep: killed=${r.killed}`);
+      log.info(`[Maintenance] Fast zombie sweep: killed=${r.killed}`);
       broadcast({ type: "log", data: { level: "WARN", message: `[🧹 Maintenance] Swept ${r.killed} zombie browser process(es)` } });
     }
   } catch (e: unknown) {
     log.warn(`[Maintenance] Zombie sweep error: ${e instanceof Error ? e.message : String(e)}`);
   }
-}, 10 * 60_000).unref();
+}, 30_000).unref();
 
 // 3. Periodic Cloud Sync (Upload recordings, results, backups) every 30 minutes
 process.env.VITEST ? null : setInterval(async () => {

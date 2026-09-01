@@ -66,23 +66,45 @@ async function cleanOldTracesAndEvidence(): Promise<void> {
   const dirs = [
     path.join(process.cwd(), "traces"),
     path.join(process.cwd(), "reports", "cdp"),
+    path.join(process.cwd(), "recordings"),
   ];
   const maxAgeMs = 24 * 60 * 60 * 1000; // 24 hours
+  const maxTotalSizeBytes = 2 * 1024 * 1024 * 1024; // 2GB quota
   const now = Date.now();
 
   for (const dir of dirs) {
     try {
       if (!fs.existsSync(dir)) continue;
       const entries = await fs.promises.readdir(dir);
+      const filesWithStats: Array<{ path: string; size: number; mtime: number }> = [];
+      let totalDirSize = 0;
+
       for (const entry of entries) {
-        if (!entry.endsWith(".zip") && !entry.endsWith(".trace")) continue;
+        if (entry.startsWith(".")) continue;
         const filePath = path.join(dir, entry);
         try {
           const stats = await fs.promises.stat(filePath);
-          if (now - stats.mtimeMs > maxAgeMs) {
-            await fs.promises.unlink(filePath).catch(() => {});
+          if (stats.isFile()) {
+            if (now - stats.mtimeMs > maxAgeMs) {
+              await fs.promises.unlink(filePath).catch(() => {});
+            } else {
+              filesWithStats.push({ path: filePath, size: stats.size, mtime: stats.mtimeMs });
+              totalDirSize += stats.size;
+            }
           }
         } catch { /* intentional */ }
+      }
+
+      // Enforce 2GB Quota: evict oldest files if total size exceeds limit
+      if (totalDirSize > maxTotalSizeBytes) {
+        filesWithStats.sort((a, b) => a.mtime - b.mtime);
+        while (totalDirSize > maxTotalSizeBytes * 0.75 && filesWithStats.length > 0) {
+          const oldest = filesWithStats.shift();
+          if (oldest) {
+            await fs.promises.unlink(oldest.path).catch(() => {});
+            totalDirSize -= oldest.size;
+          }
+        }
       }
     } catch { /* intentional */ }
   }
