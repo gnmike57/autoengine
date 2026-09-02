@@ -13,6 +13,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createLogger } from "../core/logger.js";
+import { killOurOrphans } from "../services/process-cleaner.js";
 import { getHermesObserver } from "./hermes-observer.js";
 import { OpsOrchestrator } from "./ops-orchestrator.js";
 
@@ -94,8 +95,7 @@ export class Watchdog {
             log.warn(`[Watchdog] Drain complete (Active: ${active}, Time: ${timeWaited}ms). Sweeping zombies...`);
             
             try {
-              const { killOurOrphans } = require("../services/process-cleaner.js");
-              killOurOrphans();
+              void killOurOrphans();
             } catch (e) {
               log.error(`[Watchdog] Failed to clean zombies during drain: ${e}`);
             }

@@ -1797,6 +1797,7 @@ wss.on("connection", (ws: any, req: import("http").IncomingMessage) => {
               enableVerification: currentEnableVerification,
               fpStrategy: currentFpStrategy,
               proxyPool: currentProxyPool,
+              mullvadSessionMode: currentMullvadMode,
               parallelSiteTesting: msg.data?.parallelSites,
               useHttpCloak: currentUseHttpCloak,
               stealthBypassHttpCloak: currentStealthBypass,

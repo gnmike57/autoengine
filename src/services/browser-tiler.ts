@@ -129,14 +129,20 @@ export class BrowserTiler {
             try {
                 // Fallback for macOS accessibility block (cached for 60 seconds)
                 const raw = execFileSync("system_profiler", ["SPDisplaysDataType"]).toString();
-                const m = raw.match(/Resolution:\s*(\d+)\s*x\s*(\d+)/);
-                if (m && m[1] && m[2]) {
-                    const w = parseInt(m[1], 10);
-                    const h = parseInt(m[2], 10);
-                    // Handle retina display scaling
+                const uiMatch = raw.match(/UI Looks like:\s*(\d+)\s*x\s*(\d+)/i);
+                const resMatch = raw.match(/Resolution:\s*(\d+)\s*x\s*(\d+)/i);
+                if (uiMatch && uiMatch[1] && uiMatch[2]) {
+                    const logicalW = parseInt(uiMatch[1], 10);
+                    const logicalH = parseInt(uiMatch[2], 10);
+                    screen = { x: 0, y: 31, width: logicalW, height: Math.max(100, logicalH - 31) };
+                    cachedMacScreen = { bounds: screen, expiresAt: now + 60000 };
+                } else if (resMatch && resMatch[1] && resMatch[2]) {
+                    const w = parseInt(resMatch[1], 10);
+                    const h = parseInt(resMatch[2], 10);
+                    // Handle retina display scaling if logical size unavailable
                     const logicalW = w > 2000 ? Math.round(w / 2) : w;
                     const logicalH = h > 1400 ? Math.round(h / 2) : h;
-                    screen = { x: 0, y: 31, width: logicalW, height: logicalH - 31 }; // Account for 31px Apple menu bar
+                    screen = { x: 0, y: 31, width: logicalW, height: Math.max(100, logicalH - 31) }; // Account for 31px Apple menu bar
                     cachedMacScreen = { bounds: screen, expiresAt: now + 60000 };
                 }
             } catch {}
