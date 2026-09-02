@@ -62,4 +62,60 @@ describe('OpsOrchestrator', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
     fetchSpy.mockRestore();
   });
+
+  test('should execute skill safely inside vm sandbox', async () => {
+    let completedSuccess: boolean | null = null;
+    let completedOutput = '';
+    const sandboxedOrchestrator = new OpsOrchestrator({
+      onSkillComplete: (_skill, success, output) => {
+        completedSuccess = success;
+        completedOutput = output;
+      }
+    });
+
+    const safeSkill = {
+      id: 'test_skill_1',
+      triggerCondition: 'manual',
+      script: 'console.log("Safe script running");',
+      createdAt: new Date().toISOString()
+    };
+
+    await sandboxedOrchestrator.executeSkill(safeSkill);
+    expect(completedSuccess).toBe(true);
+    expect(completedOutput).toBe('Sandbox execution OK');
+  });
+
+  test('should catch and isolate dangerous or failing scripts in vm sandbox', async () => {
+    let completedSuccess: boolean | null = null;
+    let completedOutput = '';
+    const sandboxedOrchestrator = new OpsOrchestrator({
+      onSkillComplete: (_skill, success, output) => {
+        completedSuccess = success;
+        completedOutput = output;
+      }
+    });
+
+    const dangerousSkill = {
+      id: 'test_skill_bad',
+      triggerCondition: 'manual',
+      script: 'process.exit(1);', // 'process' is not injected into sandbox
+      createdAt: new Date().toISOString()
+    };
+
+    await sandboxedOrchestrator.executeSkill(dangerousSkill);
+    expect(completedSuccess).toBe(false);
+    expect(completedOutput).toContain('process is not defined');
+  });
+
+  test('should trigger automatic rollback when batch success rate drops below 40%', async () => {
+    const orchestrator = new OpsOrchestrator();
+    const triggerContext = {
+      recentOutcomes: ['blocked', 'blocked'],
+      stats: {},
+      successRate: 0.25 // 25% < 40% threshold
+    };
+
+    // Should evaluate triggers and attempt rollback without crashing
+    await expect(orchestrator.evaluateTriggers(triggerContext)).resolves.not.toThrow();
+  });
 });

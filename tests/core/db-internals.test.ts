@@ -76,3 +76,33 @@ describe("Outcome vocabulary centralization (Rule 45)", () => {
     expect(CONFIDENT_OUTCOMES.length).toBe(5);
   });
 });
+
+describe("Ops Revisions & Rollback Durability", () => {
+  it("should record, retrieve, and mark revisions as rolled back", async () => {
+    const { insertRevision, getLastActiveRevision, markRevisionRolledBack, initDB } = await import("../../src/core/database.js");
+    initDB();
+
+    const revId = insertRevision(
+      "timing",
+      "POST_SUBMIT_DOM_SETTLE",
+      JSON.stringify({ POST_SUBMIT_DOM_SETTLE: 500 }),
+      JSON.stringify({ POST_SUBMIT_DOM_SETTLE: 300 })
+    );
+
+    expect(revId).toBeGreaterThan(0);
+
+    const activeRev = getLastActiveRevision();
+    expect(activeRev).toBeDefined();
+    expect(activeRev.id).toBe(revId);
+    expect(activeRev.revision_type).toBe("timing");
+    expect(activeRev.target_id).toBe("POST_SUBMIT_DOM_SETTLE");
+    expect(activeRev.status).toBe("active");
+
+    markRevisionRolledBack(revId, "Test rollback");
+
+    const activeRevAfter = getLastActiveRevision();
+    if (activeRevAfter) {
+      expect(activeRevAfter.id).not.toBe(revId);
+    }
+  });
+});

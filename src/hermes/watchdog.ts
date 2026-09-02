@@ -82,28 +82,28 @@ export class Watchdog {
       stallTimeoutMs: config.stallTimeoutMs ?? 300000,
       onRestart: config.onRestart ?? ((reason) => {
         log.error(`[Watchdog] Graceful drain requested: ${reason} — triggering DRAIN state and waiting up to 60s`);
-        
+
         let timeWaited = 0;
         const drainTimeoutMs = 60000;
-        
+
         const drainInterval = setInterval(() => {
           timeWaited += 5000;
           const active = this.config.getActiveSessions ? this.config.getActiveSessions() : 0;
-          
+
           if (active === 0 || timeWaited >= drainTimeoutMs) {
             clearInterval(drainInterval);
             log.warn(`[Watchdog] Drain complete (Active: ${active}, Time: ${timeWaited}ms). Sweeping zombies...`);
-            
+
             try {
               void killOurOrphans();
             } catch (e) {
               log.error(`[Watchdog] Failed to clean zombies during drain: ${e}`);
             }
-            
+
             log.error(`[Watchdog] Exiting cleanly for PM2 restart.`);
             setImmediate(() => process.exit(0));
           } else {
-            log.info(`[Watchdog] Draining... ${active} sessions remain. Waited ${timeWaited/1000}s`);
+            log.info(`[Watchdog] Draining... ${active} sessions remain. Waited ${timeWaited / 1000}s`);
           }
         }, 5000);
       }),
@@ -186,24 +186,24 @@ export class Watchdog {
     const now = Date.now();
     // Run log analysis every 10 minutes
     if (now - this.lastLogAnalysisTime > 10 * 60 * 1000) {
-       this.lastLogAnalysisTime = now;
-       try {
-         const logFile = path.join(process.cwd(), 'logs', 'automati-server-out.log');
-         if (fs.existsSync(logFile)) {
-            // Read last ~50k bytes roughly to avoid memory explosion
-            const stats = fs.statSync(logFile);
-            const readSize = Math.min(stats.size, 50000);
-            const fd = fs.openSync(logFile, 'r');
-            const buffer = Buffer.alloc(readSize);
-            fs.readSync(fd, buffer, 0, readSize, Math.max(0, stats.size - readSize));
-            fs.closeSync(fd);
+      this.lastLogAnalysisTime = now;
+      try {
+        const logFile = path.join(process.cwd(), 'logs', 'automati-server-out.log');
+        if (fs.existsSync(logFile)) {
+          // Read last ~50k bytes roughly to avoid memory explosion
+          const stats = fs.statSync(logFile);
+          const readSize = Math.min(stats.size, 50000);
+          const fd = fs.openSync(logFile, 'r');
+          const buffer = Buffer.alloc(readSize);
+          fs.readSync(fd, buffer, 0, readSize, Math.max(0, stats.size - readSize));
+          fs.closeSync(fd);
 
-            const logContent = buffer.toString('utf8');
-            void this.opsOrchestrator.analyzeLogs(logContent).catch((e) => log.warn(`[Watchdog] Log analysis rejected: ${e}`));
-         }
-       } catch (e) {
-         log.warn(`[Watchdog] Failed to trigger log analysis: ${String(e)}`);
-       }
+          const logContent = buffer.toString('utf8');
+          void this.opsOrchestrator.analyzeLogs(logContent).catch((e) => log.warn(`[Watchdog] Log analysis rejected: ${e}`));
+        }
+      } catch (e) {
+        log.warn(`[Watchdog] Failed to trigger log analysis: ${String(e)}`);
+      }
     }
   }
 
