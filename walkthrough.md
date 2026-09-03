@@ -46,6 +46,18 @@ We have completed the full implementation, integration, and verification of the 
 13. **ESM Cleanliness in Hermes Watchdog (`src/hermes/watchdog.ts`)**:
     - Replaced CommonJS `require()` with static ESM `killOurOrphans` import.
 
+### 🤖 Phase 5: Hermes Autonomous Decision-Making & Sandboxing
+14. **Isolated `node:vm` Execution Boundary (`src/hermes/ops-orchestrator.ts`)**:
+    - AI-generated OpsSkills execute in a locked `vm.runInNewContext` sandbox containing only safe primitives (`console`, `fetch`, `setTimeout`, `clearTimeout`).
+    - Destructive globals and modules (`process`, `child_process`, `fs`) are completely blocked.
+15. **Durable Rollback Ledger (`src/core/database.ts`, `src/hermes/ops-orchestrator.ts`)**:
+    - Created `ops_revisions` table tracking timing and skill changes with `previous_state` and `new_state` snapshots.
+    - Automatic rollback trigger: when batch success rate drops below 40%, the orchestrator instantly restores previous timing state or disables anomalous skills.
+16. **Self-Repair Loop Prevention & Cooldown Safeguards (`src/hermes/hermes-observer.ts`)**:
+    - Implemented a 1-hour global repair cooldown after applying a self-repair correction.
+    - Added per-anomaly 24-hour attempt tracking (max 2 attempts per anomaly before escalating to human review).
+    - Prompt injection of historical failed suggestions to force radically different approaches.
+
 ---
 
 ## 2. Master Verification Results
@@ -55,8 +67,9 @@ We have completed the full implementation, integration, and verification of the 
 | **TypeScript Strict Compiler** | `npm run typecheck` | ✅ **PASSED (0 errors)** | Clean type check across all source files |
 | **ESLint Static Analysis** | `npx eslint src/**/*.ts tests/**/*.ts --quiet` | ✅ **PASSED (0 errors)** | 0 errors across entire repository |
 | **Frontend AST & DOM Integrity** | `npm run audit:all` | ✅ **PASSED** | Single source of truth verified |
-| **Hermes AI Health Check** | `npm run audit:all` | ✅ **PASSED** | DOM Healer & AI Vision verified |
+| **Hermes AI Health Check** | `npm run audit:all` | ✅ **PASSED** | DOM Healer, AI Vision & Observer verified |
 | **Backend & Golden Template** | `npm run audit:all` | ✅ **PASSED** | Camoufox lifecycle preserved |
 | **API, WS & Database Contracts** | `npm run audit:all` | ✅ **PASSED** | WAL mode, message handlers & schemas verified |
-| **Full Vitest Test Suite** | `npm run test -- --run` | ✅ **PASSED (137/137 files, 1440 passed tests)** | 100% test pass rate |
+| **Full Vitest Test Suite** | `npm run test -- --run` | ✅ **PASSED (138/138 files, 1445 passed tests)** | 100% test pass rate |
+
 
