@@ -3,6 +3,8 @@ import { createSession } from "./backends/index.js";
 import { globalTiler } from "./browser-tiler.js";
 import { ConfigStore } from "./config-store.js";
 import { execSync } from "child_process";
+import * as os from "os";
+import * as path from "path";
 import fs from "fs";
 import { cleanPreviousZombies } from "./process-cleaner.js";
 
@@ -54,8 +56,9 @@ $Bitmap.Save("C:\\Users\\home\\.gemini\\antigravity-ide\\brain\\684483ea-47ca-43
 $Graphics.Dispose()
 $Bitmap.Dispose()
 `;
-    fs.writeFileSync("scratch/screenshot-cascading.ps1", psScript);
-    execSync("powershell.exe -ExecutionPolicy Bypass -File scratch/screenshot-cascading.ps1");
+    const psScriptPath = path.join(os.tmpdir(), "screenshot-cascading.ps1");
+    fs.writeFileSync(psScriptPath, psScript);
+    execSync(`powershell.exe -ExecutionPolicy Bypass -File "${psScriptPath}"`);
     
     console.log("✅ Screenshot saved. Keep open for 5s...");
     await new Promise(r => setTimeout(r, 5000));

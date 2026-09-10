@@ -14,6 +14,9 @@ erDiagram
         INTEGER next_batch_index
         DATETIME created_at
         TEXT target_sites
+        TEXT status
+        INTEGER processing_started_at
+        INTEGER crash_count
     }
     test_runs {
         INTEGER id
@@ -54,6 +57,7 @@ erDiagram
         TEXT reason
         DATETIME created_at
         BOOLEAN completed
+        TEXT target_site
     }
     email_denylist_db {
         INTEGER id
@@ -125,6 +129,26 @@ erDiagram
         INTEGER attempt_index
         DATETIME timestamp
     }
+    ops_revisions {
+        INTEGER id
+        TEXT revision_type
+        'timing' --
+        TEXT previous_state
+        TEXT new_state
+        DATETIME applied_at
+        TEXT status
+    }
+    darwin_insights {
+        INTEGER id
+        TEXT timestamp
+        TEXT optimal_backend
+        INTEGER score
+        REAL decisive_rate
+        REAL block_rate
+        INTEGER avg_latency_ms
+        INTEGER sample_size
+        TEXT report_json
+    }
 ```
 
 
@@ -139,7 +163,7 @@ CREATE TABLE credentials (
       password_count INTEGER DEFAULT 0,
       next_batch_index INTEGER DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    , target_sites TEXT DEFAULT '["joe","ignition"]')
+    , target_sites TEXT DEFAULT '["joe","ignition"]', status TEXT DEFAULT 'untested', processing_started_at INTEGER, crash_count INTEGER DEFAULT 0)
 ```
 
 ### `test_runs`
@@ -196,7 +220,7 @@ CREATE TABLE scheduled_retests (
       reason TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       completed BOOLEAN DEFAULT 0
-    )
+    , target_site TEXT)
 ```
 
 ### `email_denylist_db`
@@ -297,5 +321,33 @@ CREATE TABLE session_telemetry (
       attempt_index INTEGER DEFAULT 0,
       timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     )
+```
+
+### `ops_revisions`
+```sql
+CREATE TABLE ops_revisions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      revision_type TEXT NOT NULL, -- 'timing' or 'skill'
+      target_id TEXT NOT NULL,
+      previous_state TEXT NOT NULL,
+      new_state TEXT NOT NULL,
+      applied_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      status TEXT DEFAULT 'active' -- 'active' or 'rolled_back'
+    )
+```
+
+### `darwin_insights`
+```sql
+CREATE TABLE darwin_insights (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT NOT NULL,
+            optimal_backend TEXT NOT NULL,
+            score INTEGER NOT NULL,
+            decisive_rate REAL NOT NULL,
+            block_rate REAL NOT NULL,
+            avg_latency_ms INTEGER NOT NULL,
+            sample_size INTEGER NOT NULL,
+            report_json TEXT NOT NULL
+          )
 ```
 
