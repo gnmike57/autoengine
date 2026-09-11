@@ -90,18 +90,24 @@ Darwin Mode tests multiple candidate backends against live targets under identic
 ## 🛠 Project Structure
 
 ```
-├── backends/       # Browser Backends (Stealth, Cloak, Zendriver, Spider)
-├── data/           # SQLite Database & Storage (WAL mode)
-├── docs/           # Architecture Blueprints & Guides
-├── learning/       # Hermes Long-Term Memory & Historical Insights
-├── reports/darwin/ # Darwin Diagnostic Reports & Post-Mortems
+├── backends/           # Browser Backends (Stealth, Cloak, Zendriver, Spider)
+├── config/             # Runtime configuration files
+├── data/               # SQLite Database & Storage (WAL mode)
+├── docs/               # Architecture Blueprints & Guides
+├── hermes/             # Hermes AI Python bridge & learning database
+├── learning/           # Hermes Long-Term Memory & Historical Insights
+├── profiles/           # Browser profile templates
+├── reports/            # Darwin Diagnostic Reports, Benchmarks & Traces
+├── scripts/            # Operational scripts (audits, benchmarks, evidence)
 ├── src/
-│   ├── core/       # AutomationEngine, DarwinEngine, Database, Logger
-│   ├── hermes/     # Hermes AI, Darwin Analyzer, Self-Healing, Strategy Engine
-│   ├── guards/     # CookieGuard, SubmitButtonTracker
-│   ├── proxy/      # Mullvad Adapter, Wireproxy Forwarder, Health Checker
-│   ├── server/     # Express + WebSocket UI Server (Single Source of Truth)
-│   ├── stealth/    # Random Login Actions, Fingerprint Blender
-│   └── targets/    # universal-login.ts, login-flow.ts, site definitions
-└── tests/          # System Audits and Test Suites
+│   ├── core/           # AutomationEngine, DarwinEngine, Database, Logger
+│   ├── hermes/         # Hermes AI, Darwin Analyzer, Self-Healing, Strategy Engine
+│   ├── guards/         # CookieGuard, SubmitButtonTracker
+│   ├── intelligence/   # LLM Provider, DOM Classifier, Vision, Research
+│   ├── proxy/          # Mullvad Adapter, Wireproxy Forwarder, Health Checker
+│   ├── server/         # Express + WebSocket UI Server (Single Source of Truth)
+│   ├── services/       # Process Cleaner, Screenshot, Video, Timeline, Telemetry
+│   ├── stealth/        # Random Login Actions, Fingerprint Blender, TLS Proxy
+│   └── targets/        # universal-login.ts, login-flow.ts, site definitions
+└── tests/              # Unit Tests, Integration Tests & Live Test Harnesses
 ```

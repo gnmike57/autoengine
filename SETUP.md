@@ -24,7 +24,8 @@ ENGINE_CONCURRENCY=3
 DEFAULT_BACKEND=stealth
 HEADLESS_MODE=true
 
-# Database Configuration
+# Database Configuration (SQLite WAL mode, created automatically on first start)
+# The active database lives at data/credentials.sqlite
 DATABASE_URL=data/credentials.sqlite
 
 # Proxy Configuration
@@ -84,6 +85,33 @@ npm run typecheck
 3. **Auto-Elimination**: Any engine with $\ge 3$ blocks or failures is automatically eliminated.
 4. **Optimal Auto-Pivoting**: When statistical confidence is reached, the highest-scoring backend is crowned, logged into `learning/hermes-memory.json`, and the batch is automatically transitioned to run on that winner.
 5. **Hard Review & Auto-Mitigation**: If all candidate backends are blocked, Hermes triggers proxy rotation and concurrency reduction before initiating post-mortem analysis.
+
+---
+
+## 🧹 Maintenance & Cleanup
+
+Purge stale run artifacts (screenshots, traces, browser profiles):
+```bash
+rm -rf screenshots/* reports/traces/*.zip .chrome-dashboard .cloak-profiles data/temp_profiles
+rm -rf coverage playwright-report test-results logs/app.log
+```
+
+Reset misdirected credentials and wipe browser state:
+```bash
+npm run hard-reset       # Interactive reset
+npm run hard-reset:dry   # Preview without writing
+```
+
+Kill orphaned browser processes:
+```bash
+npm run clean:zombies      # Kill orphaned browsers
+npm run clean:zombies:dry  # Preview only
+```
+
+Regenerate the living database architecture doc:
+```bash
+npm run build:architecture
+```
 
 ---
 

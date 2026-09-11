@@ -3767,7 +3767,7 @@ process.env.VITEST ? null : setInterval(() => {
     if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
     const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 16);
     const dest = path.join(backupDir, `credentials-auto-${ts}.db`);
-    const srcDb = path.resolve("credentials.db");
+    const srcDb = path.resolve("data", "credentials.sqlite");
     if (fs.existsSync(srcDb)) {
       fs.copyFileSync(srcDb, dest);
       log.info(`[Maintenance] Auto-backup: ${dest}`);
